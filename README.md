@@ -1,6 +1,21 @@
 # Quasar App (quasar-project)
 
-A Quasar Project
+This is a student project built with the Quasar Framework (Vue.js) for managing a hospital system.
+
+## Project Description
+
+The project features:
+- User authentication (nurse, chef, admin)
+- Patient management (add, view, history)
+- Menu and meal management
+- Different user panels (nurse panel, chef panel, admin panel)
+
+## Technologies Used
+
+- [Quasar Framework](https://quasar.dev/) (Vue.js)
+- JavaScript / Vue 3
+- Axios for HTTP requests
+- Node.js backend included in this repository
 
 ## Install the dependencies
 ```bash
