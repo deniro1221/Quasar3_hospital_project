@@ -64,7 +64,7 @@ const columns = [
 // Dohvati meni sa servera
 async function osvjeziMenije() {
   try {
-    const response = await fetch('http://localhost:3010/menu/history') // API endpoint za sve menije
+    const response = await fetch('http://localhost:3000/menu/history') // API endpoint za sve menije
     const data = await response.json()
     if (Array.isArray(data)) {
       meni.value = data // ako je već niz

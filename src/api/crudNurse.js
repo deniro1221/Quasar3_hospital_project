@@ -1,15 +1,9 @@
-import express from 'express'
-import bodyParser from 'body-parser'
-import cors from 'cors'
-import { getConnection } from './db.js' // Ispravna putanja do db.js
+import { Router } from 'express'
+import { getConnection } from './db.js'
 
-const app = express()
-const port = 3001
+const router = Router()
 
-app.use(cors())
-app.use(bodyParser.json())
-
-// GET sestre
+// GET sestra
 export const getNurse = async (req, res) => {
   const connection = await getConnection()
   try {
@@ -25,11 +19,11 @@ export const getNurse = async (req, res) => {
 
 // ADD sestra
 export const addNurse = async (req, res) => {
-  const { Ime_sestre, Prezime_sestre, username, lozinka } = req.body // Ovdje možete dodati username i lozinku ako su potrebni
+  const { Ime_sestre, Prezime_sestre, username, lozinka } = req.body
   const connection = await getConnection()
   try {
     await connection.execute(
-      'INSERT INTO sestra (Ime_sestre, Prezime_sestre, username, lozinka) VALUES (?, ?,?,?)',
+      'INSERT INTO sestra (Ime_sestre, Prezime_sestre, username, lozinka) VALUES (?, ?, ?, ?)',
       [Ime_sestre, Prezime_sestre, username, lozinka],
     )
     res.status(201).json({ message: 'Sestra dodana uspješno' })
@@ -75,15 +69,9 @@ export const deleteNurse = async (req, res) => {
   }
 }
 
-// Pokretanje servera
-app.listen(port, () => {
-  console.log(`Server je pokrenut na http://localhost:${port}`)
-})
+router.get('/', getNurse)
+router.post('/', addNurse)
+router.put('/:ID_sestre', updateNurse)
+router.delete('/:ID_sestre', deleteNurse)
 
-// Definirajte svoje rute
-app.get('/nurse', getNurse)
-app.post('/nurse', addNurse)
-app.put('/nurse/:ID_sestre', updateNurse)
-app.delete('/nurse/:ID_sestre', deleteNurse)
-
-export default app
+export default router

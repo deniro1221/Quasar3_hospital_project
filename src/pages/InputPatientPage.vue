@@ -85,7 +85,7 @@ async function postPatient() {
   refreshID()
   console.log('ID_sestre za slanje: ', idSestre.value)
   try {
-    const response = await fetch('http://localhost:3012/dijeta-pacijent', {
+    const response = await fetch('http://localhost:3000/dijeta-pacijent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

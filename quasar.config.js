@@ -56,18 +56,7 @@ export default defineConfig((/* ctx */) => {
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
 
-      vitePlugins: [
-        [
-          'vite-plugin-checker',
-          {
-            eslint: {
-              lintCommand: 'eslint -c ./eslint.config.js "./src*/**/*.{js,mjs,cjs,vue}"',
-              useFlatConfig: true,
-            },
-          },
-          { server: false },
-        ],
-      ],
+      lintCommand: 'eslint --ext .js,.mjs,.cjs,.vue ./src',
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#devserver

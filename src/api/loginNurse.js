@@ -1,16 +1,9 @@
-import express from 'express'
-import bodyParser from 'body-parser'
-import cors from 'cors'
-import { getConnection } from './db.js' // Ispravna putanja do db.js
+import { Router } from 'express'
+import { getConnection } from './db.js'
 
-const app = express()
-const port = 3006
+const router = Router()
 
-app.use(cors())
-app.use(bodyParser.json())
-
-// API ruta za prijavu sestre
-app.post('/login_nurse', async (req, res) => {
+router.post('/', async (req, res) => {
   const { username, password } = req.body
 
   if (!username || !password) {
@@ -24,10 +17,8 @@ app.post('/login_nurse', async (req, res) => {
 
     if (results.length > 0) {
       const sestra = results[0]
-      // Pretpostavljena kolona ID_sestra (ili slično)
       const idSestre = sestra.ID_sestre || null
 
-      // Pošalji rezultat s ID-em sestra
       return res.status(200).json({
         message: 'Prijava uspješna!',
         ID_sestre: idSestre,
@@ -40,7 +31,6 @@ app.post('/login_nurse', async (req, res) => {
     return res.status(500).json({ message: 'Greška na serveru.' })
   }
 })
-// Pokrenite server
-app.listen(port, () => {
-  console.log(`Server je pokrenut na http://localhost:${port}`)
-})
+
+// Exportaj router da ga možeš integrirati u glavni server na portu 3000
+export default router

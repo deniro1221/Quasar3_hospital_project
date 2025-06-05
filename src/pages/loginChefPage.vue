@@ -26,7 +26,7 @@ const errorMessage = ref('') // Varijabla za pohranu poruka o grešci
 
 const submit = async () => {
   try {
-    const response = await axios.post('http://localhost:3008/login_chef', {
+    const response = await axios.post('http://localhost:3000/login_chef', {
       username: username.value,
       password: password.value,
     })

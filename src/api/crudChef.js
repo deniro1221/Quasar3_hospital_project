@@ -1,13 +1,7 @@
-import express from 'express'
-import bodyParser from 'body-parser'
-import cors from 'cors'
+import { Router } from 'express'
+
 import { getConnection } from './db.js'
-
-const app = express()
-const port = 3003
-
-app.use(cors())
-app.use(bodyParser.json())
+const router = Router()
 
 // GET kuhari
 export const getChefs = async (req, res) => {
@@ -75,14 +69,10 @@ export const deleteChef = async (req, res) => {
   }
 }
 
-// Pokretanje servera
-app.listen(port, () => {
-  console.log(`Server je pokrenut na http://localhost:${port}`)
-})
+// Definiraj rute u routeru
+router.get('/', getChefs)
+router.post('/', addChef)
+router.put('/:ID_kuhara', updateChef)
+router.delete('/:ID_kuhara', deleteChef)
 
-// Definirajte rute
-app.get('/chef', getChefs)
-app.post('/chef', addChef)
-app.put('/chef/:ID_kuhara', updateChef)
-app.delete('/chef/:ID_kuhara', deleteChef)
-export default app
+export default router

@@ -1,17 +1,11 @@
-import express from 'express'
-import bodyParser from 'body-parser'
-import cors from 'cors'
 import { getConnection } from './db.js'
-import dayjs from 'dayjs' // Za lokalno formatiranje datuma
+import { Router } from 'express'
+import dayjs from 'dayjs'
 
-const app = express()
-const port = 3012
-
-app.use(cors())
-app.use(bodyParser.json())
+const router = Router()
 
 // ➕ Unos pacijenta
-app.post('/dijeta-pacijent', async (req, res) => {
+router.post('/dijeta-pacijent', async (req, res) => {
   const {
     Broj_sobe,
     Ime_prezime,
@@ -26,7 +20,7 @@ app.post('/dijeta-pacijent', async (req, res) => {
     ID_sestre,
   } = req.body
 
-  const datum_unosa = dayjs().format('YYYY-MM-DD') // Lokalni datum
+  const datum_unosa = dayjs().format('YYYY-MM-DD')
 
   try {
     const connection = await getConnection()
@@ -57,17 +51,15 @@ app.post('/dijeta-pacijent', async (req, res) => {
 })
 
 // 📥 Dohvat svih pacijenata
-app.get('/dijeta-pacijent/back', async (req, res) => {
+router.get('/dijeta-pacijent/back', async (req, res) => {
   try {
     const connection = await getConnection()
     const [rows] = await connection.execute('SELECT * FROM dijeta_pacijent')
 
-    // Formatiranje datuma u dd-mm-yyyy
     const formattedRows = rows.map((row) => {
       const formatDate = (dateObj) => {
         if (!dateObj) return null
-        const iso = dayjs(dateObj).format('DD-MM-YYYY')
-        return iso
+        return dayjs(dateObj).format('DD-MM-YYYY')
       }
 
       return {
@@ -84,11 +76,10 @@ app.get('/dijeta-pacijent/back', async (req, res) => {
     res.status(500).json({ message: 'Greška na serveru' })
   }
 })
-// ✏️ Ažuriranje pacijenta
-app.put('/dijeta-pacijent/:id', async (req, res) => {
-  const { id } = req.params
 
-  // ➕ Dodajemo ID_sestre u destructuring
+// ✏️ Ažuriranje pacijenta
+router.put('/dijeta-pacijent/:id', async (req, res) => {
+  const { id } = req.params
   const {
     Broj_sobe,
     Ime_prezime,
@@ -100,7 +91,7 @@ app.put('/dijeta-pacijent/:id', async (req, res) => {
     U_sobu,
     Odlazak,
     Dolazak,
-    ID_sestre, // 👈 OVDJE DODANO
+    ID_sestre,
   } = req.body
 
   const datum_unosa = dayjs().format('YYYY-MM-DD')
@@ -108,7 +99,6 @@ app.put('/dijeta-pacijent/:id', async (req, res) => {
   try {
     const connection = await getConnection()
 
-    // Provjera datuma odlaska
     const [result] = await connection.execute(
       `SELECT Odlazak FROM dijeta_pacijent WHERE ID_dijeta_pac = ?`,
       [id],
@@ -127,21 +117,10 @@ app.put('/dijeta-pacijent/:id', async (req, res) => {
       })
     }
 
-    // 🔄 Ažuriranje uključujući ID_sestre
     await connection.execute(
       `UPDATE dijeta_pacijent SET
-        Broj_sobe = ?,
-        Ime_prezime = ?,
-        Dorucak = ?,
-        Rucak = ?,
-        Vecera = ?,
-        Vrsta_dijete = ?,
-        Napomene = ?,
-        U_sobu = ?,
-        Odlazak = ?,
-        Dolazak = ?,
-        Datum_unosa = ?,
-        ID_sestre = ? -- 👈 DODANO OVDJE
+        Broj_sobe = ?, Ime_prezime = ?, Dorucak = ?, Rucak = ?, Vecera = ?, Vrsta_dijete = ?,
+        Napomene = ?, U_sobu = ?, Odlazak = ?, Dolazak = ?, Datum_unosa = ?, ID_sestre = ?
       WHERE ID_dijeta_pac = ?`,
       [
         Broj_sobe ?? null,
@@ -155,7 +134,7 @@ app.put('/dijeta-pacijent/:id', async (req, res) => {
         Odlazak ?? null,
         Dolazak ?? null,
         datum_unosa,
-        ID_sestre ?? null, // 👈 I OVDJE
+        ID_sestre ?? null,
         id,
       ],
     )
@@ -167,7 +146,4 @@ app.put('/dijeta-pacijent/:id', async (req, res) => {
   }
 })
 
-// Pokretanje servera
-app.listen(port, () => {
-  console.log(`✅ Server je pokrenut na: http://localhost:${port}`)
-})
+export default router

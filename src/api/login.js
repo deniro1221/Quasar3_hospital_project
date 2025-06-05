@@ -1,27 +1,17 @@
-import express from 'express'
-import bodyParser from 'body-parser'
-import cors from 'cors'
-import { getConnection } from './db.js' // Ispravna putanja do db.js
+import { Router } from 'express'
+import { getConnection } from './db.js'
+const router = Router()
 
-const app = express()
-const port = 3000
-
-app.use(cors())
-app.use(bodyParser.json())
-
-// API ruta za prijavu
-app.post('/login', async (req, res) => {
+router.post('/login', async (req, res) => {
   const { username, password } = req.body
 
-  // Provjerite jesu li podaci prazni
   if (!username || !password) {
     return res.status(400).json({ message: 'Korisničko ime i lozinka su obavezni.' })
   }
 
   try {
-    const connection = await getConnection() // Usponite konekciju
+    const connection = await getConnection()
     const sql = 'SELECT * FROM admin WHERE username = ? AND lozinka = ?'
-
     const [results] = await connection.execute(sql, [username, password])
 
     if (results.length > 0) {
@@ -35,7 +25,4 @@ app.post('/login', async (req, res) => {
   }
 })
 
-// Pokretanje servera
-app.listen(port, () => {
-  console.log(`Server je pokrenut na http://localhost:${port}`)
-})
+export default router
