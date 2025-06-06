@@ -13,7 +13,11 @@
     "dev": "quasar dev",
     "build": "quasar build",
     "postinstall": "quasar prepare",
+<<<<<<< HEAD
     "start": "node src/server.js"
+=======
+    "start": "node src/ server.js"
+>>>>>>> 8f3919ea25f5e90e4285e0e5f65b71a3e035e88f
   },
   "dependencies": {
     "@quasar/extras": "^1.16.4",
