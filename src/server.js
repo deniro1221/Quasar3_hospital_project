@@ -1,6 +1,7 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
+import process from 'process'
 
 // Uvozi rute za login, sestru i kuhare
 import loginRouter from './api/login.js'
@@ -12,9 +13,15 @@ import meniRouter from './api/meni.js'
 import inputPatientRouter from './api/inputPatient.js'
 
 const app = express()
-const port = 3000
 
-app.use(cors())
+const port = process.env.PORT || 3000
+
+app.use(
+  cors({
+    origin: ['https://earnest-vacherin-1fdc60.netlify.app'],
+    credentials: true,
+  }),
+)
 app.use(bodyParser.json())
 
 // Rute za login
