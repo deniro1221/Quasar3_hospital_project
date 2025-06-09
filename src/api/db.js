@@ -11,7 +11,7 @@ const config = {
   port: 3306,
   database: process.env.DB_NAME,
 }
-
+console.log('Kreirana konfiguracija:', config)
 export const getConnection = async () => {
   const connection = await mysql.createConnection(config)
   return connection
