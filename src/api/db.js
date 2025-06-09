@@ -17,4 +17,4 @@ export const getConnection = async () => {
   return connection
 }
 
-//promjenjene vrijednosti u .env
+//change fix
