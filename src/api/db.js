@@ -16,3 +16,5 @@ export const getConnection = async () => {
   const connection = await mysql.createConnection(config)
   return connection
 }
+
+//promjenjene vrijednosti u .env
