@@ -80,7 +80,7 @@ const columns = [
 // Dohvaćanje svih kuhara iz API-ja
 const fetchChefs = async () => {
   try {
-    const response = await axios.get('http://localhost:3000/chef')
+    const response = await axios.get('https://backend-hospital-n9to.onrender.com/chef')
     chefs.value = response.data
   } catch (error) {
     console.error('Greška prilikom dohvaćanja kuhara:', error)
@@ -109,7 +109,7 @@ const editChef = (chef) => {
 // Dodavanje novog kuhara
 const addChef = async () => {
   try {
-    await axios.post('http://localhost:3000/chef', form.value)
+    await axios.post('https://backend-hospital-n9to.onrender.com/chef', form.value)
     await fetchChefs()
     closeDialog()
   } catch (error) {
@@ -120,7 +120,10 @@ const addChef = async () => {
 // Ažuriranje podataka kuhara
 const updateChef = async () => {
   try {
-    await axios.put(`http://localhost:3000/chef/${form.value.ID_kuhara}`, form.value)
+    await axios.put(
+      `https://backend-hospital-n9to.onrender.com/chef/${form.value.ID_kuhara}`,
+      form.value,
+    )
     await fetchChefs()
     closeDialog()
   } catch (error) {
@@ -132,7 +135,7 @@ const updateChef = async () => {
 const deleteChef = async (id) => {
   if (confirm('Jeste li sigurni da želite izbrisati ovog kuhara?')) {
     try {
-      await axios.delete(`http://localhost:3000/chef/${id}`)
+      await axios.delete(`https://backend-hospital-n9to.onrender.com/chef/${id}`)
       await fetchChefs()
     } catch (error) {
       console.error('Greška prilikom brisanja kuhara:', error)
