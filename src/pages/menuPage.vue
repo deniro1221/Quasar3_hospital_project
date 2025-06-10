@@ -30,7 +30,7 @@ const formattedDate = formatDateDMY(todayDate)
 
 onMounted(async () => {
   try {
-    const response = await fetch('http://localhost:3000/menu/todays')
+    const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/todays')
     if (response.ok) {
       const data = await response.json()
       if (data) {

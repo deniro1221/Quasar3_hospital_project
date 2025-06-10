@@ -120,7 +120,7 @@ const submitManual = async () => {
   }
 
   try {
-    const response = await fetch('http://localhost:3000/menu', {
+    const response = await fetch('https://backend-hospital-n9to.onrender.com/menu', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -146,7 +146,7 @@ const submitManual = async () => {
 
 const otkrijAktivniMeni = async (openDialog = true) => {
   try {
-    const response = await fetch('http://localhost:3000/menu/today')
+    const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/today')
     const data = await response.json()
 
     if (data) {
@@ -189,7 +189,7 @@ const azurirajMeni = async () => {
       datumZaSlanje = datumZaSlanje.slice(0, 10)
     }
 
-    const response = await fetch('http://localhost:3000/menu/fresh', {
+    const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/fresh', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -239,7 +239,7 @@ const obrisiMeni = async () => {
 
   try {
     const response = await fetch(
-      `http://localhost:3000/menu/delete?datum=${encodeURIComponent(datumZaBrisanje)}`,
+      `https://backend-hospital-n9to.onrender.com/menu/delete?datum=${encodeURIComponent(datumZaBrisanje)}`,
       { method: 'DELETE' },
     )
 

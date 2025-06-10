@@ -81,7 +81,7 @@ const columns = [
 
 async function showPatient() {
   try {
-    const response = await fetch('http://localhost:3000/dijeta-pacijent/back')
+    const response = await fetch('https://backend-hospital-n9to.onrender.com/dijeta-pacijent/back')
     const data = await response.json()
     dijeta_pac.value = Array.isArray(data) ? data : data ? [data] : []
   } catch (error) {
@@ -152,7 +152,7 @@ async function confirmUpdate() {
     //delete updatedRow.ID_sestre--->ukoliko se želi da se ne ažurira idsestre
     delete updatedRow.Datum_unosa
 
-    const url = `http://localhost:3000/dijeta-pacijent/${rowId}`
+    const url = `https://backend-hospital-n9to.onrender.com/dijeta-pacijent/${rowId}`
 
     try {
       const response = await fetch(url, {
