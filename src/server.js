@@ -16,12 +16,8 @@ const app = express()
 
 const port = process.env.PORT || 10000
 
-app.use(
-  cors({
-    origin: ['https://earnest-vacherin-1fdc60.netlify.app'],
-    credentials: true,
-  }),
-)
+app.use(cors())
+
 app.use(bodyParser.json())
 
 // Rute za login
