@@ -32,3 +32,4 @@ export const getConnection = async () => {
     throw error
   }
 }
+//fix .env
