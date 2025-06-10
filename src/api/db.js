@@ -1,8 +1,21 @@
 import mysql from 'mysql2/promise'
 import dotenv from 'dotenv'
 import process from 'process'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-dotenv.config({ path: 'C:\\thalasso_projekt\\quasar-project\\.env' })
+// Ovo treba ako koristiš ES module (import/export)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+// Idi dvije razine gore iz `src/api` do root projekta
+const envPath = path.resolve(__dirname, '../../.env')
+console.log('Učitavam .env sa:', envPath)
+
+dotenv.config({ path: envPath })
+
+// TEST - provjeri je li učitalo:
+console.log('DB_HOST:', process.env.DB_HOST)
 
 const config = {
   host: process.env.DB_HOST,
