@@ -2,7 +2,7 @@ import mysql from 'mysql2/promise'
 import dotenv from 'dotenv'
 import process from 'process'
 
-dotenv.config() // Učitaj varijable iz .env
+dotenv.config({ path: 'C:\\thalasso_projekt\\quasar-project\\.env' })
 
 const config = {
   host: process.env.DB_HOST,
