@@ -12,6 +12,7 @@ const config = {
   port: 3306,
   user: 'dsubasic',
   password: '11',
+  database: 'dsubasic',
 }
 console.log('Kreirana konfiguracija:', config)
 export const getConnection = async () => {
