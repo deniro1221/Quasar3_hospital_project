@@ -4,20 +4,19 @@ import process from 'process'
 
 dotenv.config()
 
-// TEST - provjeri je li učitalo:
 console.log('DB_HOST:', process.env.DB_HOST)
 
 const config = {
-  host: 'mysql-thalassock.alwaysdata.net',
-  port: 3306,
-  user: '417243',
-  password: 'Selce#2025',
-  database: 'thalassock_1221',
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
 }
+
 console.log('Kreirana konfiguracija:', config)
+
 export const getConnection = async () => {
   const connection = await mysql.createConnection(config)
   return connection
 }
-
-//change fix
