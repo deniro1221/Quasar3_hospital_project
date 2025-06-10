@@ -77,7 +77,7 @@ const columns = [
 // Dohvaćanje svih sestara iz API-ja
 const fetchNurses = async () => {
   try {
-    const response = await axios.get('http://localhost:3000/nurse')
+    const response = await axios.get('https://backend-hospital-n9to.onrender.com/nurse')
     nurses.value = response.data
   } catch (error) {
     console.error('Greška prilikom dohvaćanja sestara:', error)
