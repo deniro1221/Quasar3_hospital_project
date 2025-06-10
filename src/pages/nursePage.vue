@@ -108,7 +108,7 @@ const editNurse = (nurse) => {
 // Dodavanje nove sestre
 const addNurse = async () => {
   try {
-    await axios.post('http://localhost:3000/nurse', form.value)
+    await axios.post('https://backend-hospital-n9to.onrender.com/nurse', form.value)
     await fetchNurses()
     closeDialog()
   } catch (error) {
@@ -119,7 +119,10 @@ const addNurse = async () => {
 // Ažuriranje sestre
 const updateNurse = async () => {
   try {
-    await axios.put(`http://localhost:3000/nurse/${form.value.ID_sestre}`, form.value)
+    await axios.put(
+      `https://backend-hospital-n9to.onrender.com/nurse/${form.value.ID_sestre}`,
+      form.value,
+    )
     await fetchNurses()
     closeDialog()
   } catch (error) {
@@ -131,7 +134,7 @@ const updateNurse = async () => {
 const deleteNurse = async (id) => {
   if (confirm('Jeste li sigurni da želite izbrisati ovu sestru?')) {
     try {
-      await axios.delete(`http://localhost:3000/nurse/${id}`)
+      await axios.delete(`https://backend-hospital-n9to.onrender.com/nurse/${id}`)
       await fetchNurses()
     } catch (error) {
       console.error('Greška prilikom brisanja sestre:', error)
