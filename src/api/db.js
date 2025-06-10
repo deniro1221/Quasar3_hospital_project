@@ -8,11 +8,11 @@ dotenv.config()
 console.log('DB_HOST:', process.env.DB_HOST)
 
 const config = {
-  host: 'ucka.veleri.hr',
+  host: 'mysql-thalassock.alwaysdata.net',
   port: 3306,
-  user: 'dsubasic',
-  password: '11',
-  database: 'dsubasic',
+  user: '417243',
+  password: 'Selce#2025',
+  database: 'thalassock_1221',
 }
 console.log('Kreirana konfiguracija:', config)
 export const getConnection = async () => {
