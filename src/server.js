@@ -44,3 +44,5 @@ app.use('/', inputPatientRouter)
 app.listen(port, () => {
   console.log(`Server je pokrenut na http://localhost:${port}`)
 })
+
+//frontned app you can start on: earnest-vacherin-1fdc60.netlify.app
