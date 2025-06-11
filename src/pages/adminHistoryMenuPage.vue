@@ -64,7 +64,7 @@ const columns = [
 // Dohvati meni sa servera
 async function osvjeziMenije() {
   try {
-    const response = await fetch('https://backend-hospital-n9to.onrender.com') // API endpoint za sve menije
+    const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/history') // API endpoint za sve menije
     const data = await response.json()
     if (Array.isArray(data)) {
       meni.value = data // ako je već niz
