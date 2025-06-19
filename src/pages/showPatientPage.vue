@@ -20,7 +20,7 @@
     <!-- Add Patient Diet Button -->
     <q-btn label="Dodaj dijetu pacijenta" color="primary" @click="openDialog" class="q-mb-md" />
 
-    <q-table :rows="dijeta_pac" :columns="columns" row-key="ID_dijeta_pac" class="styled-table">
+    <q-table :rows="activePatients" :columns="columns" row-key="ID_dijeta_pac" class="styled-table">
       <template v-slot:body="props">
         <q-tr :props="props">
           <q-td v-for="col in columns" :key="col.name" :props="props">
@@ -90,7 +90,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import html2pdf from 'html2pdf.js'
 import { useRouter } from 'vue-router'
 
@@ -139,6 +139,21 @@ const odlazak = ref('')
 
 // Router
 const router = useRouter()
+
+// Computed property for active patients
+const activePatients = computed(() => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0) // Set time to midnight for accurate comparison
+
+  return dijeta_pac.value.filter((patient) => {
+    if (!patient.Odlazak) return true // If departure date is null, consider them active
+
+    const departureDate = new Date(patient.Odlazak)
+    departureDate.setHours(0, 0, 0, 0)
+
+    return departureDate >= today // Departure date is today or in the future
+  })
+})
 
 // Functions
 
