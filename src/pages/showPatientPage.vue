@@ -20,7 +20,7 @@
     <!-- Add Patient Diet Button -->
     <q-btn label="Dodaj dijetu pacijenta" color="primary" @click="openDialog" class="q-mb-md" />
 
-    <q-table :rows="dijeta_pac" :columns="columns" row-key="ID_dijeta_pac" class="full-width-table">
+    <q-table :rows="dijeta_pac" :columns="columns" row-key="ID_dijeta_pac" class="styled-table">
       <template v-slot:body="props">
         <q-tr :props="props">
           <q-td v-for="col in columns" :key="col.name" :props="props">
@@ -445,14 +445,22 @@ onMounted(() => {
   border-radius: 8px;
 }
 
-/* Full Width Table Styling */
-.full-width-table {
-  width: 100%; /* Table takes full width */
+/* Styled Table */
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.full-width-table th,
-.full-width-table td {
-  font-weight: 500; /* Slightly bolder font */
+.styled-table th,
+.styled-table td {
+  border: 1px solid #ddd; /* Light gray border */
+  padding: 8px;
+  text-align: left;
+}
+
+.styled-table th {
+  background-color: #f2f2f2; /* Light gray background for header */
+  font-weight: bold;
 }
 
 /* Button Group Styling */
