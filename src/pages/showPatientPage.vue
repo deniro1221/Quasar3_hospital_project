@@ -52,21 +52,12 @@
       </q-table>
     </div>
 
-    <!-- Button Group -->
+    <!-- Combined Button Group -->
     <div class="q-gutter-sm button-group">
       <q-btn label="Ažuriraj" color="primary" @click="confirmUpdate" />
-      <q-btn label="Odjavi se" color="negative" class="button-item" @click="logout" />
-    </div>
-
-    <!-- PDF Export Buttons -->
-    <div class="q-mt-md q-gutter-sm button-group">
-      <q-btn
-        label="Ispiši PDF (aktivne)"
-        color="secondary"
-        @click="izveziAktivnePDF"
-        class="q-ml-sm"
-      />
-      <q-btn label="Ispiši PDF (sve)" color="secondary" @click="izveziSvePDF" class="q-ml-sm" />
+      <q-btn label="Odjavi se" color="negative" @click="logout" />
+      <q-btn label="Ispiši PDF (aktivne)" color="secondary" @click="izveziAktivnePDF" />
+      <q-btn label="Ispiši PDF (sve)" color="secondary" @click="izveziSvePDF" />
     </div>
 
     <!-- Add Patient Diet Dialog -->
@@ -475,7 +466,7 @@ onMounted(() => {
 /* Button Group Styling */
 .button-group {
   display: flex;
-  justify-content: left; /* Align buttons to the left */
+  justify-content: start; /* Align buttons to the left */
   gap: 10px; /* Space between buttons */
   margin-bottom: 10px; /* Space below the button group */
 }
