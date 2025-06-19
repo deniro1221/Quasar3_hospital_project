@@ -2,11 +2,23 @@
   <q-page padding>
     <h4>Pregled dijeta pacijenata</h4>
 
+    <!-- Message Display -->
+    <div
+      v-if="message"
+      :class="isSuccess ? 'bg-green-2 text-green-10' : 'bg-red-2 text-red-10'"
+      class="q-pa-md q-mb-md rounded-borders"
+    >
+      {{ message }}
+    </div>
+
+    <!-- Add Patient Diet Button -->
+    <q-btn label="Dodaj dijetu pacijenta" color="primary" @click="openDialog" class="q-mb-md" />
+
     <q-table :rows="dijeta_pac" :columns="columns" row-key="ID_dijeta_pac">
       <template v-slot:body="props">
         <q-tr :props="props">
           <q-td v-for="col in columns" :key="col.name" :props="props">
-            <!-- Uređivanje na dvoklik -->
+            <!-- Editing on Double Click -->
             <div
               v-if="editingCell.rowId === props.row.ID_dijeta_pac && editingCell.col === col.name"
             >
@@ -32,7 +44,7 @@
       </template>
     </q-table>
 
-    <!-- Dugmad za ispis PDF-a smještena ispod tablice -->
+    <!-- PDF Export Buttons -->
     <div class="q-mt-md q-gutter-sm">
       <q-btn
         label="Ispiši PDF (aktivne)"
@@ -48,21 +60,50 @@
       <q-btn label="Nazad" color="red" to="/nurse_panel" />
     </div>
 
-    <div v-if="message" style="margin-top: 10px" :style="{ color: isSuccess ? 'green' : 'red' }">
-      {{ message }}
-    </div>
+    <!-- Add Patient Diet Dialog -->
+    <q-dialog v-model="dialogOpen">
+      <q-card style="width: 700px; max-width: 80vw;">
+        <q-card-section>
+          <div class="text-h6">Dodaj novu dijetu pacijenta</div>
+        </q-card-section>
+
+        <q-card-section>
+          <q-form @submit.prevent="postPatient" class="q-gutter-md">
+            <q-input v-model="brojSobe" label="Broj sobe" type="number" required />
+            <q-input v-model="imePrezime" label="Ime i prezime" required />
+            <q-input v-model="dorucak" label="Doručak" required />
+            <q-input v-model="rucak" label="Ručak" required />
+            <q-input v-model="vecera" label="Večera" required />
+            <q-input v-model="vrsta_dijete" label="Vrsta dijete" required />
+            <q-input v-model="napomene" label="Napomene" />
+            <q-input v-model="dolazak" label="Dolazak" type="date" required />
+            <q-input v-model="odlazak" label="Odlazak" type="date" required />
+            <q-select v-model="uSobu" label="U sobu" :options="['da', 'ne']" required />
+          </q-form>
+        </q-card-section>
+
+        <q-card-actions align="right" class="q-pa-sm">
+          <q-btn label="Odustani" color="secondary" @click="closeDialog" />
+          <q-btn label="Spremi" color="primary" @click="postPatient" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import html2pdf from 'html2pdf.js'
+
+// Data
 const dijeta_pac = ref([])
 const editingCell = ref({})
 const changesMap = ref({})
 const message = ref('')
-const idSestre = localStorage.getItem('idSestre') || null
+const isSuccess = ref(false)
+const idSestre = ref(Number(localStorage.getItem('idSestre') ?? '1'))
 
+// Columns definition
 const columns = [
   { name: 'ID_dijeta_pac', label: 'ID Dijete pacijenta', align: 'left', field: 'ID_dijeta_pac' },
   { name: 'Broj_sobe', label: 'Broj sobe', align: 'left', field: 'Broj_sobe' },
@@ -79,6 +120,64 @@ const columns = [
   { name: 'ID_sestre', label: 'ID Sestre', align: 'left', field: 'ID_sestre' },
 ]
 
+// Dialog Control
+const dialogOpen = ref(false)
+
+// Form fields
+const brojSobe = ref('')
+const imePrezime = ref('')
+const dorucak = ref('')
+const rucak = ref('')
+const vecera = ref('')
+const vrsta_dijete = ref('')
+const napomene = ref('')
+const uSobu = ref('da')
+const dolazak = ref('')
+const odlazak = ref('')
+
+// Functions
+
+// Refresh ID
+function refreshID() {
+  idSestre.value = Number(localStorage.getItem('idSestre'))
+  console.log('ID sestre je na: ', idSestre.value)
+}
+
+// Show Message
+function showMessage(txt, success = true) {
+  isSuccess.value = success
+  message.value = txt
+  setTimeout(() => {
+    message.value = ''
+  }, 3000)
+}
+
+// Reset Form
+function resetForm() {
+  brojSobe.value = ''
+  imePrezime.value = ''
+  dorucak.value = ''
+  rucak.value = ''
+  vecera.value = ''
+  vrsta_dijete.value = ''
+  napomene.value = ''
+  uSobu.value = 'da'
+  dolazak.value = ''
+  odlazak.value = ''
+}
+
+// Open Dialog
+function openDialog() {
+  dialogOpen.value = true
+}
+
+// Close Dialog
+function closeDialog() {
+  dialogOpen.value = false
+  resetForm() // Clear the form when closing
+}
+
+// Fetch Patient Data
 async function showPatient() {
   try {
     const response = await fetch('https://backend-hospital-n9to.onrender.com/dijeta-pacijent/back')
@@ -90,10 +189,7 @@ async function showPatient() {
   console.log('Prikaz podataka: ', dijeta_pac.value)
 }
 
-onMounted(() => {
-  showPatient()
-})
-
+// Format Date to MySQL
 function formatDateToMySQL(dateStr) {
   if (!dateStr || typeof dateStr !== 'string') return dateStr
   if (!dateStr.includes('-')) return dateStr
@@ -106,11 +202,13 @@ function formatDateToMySQL(dateStr) {
   return dateStr
 }
 
+// Cell Double Click
 function onCellDblClick(row, column) {
   if (['ID_dijeta_pac', 'ID_sestre', 'Datum_unosa'].includes(column.name)) return
   editingCell.value = { rowId: row.ID_dijeta_pac, col: column.name }
 }
 
+// Cell Input
 function onCellInput(row, column, event) {
   let newVal = event.target.value || event.target.innerText
   if (['Odlazak', 'Datum_unosa', 'Dolazak'].includes(column.name)) {
@@ -125,10 +223,12 @@ function onCellInput(row, column, event) {
   editingCell.value = {}
 }
 
+// Cancel Edit
 function cancelEdit() {
   editingCell.value = {}
 }
 
+// Confirm Update
 async function confirmUpdate() {
   if (!Object.keys(changesMap.value).length) {
     message.value = 'Nema promjena za ažurirati.'
@@ -145,11 +245,11 @@ async function confirmUpdate() {
 
     updatedRow.Odlazak = formatDateToMySQL(updatedRow.Odlazak)
     updatedRow.Dolazak = formatDateToMySQL(updatedRow.Dolazak)
-    updatedRow.ID_sestre = idSestre // Dodaj trenutni ID sestre
+    updatedRow.ID_sestre = idSestre.value // Use ref value
 
-    // 🔒 Ukloni zaštićena polja prije slanja
+    // 🔒 Remove protected fields before sending
     delete updatedRow.ID_dijeta_pac
-    //delete updatedRow.ID_sestre--->ukoliko se želi da se ne ažurira idsestre
+    //delete updatedRow.ID_sestre--->if you don't want to update idsestre
     delete updatedRow.Datum_unosa
 
     const url = `https://backend-hospital-n9to.onrender.com/dijeta-pacijent/${rowId}`
@@ -181,7 +281,7 @@ async function confirmUpdate() {
     }
   }
 
-  // Osvježi podatke nakon svih pokušaja ažuriranja, bez obzira na uspjeh ili neuspjeh
+  // Refresh data after all update attempts, regardless of success or failure
   await showPatient()
 
   message.value = `Uspješno ažurirano: ${successCount}, Neuspješno: ${failCount}.`
@@ -189,7 +289,43 @@ async function confirmUpdate() {
   editingCell.value = {}
 }
 
-// Funkcija za generiranje i spremanje PDF-a iz podataka
+// Post Patient Data
+async function postPatient() {
+  refreshID()
+  console.log('ID_sestre za slanje: ', idSestre.value)
+  try {
+    const response = await fetch('https://backend-hospital-n9to.onrender.com/dijeta-pacijent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        Broj_sobe: brojSobe.value,
+        Ime_prezime: imePrezime.value,
+        Dorucak: dorucak.value,
+        Rucak: rucak.value,
+        Vecera: vecera.value,
+        vrsta_dijete: vrsta_dijete.value,
+        Napomene: napomene.value,
+        U_sobu: uSobu.value,
+        Dolazak: dolazak.value,
+        Odlazak: odlazak.value,
+        ID_sestre: idSestre.value,
+      }),
+    })
+
+    if (response.ok) {
+      showMessage('Podaci uspješno spremljeni.', true)
+      await showPatient() // Refresh table data
+      closeDialog() // Close the dialog
+    } else {
+      showMessage('Greška pri unosu podataka.', false)
+    }
+  } catch (error) {
+    console.error('Greška:', error)
+    showMessage('Greška na serveru.', false)
+  }
+}
+
+// Function to generate and save PDF from data
 function printPdfFromData(data, title) {
   if (!data.length) {
     alert('Nema podataka za ispis.')
@@ -233,23 +369,21 @@ function printPdfFromData(data, title) {
   html2pdf().from(container).save()
 }
 
-// Funkcija za ispis svih dijeta pacijenata
+// Function to export all patient diets to PDF
 function izveziSvePDF() {
   printPdfFromData(dijeta_pac.value, 'Sve dijete pacijenata')
 }
 
 function parseDateString(dateStr) {
-  // Ako je datum u formatu DD-MM-YYYY
   const parts = dateStr.match(/^(\d{2})-(\d{2})-(\d{4})$/)
   if (parts) {
     const [, day, month, year] = parts
     return new Date(`${year}-${month}-${day}`)
   }
-
-  // Ako je već u ispravnom formatu
   return new Date(dateStr)
 }
 
+// Function to export active patient diets to PDF
 function izveziAktivnePDF() {
   const today = new Date()
   const todayStart = new Date(today)
@@ -278,4 +412,16 @@ function izveziAktivnePDF() {
 
   printPdfFromData(aktivne, 'Aktivne dijete pacijenata')
 }
+
+// Lifecycle Hook
+onMounted(() => {
+  showPatient()
+  refreshID()
+})
 </script>
+
+<style scoped>
+.rounded-borders {
+  border-radius: 8px;
+}
+</style>
