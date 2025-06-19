@@ -146,9 +146,9 @@ const activePatients = computed(() => {
   today.setHours(0, 0, 0, 0) // Set time to midnight for accurate comparison
 
   return dijeta_pac.value.filter((patient) => {
-    if (!patient.Odlazak) return true // If departure date is null, consider them active
+    if (!patient.Datum_odlaska) return true // If departure date is null, consider them active
 
-    const departureDate = new Date(patient.Odlazak)
+    const departureDate = new Date(patient.Datum_odlaska)
     departureDate.setHours(0, 0, 0, 0)
 
     return departureDate >= today // Departure date is today or in the future
