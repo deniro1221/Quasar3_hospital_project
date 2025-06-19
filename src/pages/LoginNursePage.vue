@@ -39,7 +39,7 @@ const submit = async () => {
     console.log('ID_sestre spremljen u localStorage:', localStorage.getItem('idSestre'))
 
     // Preusmjerite na admin stranicu nakon uspješne prijave
-    router.push('/nurse_panel')
+    router.push('/showPatient')
   } catch (error) {
     if (error.response) {
       errorMessage.value = error.response.data.message || 'Došlo je do greške. Pokušajte ponovo.'
