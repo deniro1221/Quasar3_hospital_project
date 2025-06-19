@@ -20,37 +20,35 @@
     <!-- Add Patient Diet Button -->
     <q-btn label="Dodaj dijetu pacijenta" color="primary" @click="openDialog" class="q-mb-md" />
 
-    <div class="a4-container">
-      <q-table :rows="dijeta_pac" :columns="columns" row-key="ID_dijeta_pac" class="a4-table">
-        <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td v-for="col in columns" :key="col.name" :props="props">
-              <!-- Editing on Double Click -->
-              <div
-                v-if="editingCell.rowId === props.row.ID_dijeta_pac && editingCell.col === col.name"
-              >
-                <input
-                  v-model="props.row[col.field]"
-                  @blur="onCellInput(props.row, col, $event)"
-                  @keydown.enter="onCellInput(props.row, col, $event)"
-                  @keydown.esc="cancelEdit()"
-                  autofocus
-                  style="width: 100%"
-                />
-              </div>
-              <div
-                v-else
-                @dblclick="onCellDblClick(props.row, col)"
-                style="min-width: 80px; cursor: pointer; user-select: none"
-                title="Dvoklik za uređivanje"
-              >
-                {{ props.row[col.field] }}
-              </div>
-            </q-td>
-          </q-tr>
-        </template>
-      </q-table>
-    </div>
+    <q-table :rows="dijeta_pac" :columns="columns" row-key="ID_dijeta_pac" class="full-width-table">
+      <template v-slot:body="props">
+        <q-tr :props="props">
+          <q-td v-for="col in columns" :key="col.name" :props="props">
+            <!-- Editing on Double Click -->
+            <div
+              v-if="editingCell.rowId === props.row.ID_dijeta_pac && editingCell.col === col.name"
+            >
+              <input
+                v-model="props.row[col.field]"
+                @blur="onCellInput(props.row, col, $event)"
+                @keydown.enter="onCellInput(props.row, col, $event)"
+                @keydown.esc="cancelEdit()"
+                autofocus
+                style="width: 100%"
+              />
+            </div>
+            <div
+              v-else
+              @dblclick="onCellDblClick(props.row, col)"
+              style="min-width: 80px; cursor: pointer; user-select: none"
+              title="Dvoklik za uređivanje"
+            >
+              {{ props.row[col.field] }}
+            </div>
+          </q-td>
+        </q-tr>
+      </template>
+    </q-table>
 
     <!-- Combined Button Group -->
     <div class="q-gutter-sm button-group">
@@ -447,19 +445,13 @@ onMounted(() => {
   border-radius: 8px;
 }
 
-/* A4 Paper Styling */
-.a4-container {
-  width: 21cm; /* A4 width */
-  min-height: 29.7cm; /* A4 height */
-  padding: 1cm;
-  margin: 0 auto;
-  border: 1px solid #ccc;
-  background-color: white;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+/* Full Width Table Styling */
+.full-width-table {
+  width: 100%; /* Table takes full width */
 }
 
-.a4-table th,
-.a4-table td {
+.full-width-table th,
+.full-width-table td {
   font-weight: 500; /* Slightly bolder font */
 }
 
