@@ -2,6 +2,12 @@
   <q-page padding>
     <h4>Pregled dijeta pacijenata</h4>
 
+    <!-- User Info Display -->
+    <div class="q-mb-md">
+      <p v-if="loggedInUser">Sestra: {{ loggedInUser }}</p>
+      <p v-if="idSestre">ID Sestre: {{ idSestre }}</p>
+    </div>
+
     <!-- Message Display -->
     <div
       v-if="message"
@@ -58,6 +64,7 @@
     <div class="q-gutter-sm" style="margin-top: 20px">
       <q-btn label="Ažuriraj" color="primary" @click="confirmUpdate" />
       <q-btn label="Nazad" color="red" to="/nurse_panel" />
+      <q-btn label="Odjavi se" color="negative" class="button-item" @click="logout" />
     </div>
 
     <!-- Add Patient Diet Dialog -->
@@ -94,6 +101,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import html2pdf from 'html2pdf.js'
+import { useRouter } from 'vue-router'
 
 // Data
 const dijeta_pac = ref([])
@@ -101,7 +109,10 @@ const editingCell = ref({})
 const changesMap = ref({})
 const message = ref('')
 const isSuccess = ref(false)
-const idSestre = ref(Number(localStorage.getItem('idSestre') ?? '1'))
+
+// User Info
+const loggedInUser = ref('')
+const idSestre = ref('')
 
 // Columns definition
 const columns = [
@@ -135,12 +146,14 @@ const uSobu = ref('da')
 const dolazak = ref('')
 const odlazak = ref('')
 
+// Router
+const router = useRouter()
+
 // Functions
 
 // Refresh ID
 function refreshID() {
-  idSestre.value = Number(localStorage.getItem('idSestre'))
-  console.log('ID sestre je na: ', idSestre.value)
+  idSestre.value = localStorage.getItem('idSestre') ? Number(localStorage.getItem('idSestre')) : ''
 }
 
 // Show Message
@@ -325,6 +338,16 @@ async function postPatient() {
   }
 }
 
+// Logout Function
+const logout = () => {
+  localStorage.removeItem('loggedInUser')
+  localStorage.removeItem('idSestre')
+  idSestre.value = ''
+  loggedInUser.value = ''
+  router.push('/login_nurse')
+  console.log('ID_sestre u Vue nakon odjave:', idSestre.value)
+}
+
 // Function to generate and save PDF from data
 function printPdfFromData(data, title) {
   if (!data.length) {
@@ -415,8 +438,14 @@ function izveziAktivnePDF() {
 
 // Lifecycle Hook
 onMounted(() => {
-  showPatient()
+  loggedInUser.value = localStorage.getItem('loggedInUser')
   refreshID()
+  console.log('ID_sestre u Vue nakon učitavanja:', idSestre.value)
+
+  if (!loggedInUser.value) {
+    router.push('/login_nurse')
+  }
+  showPatient()
 })
 </script>
 
