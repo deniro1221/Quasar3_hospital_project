@@ -54,8 +54,8 @@
     <div class="q-gutter-sm button-group">
       <q-btn label="Ažuriraj" color="primary" @click="confirmUpdate" />
       <q-btn label="Odjavi se" color="negative" @click="logout" />
-      <q-btn label="Ispiši PDF (aktivne)" color="secondary" @click="izveziAktivnePDF" />
-      <q-btn label="Ispiši PDF (sve)" color="secondary" @click="izveziSvePDF" />
+      <q-btn label="Ispis" color="secondary" @click="izveziAktivnePDF" />
+
     </div>
 
     <!-- Add Patient Diet Dialog -->
@@ -398,10 +398,6 @@ function printPdfFromData(data, title) {
   html2pdf().from(container).save()
 }
 
-// Function to export all patient diets to PDF
-function izveziSvePDF() {
-  printPdfFromData(dijeta_pac.value, 'Sve dijete pacijenata')
-}
 
 function parseDateString(dateStr) {
   const parts = dateStr.match(/^(\d{2})-(\d{2})-(\d{4})$/)
