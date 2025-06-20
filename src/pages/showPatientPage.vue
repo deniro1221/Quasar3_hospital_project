@@ -199,7 +199,7 @@ function closeDialog() {
 // Fetch Patient Data
 async function showPatient() {
   try {
-    const response = await fetch('https://backend-hospital-n9to.onrender.com/dijeta-pacijent/back')
+    const response = await fetch('https://backend-hospital-n9to.onrender.com/dijeta-pacijent/active')
     const data = await response.json()
     dijeta_pac.value = Array.isArray(data) ? data : data ? [data] : []
   } catch (error) {
