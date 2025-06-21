@@ -55,7 +55,6 @@
       <q-btn label="Ažuriraj" color="primary" @click="confirmUpdate" />
       <q-btn label="Odjavi se" color="negative" @click="logout" />
       <q-btn label="Ispis" color="secondary" @click="izveziAktivnePDF" />
-
     </div>
 
     <!-- Add Patient Diet Dialog -->
@@ -104,6 +103,7 @@ const isSuccess = ref(false)
 // User Info
 const loggedInUser = ref('')
 const idSestre = ref('')
+const username = ref('')
 
 // Columns definition
 const columns = [
@@ -119,8 +119,7 @@ const columns = [
   { name: 'Dolazak', label: 'Dolazak', align: 'left', field: 'Dolazak' },
   { name: 'Odlazak', label: 'Odlazak', align: 'left', field: 'Odlazak' },
   { name: 'Datum_unosa', label: 'Datum unosa', align: 'left', field: 'Datum_unosa' },
-  // { name: 'ID_sestre', label: 'ID Sestre', align: 'left', field: 'ID_sestre' },// remove this row
-  { name: 'username', label: 'Sestra', align: 'left', field: 'username' }, //added row with username
+  { name: 'username', label: 'Sestra', align: 'left', field: 'username' },
 ]
 
 // Dialog Control
@@ -161,6 +160,7 @@ const activePatients = computed(() => {
 // Refresh ID
 function refreshID() {
   idSestre.value = localStorage.getItem('idSestre') ? Number(localStorage.getItem('idSestre')) : ''
+  username.value = localStorage.getItem('loggedInUser') || ''
 }
 
 // Show Message
@@ -266,10 +266,10 @@ async function confirmUpdate() {
     updatedRow.Odlazak = formatDateToMySQL(updatedRow.Odlazak)
     updatedRow.Dolazak = formatDateToMySQL(updatedRow.Dolazak)
     updatedRow.ID_sestre = idSestre.value // Use ref value
+    updatedRow.username = username.value
 
     // 🔒 Remove protected fields before sending
     delete updatedRow.ID_dijeta_pac
-    //delete updatedRow.ID_sestre--->if you don't want to update idsestre
     delete updatedRow.Datum_unosa
 
     const url = `https://backend-hospital-n9to.onrender.com/dijeta-pacijent/${rowId}`
@@ -329,6 +329,7 @@ async function postPatient() {
         Dolazak: dolazak.value,
         Odlazak: odlazak.value,
         ID_sestre: idSestre.value,
+        username: username.value
       }),
     })
 

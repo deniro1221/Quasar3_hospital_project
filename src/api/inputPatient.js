@@ -56,11 +56,7 @@ router.post('/dijeta-pacijent', async (req, res) => {
 router.get('/dijeta-pacijent/back', async (req, res) => {
   try {
     const connection = await getConnection()
-    const [rows] = await connection.execute(
-      `SELECT dijeta_pacijent.*, login_nurse.username
-       FROM dijeta_pacijent
-       LEFT JOIN login_nurse ON dijeta_pacijent.ID_sestre = login_nurse.ID_sestre`,
-    )
+    const [rows] = await connection.execute('SELECT * FROM dijeta_pacijent')
 
     const formattedRows = rows.map((row) => {
       const formatDate = (dateObj) => {
@@ -88,10 +84,7 @@ router.get('/dijeta-pacijent/active', async (req, res) => {
   try {
     const connection = await getConnection()
     const [rows] = await connection.execute(
-      `SELECT dijeta_pacijent.*, login_nurse.username
-       FROM dijeta_pacijent
-       LEFT JOIN login_nurse ON dijeta_pacijent.ID_sestre = login_nurse.ID_sestre
-       WHERE dijeta_pacijent.Odlazak >= CURDATE() OR dijeta_pacijent.Odlazak IS NULL`,
+      'SELECT * FROM dijeta_pacijent WHERE Odlazak >= CURDATE() OR Odlazak IS NULL',
     )
 
     const formattedRows = rows.map((row) => {
