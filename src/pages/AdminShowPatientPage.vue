@@ -54,13 +54,13 @@ const columns = [
   { name: 'Dolazak', label: 'Dolazak', align: 'left', field: 'Dolazak' },
   { name: 'Odlazak', label: 'Odlazak', align: 'left', field: 'Odlazak' },
   { name: 'Datum_unosa', label: 'Datum unosa', align: 'left', field: 'Datum_unosa' },
-  { name: 'ID_sestre', label: 'ID Sestre', align: 'left', field: 'ID_sestre' },
+  { name: 'username', label: 'Sestra', align: 'left', field: 'username' },
 ]
 
 // Učitavanje podataka
 async function showPatient() {
   try {
-    const response = await fetch('https://backend-hospital-n9to.onrender.com/dijeta-pacijent/back')
+    const response = await fetch('https://backend-hospital-n9to.onrender.com/dijeta-pacijent/active')
     const data = await response.json()
     dijeta_pac.value = Array.isArray(data) ? data : data ? [data] : []
     console.log('Učitani podaci:', dijeta_pac.value)
