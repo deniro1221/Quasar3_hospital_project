@@ -18,6 +18,7 @@ router.post('/dijeta-pacijent', async (req, res) => {
     Odlazak,
     Dolazak,
     ID_sestre,
+    username,
   } = req.body
 
   const datum_unosa = dayjs().format('YYYY-MM-DD')
@@ -26,8 +27,8 @@ router.post('/dijeta-pacijent', async (req, res) => {
     const connection = await getConnection()
     await connection.execute(
       `INSERT INTO dijeta_pacijent
-        (Broj_sobe, Ime_prezime, Dorucak, Rucak, Vecera, Vrsta_dijete, Napomene, U_sobu, Datum_unosa, Dolazak, Odlazak, ID_sestre)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (Broj_sobe, Ime_prezime, Dorucak, Rucak, Vecera, Vrsta_dijete, Napomene, U_sobu, Datum_unosa, Dolazak, Odlazak, ID_sestre, username)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         Broj_sobe ?? null,
         Ime_prezime ?? null,
@@ -41,6 +42,7 @@ router.post('/dijeta-pacijent', async (req, res) => {
         Dolazak ?? null,
         Odlazak ?? null,
         ID_sestre ?? null,
+        username ?? null,
       ],
     )
     res.json({ message: 'Dijeta pacijenta uspješno spremljena' })
@@ -54,7 +56,11 @@ router.post('/dijeta-pacijent', async (req, res) => {
 router.get('/dijeta-pacijent/back', async (req, res) => {
   try {
     const connection = await getConnection()
-    const [rows] = await connection.execute('SELECT * FROM dijeta_pacijent')
+    const [rows] = await connection.execute(
+      `SELECT dijeta_pacijent.* , login_nurse.username
+      FROM dijeta_pacijent
+      JOIN login_nurse ON dijeta_pacijent.ID_sestre = login_nurse.ID_sestre`,
+    )
 
     const formattedRows = rows.map((row) => {
       const formatDate = (dateObj) => {
@@ -82,7 +88,10 @@ router.get('/dijeta-pacijent/active', async (req, res) => {
   try {
     const connection = await getConnection()
     const [rows] = await connection.execute(
-      'SELECT * FROM dijeta_pacijent WHERE Odlazak >= CURDATE() OR Odlazak IS NULL',
+      `SELECT dijeta_pacijent.* , login_nurse.username
+      FROM dijeta_pacijent
+      JOIN login_nurse ON dijeta_pacijent.ID_sestre = login_nurse.ID_sestre
+      WHERE Odlazak >= CURDATE() OR Odlazak IS NULL`,
     )
 
     const formattedRows = rows.map((row) => {
@@ -121,6 +130,7 @@ router.put('/dijeta-pacijent/:id', async (req, res) => {
     Odlazak,
     Dolazak,
     ID_sestre,
+    username,
   } = req.body
 
   const datum_unosa = dayjs().format('YYYY-MM-DD')
@@ -142,14 +152,16 @@ router.put('/dijeta-pacijent/:id', async (req, res) => {
 
     if (postojećiOdlazak && danas.isAfter(postojećiOdlazak)) {
       return res.status(400).json({
-        message: `Ažuriranje nije dozvoljeno. Datum odlaska (${postojećiOdlazak.format('DD.MM.YYYY')}) je prošao.`,
+        message: `Ažuriranje nije dozvoljeno. Datum odlaska (${postojećiOdlazak.format(
+          'DD.MM.YYYY',
+        )}) je prošao.`,
       })
     }
 
     await connection.execute(
       `UPDATE dijeta_pacijent SET
         Broj_sobe = ?, Ime_prezime = ?, Dorucak = ?, Rucak = ?, Vecera = ?, Vrsta_dijete = ?,
-        Napomene = ?, U_sobu = ?, Odlazak = ?, Dolazak = ?, Datum_unosa = ?, ID_sestre = ?
+        Napomene = ?, U_sobu = ?, Odlazak = ?, Dolazak = ?, Datum_unosa = ?, ID_sestre = ?, username = ?
       WHERE ID_dijeta_pac = ?`,
       [
         Broj_sobe ?? null,
@@ -164,6 +176,7 @@ router.put('/dijeta-pacijent/:id', async (req, res) => {
         Dolazak ?? null,
         datum_unosa,
         ID_sestre ?? null,
+        username ?? null,
         id,
       ],
     )

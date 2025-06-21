@@ -119,7 +119,8 @@ const columns = [
   { name: 'Dolazak', label: 'Dolazak', align: 'left', field: 'Dolazak' },
   { name: 'Odlazak', label: 'Odlazak', align: 'left', field: 'Odlazak' },
   { name: 'Datum_unosa', label: 'Datum unosa', align: 'left', field: 'Datum_unosa' },
-  { name: 'ID_sestre', label: 'ID Sestre', align: 'left', field: 'ID_sestre' },
+  // { name: 'ID_sestre', label: 'ID Sestre', align: 'left', field: 'ID_sestre' },// remove this row
+  { name: 'username', label: 'Sestra', align: 'left', field: 'username' }, //added row with username
 ]
 
 // Dialog Control
@@ -223,7 +224,7 @@ function formatDateToMySQL(dateStr) {
 
 // Cell Double Click
 function onCellDblClick(row, column) {
-  if (['ID_dijeta_pac', 'ID_sestre', 'Datum_unosa'].includes(column.name)) return
+  if (['ID_dijeta_pac', 'username', 'Datum_unosa'].includes(column.name)) return
   editingCell.value = { rowId: row.ID_dijeta_pac, col: column.name }
 }
 
