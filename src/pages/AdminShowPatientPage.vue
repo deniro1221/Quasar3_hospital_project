@@ -18,7 +18,7 @@
       <q-btn
         label="Ispiši"
         color="secondary"
-        @click="izveziAktivnePDF"
+        @click="izveziSvePDF"
         class="q-ml-sm"
       />
 
