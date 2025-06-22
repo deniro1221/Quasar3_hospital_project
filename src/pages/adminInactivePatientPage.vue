@@ -22,7 +22,8 @@
     </q-table>
 
     <div class="q-gutter-sm button-group">
-      <q-btn label="Natrag" color="secondary" to="/nurse_panel" />
+      <q-btn label="Natrag" color="secondary" to="/showPatientAdmin" />
+      <q-btn label="Ispiši" color="secondary" @click="izveziSvePDF" class="q-ml-sm" />
     </div>
   </q-page>
 </template>
@@ -30,6 +31,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import html2pdf from 'html2pdf.js'
 
 const router = useRouter()
 
@@ -67,6 +69,55 @@ async function fetchInactivePatients() {
     isSuccess.value = false
   }
 }
+// Funkcija za generisanje PDF-a
+function printPdfFromData(data, title) {
+  if (!data.length) {
+    alert('Nema podataka za ispis.')
+    return
+  }
+
+  const style = `
+    <style>
+      table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: Arial, sans-serif; }
+      th, td { border: 1px solid #333; padding: 6px; text-align: left; }
+      th { background: #f0f0f0; }
+      h3 { margin-bottom: 10px; font-family: Arial, sans-serif; }
+    </style>
+  `
+
+  const html = `
+    ${style}
+    <h3>${title}</h3>
+    <table>
+      <thead>
+        <tr>
+          ${columns.map((c) => `<th>${c.label}</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        ${data
+          .map(
+            (row) => `
+            <tr>
+              ${columns.map((c) => `<td>${row[c.field] ?? ''}</td>`).join('')}
+            </tr>
+          `,
+          )
+          .join('')}
+      </tbody>
+    </table>
+  `
+
+  const container = document.createElement('div')
+  container.innerHTML = html
+  html2pdf().from(container).save()
+}
+
+// Export svih podataka
+function izveziSvePDF() {
+  printPdfFromData(dijeta_pac.value, 'Sve dijete pacijenata')
+}
+
 
 // Lifecycle Hook
 onMounted(() => {
