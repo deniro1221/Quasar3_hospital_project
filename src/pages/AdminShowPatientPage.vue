@@ -1,6 +1,6 @@
 <template>
   <q-page padding>
-    <h4>Pregled dijeta pacijenata</h4>
+    <h4>Pregled aktivnih dijeta pacijenata</h4>
 
     <!-- Tabela sa prikazom podataka -->
     <q-table :rows="dijeta_pac" :columns="columns" row-key="ID_dijeta_pac">
@@ -16,12 +16,12 @@
     <!-- Dugmad za ispis PDF-a -->
     <div class="q-mt-md q-gutter-sm">
       <q-btn
-        label="Ispiši PDF (aktivne)"
+        label="Ispiši"
         color="secondary"
         @click="izveziAktivnePDF"
         class="q-ml-sm"
       />
-      <q-btn label="Ispiši PDF (sve)" color="secondary" @click="izveziSvePDF" class="q-ml-sm" />
+
       <q-btn label="Nazad" color="secondary" class="q-ml-sm" to="/admin" />
       <q-btn label="Arhiv neaktivnih pacijenta" color="secondary" class="q-ml-sm" to="/showPatientInactive" />
     </div>
@@ -124,7 +124,7 @@ function izveziSvePDF() {
 }
 
 // Export aktivnih dijeta
-function izveziAktivnePDF() {
+/*function izveziAktivnePDF() {
   const today = new Date()
   const todayStart = new Date(today.setHours(0, 0, 0, 0))
 
@@ -141,6 +141,7 @@ function izveziAktivnePDF() {
 
   printPdfFromData(aktivne, 'Aktivne dijete pacijenata')
 }
+  */
 
 // Pomoćna funkcija za parsiranje datuma
 function parseDateString(dateStr) {
