@@ -115,7 +115,7 @@ function printPdfFromData(data, title) {
 
 // Export svih podataka
 function izveziSvePDF() {
-  printPdfFromData(dijeta_pac.value, 'Sve dijete pacijenata')
+  printPdfFromData(inactivePatients.value, 'Arhiva pacijenata') // Make the changes here instead of dijeta_pac.value to inactivePatients.value
 }
 
 
