@@ -16,7 +16,7 @@ const routes = [
       { path: 'history_menu', component: () => import('pages/historyMenuPage.vue') },
       { path: 'admin_history_menu', component: () => import('pages/adminHistoryMenuPage.vue') },
       { path: 'menu_page', component: () => import('pages/menuPage.vue') },
-
+{ path: 'showPatientInactive', component: () => import('pages/adminInactivePatientPage.vue') },
       { path: 'showPatient', component: () => import('pages/showPatientPage.vue') },
       { path: 'showPatientAdmin', component: () => import('pages/AdminShowPatientPage.vue') },
     ],

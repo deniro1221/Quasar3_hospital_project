@@ -108,6 +108,33 @@ router.get('/dijeta-pacijent/active', async (req, res) => {
   }
 })
 
+// 📥 Dohvat neaktivnih pacijenata
+router.get('/dijeta-pacijent/inactive', async (req, res) => {
+  try {
+    const connection = await getConnection()
+    const [rows] = await connection.execute('SELECT * FROM dijeta_pacijent WHERE Odlazak < CURDATE()')
+
+    const formattedRows = rows.map((row) => {
+      const formatDate = (dateObj) => {
+        if (!dateObj) return null
+        return dayjs(dateObj).format('DD-MM-YYYY')
+      }
+
+      return {
+        ...row,
+        Dolazak: formatDate(row.Dolazak),
+        Odlazak: formatDate(row.Odlazak),
+        Datum_unosa: formatDate(row.Datum_unosa),
+      }
+    })
+
+    res.json(formattedRows)
+  } catch (err) {
+    console.error('Greška kod dohvata neaktivnih pacijenata:', err)
+    res.status(500).json({ message: 'Greška na serveru' })
+  }
+})
+
 // ✏️ Ažuriranje pacijenta
 router.put('/dijeta-pacijent/:id', async (req, res) => {
   const { id } = req.params

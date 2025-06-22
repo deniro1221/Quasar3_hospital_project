@@ -23,6 +23,7 @@
       />
       <q-btn label="Ispiši PDF (sve)" color="secondary" @click="izveziSvePDF" class="q-ml-sm" />
       <q-btn label="Nazad" color="secondary" class="q-ml-sm" to="/admin" />
+      <q-btn label="Arhiv neaktivnih pacijenta" color="secondary" class="q-ml-sm" to="/showPatientInactive" />
     </div>
 
     <!-- Poruka (uspjeh ili greška) -->
