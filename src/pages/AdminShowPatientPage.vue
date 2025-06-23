@@ -3,7 +3,7 @@
     <h4>Pregled aktivnih dijeta pacijenata</h4>
 
     <!-- Tabela sa prikazom podataka -->
-    <q-table :rows="dijeta_pac" :columns="columns" row-key="ID_dijeta_pac">
+    <q-table :rows="dijeta_pac" :columns="columns" row-key="ID_dijeta_pac" class="styled-table">
       <template v-slot:body="props">
         <q-tr :props="props">
           <q-td v-for="col in columns" :key="col.name" :props="props">
@@ -15,15 +15,15 @@
 
     <!-- Dugmad za ispis PDF-a -->
     <div class="q-mt-md q-gutter-sm">
-      <q-btn
-        label="Ispiši"
-        color="secondary"
-        @click="izveziSvePDF"
-        class="q-ml-sm"
-      />
+      <q-btn label="Ispiši" color="secondary" @click="izveziSvePDF" class="q-ml-sm" />
 
       <q-btn label="Nazad" color="secondary" class="q-ml-sm" to="/admin" />
-      <q-btn label="Arhiv neaktivnih pacijenta" color="secondary" class="q-ml-sm" to="/showPatientInactive" />
+      <q-btn
+        label="Arhiv neaktivnih pacijenta"
+        color="secondary"
+        class="q-ml-sm"
+        to="/showPatientInactive"
+      />
     </div>
 
     <!-- Poruka (uspjeh ili greška) -->
@@ -153,3 +153,41 @@ function parseDateString(dateStr) {
   return new Date(dateStr)
 }
 </script>
+
+<style scoped>
+.rounded-borders {
+  border-radius: 8px;
+}
+
+/* Styled Table */
+.styled-table {
+  width: 100%;
+  border-collapse: separate; /* Use "separate" to see the cell spacing */
+  border-spacing: 0; /* Adjust this value for space between cells */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Optional: add a shadow for depth */
+  border: 1px solid #ddd; /* Table border */
+}
+
+.styled-table th,
+.styled-table td {
+  border: 1px solid #ddd; /* Light gray border */
+  padding: 8px;
+  text-align: left;
+}
+
+.styled-table th {
+  background-color: #f2f2f2; /* Light gray background for header */
+  font-weight: bold;
+  border-bottom: 2px solid #bbb; /* More prominent header bottom border */
+}
+
+/* Optional: Highlight every other row */
+.styled-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* Optional: Hover effect on rows */
+.styled-table tbody tr:hover {
+  background-color: #f0f0f0;
+}
+</style>
