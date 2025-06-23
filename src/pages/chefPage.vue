@@ -40,7 +40,7 @@
           <q-form @submit.prevent="isEditing ? updateChef() : addChef()">
             <q-input filled v-model="form.Ime_kuhara" label="Ime" required />
             <q-input filled v-model="form.Prezime_kuhara" label="Prezime" required />
-               <q-input filled v-model="form.username" label="username" required />
+            <q-input filled v-model="form.username" label="username" required />
             <q-input filled v-model="form.lozinka" label="lozinka" required />
             <div class="q-mt-md row justify-end q-gutter-sm">
               <q-btn type="submit" label="Spremi" color="primary" />
@@ -173,11 +173,13 @@ onMounted(fetchChefs)
   background-color: #009879;
   color: #ffffff;
   text-align: left;
+  font-weight: bold; /* Make header text bold */
 }
 
 .styled-table th,
 .styled-table td {
   padding: 12px 15px;
+  font-weight: 500; /* Medium font weight for cells */
 }
 
 .styled-table tbody tr {
@@ -191,8 +193,15 @@ onMounted(fetchChefs)
 .styled-table tbody tr:last-of-type {
   border-bottom: 2px solid #009879;
 }
+
+/* Optional: Highlight every other column */
+.styled-table tbody td:nth-child(even),
+.styled-table thead th:nth-child(even) {
+  background-color: #fafafa;
+}
+
+/* Optional: Hover effect on rows */
+.styled-table tbody tr:hover {
+  background-color: #f0f0f0;
+}
 </style>
-Regenerate
-Copy
-
-
