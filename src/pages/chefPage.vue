@@ -7,7 +7,7 @@
 
       <q-card-section>
         <q-btn @click="showAddChefDialog" label="Dodaj Kuhara" color="primary" class="q-mb-md" />
-        <q-table :rows="filteredChefs" :columns="columns" row-key="ID_kuhara" class="styled-table">
+        <q-table :rows="filteredChefs" :columns="columns" row-key="ID_kuhara">
           <template v-slot:body-cell-actions="props">
             <q-td :props="props" align="center">
               <q-btn flat round icon="edit" color="primary" @click="editChef(props.row)" />
@@ -61,11 +61,9 @@ import axios from 'axios'
 const chefs = ref([])
 
 const form = ref({
-  ID_kuhara: '',
-  Ime_kuhara: '',
-  Prezime_kuhara: '',
-  username: '',
-  lozinka: '',
+  ID_kuhar: '',
+  Ime_kuhar: '',
+  Prezime_kuhar: '',
 })
 
 const isEditing = ref(false)
@@ -76,7 +74,6 @@ const columns = [
   { name: 'ID_kuhara', label: 'ID kuhara', field: 'ID_kuhara', align: 'left' },
   { name: 'Ime_kuhara', label: 'Ime', field: 'Ime_kuhara', align: 'left' },
   { name: 'Prezime_kuhara', label: 'Prezime', field: 'Prezime_kuhara', align: 'left' },
-   { name: 'username', label: 'Korisničko ime', field: 'username', align: 'left' },
   { name: 'actions', label: 'Akcije', align: 'center', sortable: false },
 ]
 
@@ -100,8 +97,6 @@ const showAddChefDialog = () => {
     ID_kuhara: '',
     Ime_kuhara: '',
     Prezime_kuhara: '',
-      username: '',
-    lozinka: '',
   }
   isDialogOpen.value = true
 }
@@ -157,51 +152,3 @@ const closeDialog = () => {
 // Pri pokretanju dohvaća sve kuhare
 onMounted(fetchChefs)
 </script>
-
-<style scoped>
-.styled-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 25px 0;
-  font-size: 0.9em;
-  font-family: sans-serif;
-  min-width: 400px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-}
-
-.styled-table thead tr {
-  background-color: #009879;
-  color: #ffffff;
-  text-align: left;
-  font-weight: bold; /* Make header text bold */
-}
-
-.styled-table th,
-.styled-table td {
-  padding: 12px 15px;
-  font-weight: 500; /* Medium font weight for cells */
-}
-
-.styled-table tbody tr {
-  border-bottom: 1px solid #dddddd;
-}
-
-.styled-table tbody tr:nth-of-type(even) {
-  background-color: #f3f3f3;
-}
-
-.styled-table tbody tr:last-of-type {
-  border-bottom: 2px solid #009879;
-}
-
-/* Optional: Highlight every other column */
-.styled-table tbody td:nth-child(even),
-.styled-table thead th:nth-child(even) {
-  background-color: #fafafa;
-}
-
-/* Optional: Hover effect on rows */
-.styled-table tbody tr:hover {
-  background-color: #f0f0f0;
-}
-</style>
