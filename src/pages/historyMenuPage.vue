@@ -24,6 +24,42 @@
           style="margin-left: 10px"
         />
       </template>
+
+      <template
+        v-slot:body-cell-Datum_menija="props"
+        :props="props"
+      >
+        <q-td key="props.row.Datum_menija" auto-width>
+          {{ formatDate(props.row.Datum_menija) }}
+        </q-td>
+      </template>
+
+      <template
+        v-slot:body-cell-Marenda1="props"
+        :props="props"
+      >
+        <q-td key="props.row.Datum_menija" auto-width>
+          Juha: {{ props.row.Juha }}
+          <br />
+          Glavno Jelo: {{ props.row.Glavno_jelo }}
+          <br />
+          Salata: {{ props.row.Salata }}
+        </q-td>
+      </template>
+
+      <template
+        v-slot:body-cell-Marenda2="props"
+        :props="props"
+      >
+        <q-td key="props.row.Datum_menija" auto-width>
+          Juha: {{ props.row.Juha }}
+          <br />
+          Glavno Jelo: {{ props.row.Glavno_jelo }}
+          <br />
+          Salata: {{ props.row.Salata }}
+        </q-td>
+      </template>
+
       <template v-slot:bottom>
         <q-btn label="Nazad" color="primary" @click="goToChefPanel" />
       </template>
@@ -35,6 +71,7 @@
 import { ref, onMounted } from 'vue'
 import html2pdf from 'html2pdf.js'
 import { useRouter } from 'vue-router'
+import { date } from 'quasar'
 
 const router = useRouter()
 
@@ -55,9 +92,9 @@ function showMessage(txt, success = true) {
 
 // Kolone tablice
 const columns = [
-  { name: 'Datum_menija', label: 'Datum', align: 'left', field: 'Datum_menija' },
-  { name: 'Marenda1', label: 'Marenda 1', align: 'left', field: 'Marenda1' },
-  { name: 'Marenda2', label: 'Marenda 2', align: 'left', field: 'Marenda2' },
+  { name: 'Datum_menija', label: 'Datum', align: 'left' },
+  { name: 'Marenda1', label: 'Marenda 1', align: 'left' },
+  { name: 'Marenda2', label: 'Marenda 2', align: 'left' },
   { name: 'ID_kuhara', label: 'ID Kuhara', align: 'left', field: 'ID_kuhara' },
 ]
 
@@ -76,6 +113,11 @@ async function osvjeziMenije() {
   } catch (error) {
     showMessage('Greška pri učitavanju menija.', false, error)
   }
+}
+
+// Function to format the date
+const formatDate = (value) => {
+  return date.formatDate(value, 'DD.MM.YYYY')
 }
 
 function izveziSvePDF() {
