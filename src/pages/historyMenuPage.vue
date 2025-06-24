@@ -28,7 +28,7 @@
           <td class="px-4 py-3 border font-medium text-sm">{{ row.Datum_marende }}</td>
           <td class="px-4 py-3 border text-sm">
             <div v-if="row.Marenda1">
-              🍲 {{ row.Marenda1.Juha }}<br />
+              🍲 <span class="font-semibold">{{ row.Marenda1.Juha }}</span><br />
               🍛 {{ row.Marenda1.Glavno_jelo }}<br />
               🥗 {{ row.Marenda1.Salata }}
             </div>
@@ -36,7 +36,7 @@
           </td>
           <td class="px-4 py-3 border text-sm">
             <div v-if="row.Marenda2">
-              🍲 {{ row.Marenda2.Juha }}<br />
+              🍲 <span class="font-semibold">{{ row.Marenda2.Juha }}</span><br />
               🍛 {{ row.Marenda2.Glavno_jelo }}<br />
               🥗 {{ row.Marenda2.Salata }}
             </div>
@@ -125,7 +125,13 @@ const generatePDF = () => {
     head: [["Datum", "Marenda 1", "Marenda 2", "Kuhar"]],
     body,
     startY: 20,
-    styles: { fontSize: 8 }
+    styles: { fontSize: 8, cellWidth: 'auto' },
+    columnStyles: {
+          0: { cellWidth: 25 },   // Datum
+          1: { cellWidth: 50 },   // Marenda 1
+          2: { cellWidth: 50 },   // Marenda 2
+          3: { cellWidth: 25 },   // Kuhar
+      },
   });
 
   doc.save("povijest_marendi.pdf");
