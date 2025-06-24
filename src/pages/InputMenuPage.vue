@@ -96,42 +96,42 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import dayjs from 'dayjs'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import dayjs from 'dayjs';
 
-const router = useRouter()
+const router = useRouter();
 
 // ✅ Function to get the local date in the format yyyy-mm-dd
 function getLocalDateFormatted() {
-  return dayjs().format('YYYY-MM-DD')
+  return dayjs().format('YYYY-MM-DD');
 }
 
 // Messages and states
-const message = ref('')
-const isSuccess = ref(false)
+const message = ref('');
+const isSuccess = ref(false);
 
 function showMessage(txt, success = true) {
-  message.value = txt
-  isSuccess.value = success
+  message.value = txt;
+  isSuccess.value = success;
   setTimeout(() => {
-    message.value = ''
-  }, 3000)
+    message.value = '';
+  }, 3000);
 }
 
 // Initial data
-const datum = ref(getLocalDateFormatted()) // Date can now be changed
-const juha_m1 = ref('')
-const glavno_jelo_m1 = ref('')
-const salata_m1 = ref('')
-const juha_m2 = ref('')
-const glavno_jelo_m2 = ref('')
-const salata_m2 = ref('')
-const idKuhara = localStorage.getItem('userID')
-const username = localStorage.getItem('loggedInUser')
+const datum = ref(getLocalDateFormatted()); // Date can now be changed
+const juha_m1 = ref('');
+const glavno_jelo_m1 = ref('');
+const salata_m1 = ref('');
+const juha_m2 = ref('');
+const glavno_jelo_m2 = ref('');
+const salata_m2 = ref('');
+const idKuhara = localStorage.getItem('userID');
+const username = localStorage.getItem('loggedInUser');
 
 // Dialog and active menu
-const dialogAktivniMeni = ref(false)
+const dialogAktivniMeni = ref(false);
 const datumAktivnogMenija = ref({
   Datum_marende: '',
   Juha_m1: '',
@@ -140,16 +140,16 @@ const datumAktivnogMenija = ref({
   Juha_m2: '',
   Glavno_jelo_m2: '',
   Salata_m2: '',
-})
+});
 
 // ✅ Function to submit manual
 const submitManual = async () => {
-  const today = dayjs()
-  const selectedDate = dayjs(datum.value)
+  const today = dayjs();
+  const selectedDate = dayjs(datum.value);
 
   if (selectedDate.isBefore(today, 'day')) {
-    showMessage('Ne možete unijeti meni za prošli datum.', false)
-    return
+    showMessage('Ne možete unijeti meni za prošli datum.', false);
+    return;
   }
 
   try {
@@ -167,30 +167,30 @@ const submitManual = async () => {
         ID_kuhara: idKuhara,
         username: username.value
       }),
-    })
+    });
 
     if (response.ok) {
-      showMessage('Jelovnik uspješno spremljen!', true)
+      showMessage('Jelovnik uspješno spremljen!', true);
       // Reset the fields
-      juha_m1.value = ''
-      glavno_jelo_m1.value = ''
-      salata_m1.value = ''
-      juha_m2.value = ''
-      glavno_jelo_m2.value = ''
-      salata_m2.value = ''
+      juha_m1.value = '';
+      glavno_jelo_m1.value = '';
+      salata_m1.value = '';
+      juha_m2.value = '';
+      glavno_jelo_m2.value = '';
+      salata_m2.value = '';
     } else {
-      showMessage('Greška pri unosu!', false)
+      showMessage('Greška pri unosu!', false);
     }
   } catch (error) {
-    console.error('Greška:', error)
-    showMessage('Greška na serveru.', false)
+    console.error('Greška:', error);
+    showMessage('Greška na serveru.', false);
   }
-}
+};
 
 const otkrijAktivniMeni = async (openDialog = true) => {
   try {
-    const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/today')
-    const data = await response.json()
+    const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/today');
+    const data = await response.json();
 
     if (data) {
       datumAktivnogMenija.value = {
@@ -201,7 +201,7 @@ const otkrijAktivniMeni = async (openDialog = true) => {
         Juha_m2: data.Marenda2.Juha || '',
         Glavno_jelo_m2: data.Marenda2.Glavno_jelo || '',
         Salata_m2: data.Marenda2.Salata || '',
-      }
+      };
     } else {
       // Initialize if no data
       datumAktivnogMenija.value = {
@@ -212,32 +212,32 @@ const otkrijAktivniMeni = async (openDialog = true) => {
         Juha_m2: '',
         Glavno_jelo_m2: '',
         Salata_m2: '',
-      }
+      };
     }
 
     if (openDialog) {
-      dialogAktivniMeni.value = true
+      dialogAktivniMeni.value = true;
     }
   } catch (err) {
-    console.error('Greška:', err)
-    showMessage('Greška pri učitavanju menija!', false)
+    console.error('Greška:', err);
+    showMessage('Greška pri učitavanju menija!', false);
   }
-}
+};
 
 // ✅ Function to update active menu
 const azurirajMeni = async () => {
-  if (!confirm('Jeste li sigurni da želite ažurirati meni?')) return
+  if (!confirm('Jeste li sigurni da želite ažurirati meni?')) return;
 
-  const selectedDate = dayjs(datumAktivnogMenija.value.Datum_marende)
+  const selectedDate = dayjs(datumAktivnogMenija.value.Datum_marende);
   if (selectedDate.isBefore(dayjs(), 'day')) {
-    showMessage('Ne možete ažurirati meni za prošli datum!', false)
-    return
+    showMessage('Ne možete ažurirati meni za prošli datum!', false);
+    return;
   }
 
-  const ID_kuhara = localStorage.getItem('userID')
+  const ID_kuhara = localStorage.getItem('userID');
   if (!ID_kuhara) {
-    showMessage('ID kuhara nije pronađen!', false)
-    return
+    showMessage('ID kuhara nije pronađen!', false);
+    return;
   }
 
   try {
@@ -255,50 +255,50 @@ const azurirajMeni = async () => {
         ID_kuhara: ID_kuhara,
         username: username.value
       }),
-    })
+    });
 
     if (response.ok) {
-      showMessage('Meni je ažuriran!', true)
-      dialogAktivniMeni.value = false
+      showMessage('Meni je ažuriran!', true);
+      dialogAktivniMeni.value = false;
     } else {
-      showMessage('Greška pri ažuriranju!', false)
+      showMessage('Greška pri ažuriranju!', false);
     }
   } catch (err) {
-    console.error('Greška:', err)
-    showMessage('Greška na serveru!', false)
+    console.error('Greška:', err);
+    showMessage('Greška na serveru!', false);
   }
-}
+};
 
-const dialogObrisiMeni = ref(false) // Delete dialog
+const dialogObrisiMeni = ref(false); // Delete dialog
 // Function to open delete dialog
 const otvoriDijalogBrisanje = async () => {
-  await otkrijAktivniMeni(false) // Do NOT open display active menu
+  await otkrijAktivniMeni(false); // Do NOT open display active menu
   if (!datumAktivnogMenija.value.Datum_marende) {
-    showMessage('Nema aktivnog menija za danas!', false)
-    return
+    showMessage('Nema aktivnog menija za danas!', false);
+    return;
   }
 
-  const selectedDate = dayjs(datumAktivnogMenija.value.Datum_marende)
+  const selectedDate = dayjs(datumAktivnogMenija.value.Datum_marende);
   if (selectedDate.isBefore(dayjs(), 'day')) {
-    showMessage('Ne možete obrisati meni za prošli datum!', false)
-    return
+    showMessage('Ne možete obrisati meni za prošli datum!', false);
+    return;
   }
 
-  dialogObrisiMeni.value = true
-}
+  dialogObrisiMeni.value = true;
+};
 
 // Function to delete menu
 const obrisiMeni = async () => {
-  const datumZaBrisanje = datumAktivnogMenija.value.Datum_marende
+  const datumZaBrisanje = datumAktivnogMenija.value.Datum_marende;
 
-  const selectedDate = dayjs(datumZaBrisanje)
+  const selectedDate = dayjs(datumZaBrisanje);
   if (selectedDate.isBefore(dayjs(), 'day')) {
-    showMessage('Ne možete obrisati meni za prošli datum!', false)
-    return
+    showMessage('Ne možete obrisati meni za prošli datum!', false);
+    return;
   }
 
   if (!confirm(`Jeste li sigurni da želite obrisati meni za datum ${datumZaBrisanje}?`)) {
-    return
+    return;
   }
 
   try {
@@ -307,11 +307,11 @@ const obrisiMeni = async () => {
         datumZaBrisanje,
       )}`,
       { method: 'DELETE' },
-    )
+    );
 
     if (response.ok) {
-      showMessage('Meni je uspješno obrisan!', true)
-      dialogObrisiMeni.value = false
+      showMessage('Meni je uspješno obrisan!', true);
+      dialogObrisiMeni.value = false;
       datumAktivnogMenija.value = {
         Datum_marende: '',
         Juha_m1: '',
@@ -320,31 +320,31 @@ const obrisiMeni = async () => {
         Juha_m2: '',
         Glavno_jelo_m2: '',
         Salata_m2: '',
-      }
+      };
     } else {
-      const errorText = await response.text()
-      console.error('Odgovor sa servera:', errorText)
-      showMessage('Greška pri brisanju menija!', false)
+      const errorText = await response.text();
+      console.error('Odgovor sa servera:', errorText);
+      showMessage('Greška pri brisanju menija!', false);
     }
   } catch (err) {
-    console.error('Greška:', err)
-    showMessage('Greška na serveru!', false)
+    console.error('Greška:', err);
+    showMessage('Greška na serveru!', false);
   }
-}
+};
 
 // Function for the "Natrag" button
 function natrag() {
-  router.push('/chef_panel')
+  router.push('/chef_panel');
 }
 
 // Function for the "Odustani" button
 function odustani() {
-  juha_m1.value = ''
-  glavno_jelo_m1.value = ''
-  salata_m1.value = ''
-  juha_m2.value = ''
-  glavno_jelo_m2.value = ''
-  salata_m2.value = ''
+  juha_m1.value = '';
+  glavno_jelo_m1.value = '';
+  salata_m1.value = '';
+  juha_m2.value = '';
+  glavno_jelo_m2.value = '';
+  salata_m2.value = '';
 }
 </script>
 
@@ -352,6 +352,7 @@ function odustani() {
 .positive {
   color: green;
 }
+
 .negative {
   color: red;
 }

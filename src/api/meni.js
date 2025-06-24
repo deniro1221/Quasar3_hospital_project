@@ -1,176 +1,198 @@
-import { getConnection } from './db.js'
-import { Router } from 'express'
-import dayjs from 'dayjs'
+import { getConnection } from './db.js';
+import { Router } from 'express';
+import dayjs from 'dayjs';
 
-const router = Router()
+const router = Router();
 
 // Middleware to validate date format
 const validateDateFormat = (req, res, next) => {
-  const { Datum_marende } = req.body
+  const { Datum_marende } = req.body;
   if (Datum_marende && !dayjs(Datum_marende, 'YYYY-MM-DD', true).isValid()) {
-    return res.status(400).json({ message: 'Neispravan format datuma. Koristite YYYY-MM-DD.' })
+    return res.status(400).json({ message: 'Neispravan format datuma. Koristite YYYY-MM-DD.' });
   }
-  next()
-}
+  next();
+};
 
 // POST - Create menu entries in both Marenda1 and Marenda2
 router.post('/menu', validateDateFormat, async (req, res) => {
-  const { Datum_marende, Juha_m1, Glavno_jelo_m1, Salata_m1, Juha_m2, Glavno_jelo_m2, Salata_m2, ID_kuhara, username } = req.body
+  console.log("POST /menu - req.body:", req.body); // Debugging log
+
+  const { Datum_marende, ID_kuhara, username } = req.body; // Extract these first
+
+  const Juha_m1 = req.body.Juha_m1 || null;
+  const Glavno_jelo_m1 = req.body.Glavno_jelo_m1 || null;
+  const Salata_m1 = req.body.Salata_m1 || null;
+  const Juha_m2 = req.body.Juha_m2 || null;
+  const Glavno_jelo_m2 = req.body.Glavno_jelo_m2 || null;
+  const Salata_m2 = req.body.Salata_m2 || null;
+
+  console.log("POST /menu - Values after null check:", { Datum_marende, Juha_m1, Glavno_jelo_m1, Salata_m1, Juha_m2, Glavno_jelo_m2, Salata_m2, ID_kuhara, username });
 
   if (!Datum_marende) {
-    return res.status(400).json({ message: 'Datum je obavezan.' })
+    return res.status(400).json({ message: 'Datum je obavezan.' });
   }
 
-  let connection
+  let connection;
   try {
-    connection = await getConnection()
+    connection = await getConnection();
 
     // Insert into Marenda1
     await connection.execute(
       `INSERT INTO Marenda1 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
        VALUES (?, ?, ?, ?, ?, ?)`,
       [Datum_marende, Juha_m1, Glavno_jelo_m1, Salata_m1, ID_kuhara, username],
-    )
+    );
 
     // Insert into Marenda2
     await connection.execute(
       `INSERT INTO Marenda2 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
        VALUES (?, ?, ?, ?, ?, ?)`,
       [Datum_marende, Juha_m2, Glavno_jelo_m2, Salata_m2, ID_kuhara, username],
-    )
+    );
 
-    res.json({ message: 'Meniji uspješno spremljeni.' })
+    res.json({ message: 'Meniji uspješno spremljeni.' });
   } catch (err) {
-    console.error('Greška kod unosa menija:', err)
-    res.status(500).json({ message: 'Greška na serveru.' })
+    console.error('Greška kod unosa menija:', err);
+    res.status(500).json({ message: 'Greška na serveru.' });
   }
-})
+});
 
 // GET - Get menu for today from both Marenda1 and Marenda2
 router.get('/menu/today', async (req, res) => {
-  const today = dayjs().format('YYYY-MM-DD')
+  const today = dayjs().format('YYYY-MM-DD');
 
-  let connection
+  let connection;
   try {
-    connection = await getConnection()
+    connection = await getConnection();
 
     // Fetch from Marenda1
     const [m1Results] = await connection.execute(
       `SELECT Juha, Glavno_jelo, Salata FROM Marenda1 WHERE Datum_marende = ?`,
       [today],
-    )
+    );
 
     // Fetch from Marenda2
     const [m2Results] = await connection.execute(
       `SELECT Juha, Glavno_jelo, Salata FROM Marenda2 WHERE Datum_marende = ?`,
       [today],
-    )
+    );
 
-    const marenda1 = m1Results[0] || {}
-    const marenda2 = m2Results[0] || {}
+    const marenda1 = m1Results[0] || {};
+    const marenda2 = m2Results[0] || {};
 
-    res.json({ Datum_marende: today, Marenda1: marenda1, Marenda2: marenda2 })
+    res.json({ Datum_marende: today, Marenda1: marenda1, Marenda2: marenda2 });
   } catch (err) {
-    console.error('Greška kod dohvata menija za danas:', err)
-    res.status(500).json({ message: 'Greška na serveru.' })
+    console.error('Greška kod dohvata menija za danas:', err);
+    res.status(500).json({ message: 'Greška na serveru.' });
   }
-})
+});
 
 // PUT - Update menu entries in both Marenda1 and Marenda2
 router.put('/menu/fresh', validateDateFormat, async (req, res) => {
-  const { Datum_marende, Juha_m1, Glavno_jelo_m1, Salata_m1, Juha_m2, Glavno_jelo_m2, Salata_m2, ID_kuhara, username } = req.body
+  console.log("PUT /menu/fresh - req.body:", req.body);  // Debugging log
+
+  const { Datum_marende, ID_kuhara, username } = req.body; // Extract these first
+
+  const Juha_m1 = req.body.Juha_m1 || null;
+  const Glavno_jelo_m1 = req.body.Glavno_jelo_m1 || null;
+  const Salata_m1 = req.body.Salata_m1 || null;
+  const Juha_m2 = req.body.Juha_m2 || null;
+  const Glavno_jelo_m2 = req.body.Glavno_jelo_m2 || null;
+  const Salata_m2 = req.body.Salata_m2 || null;
+
+  console.log("PUT /menu/fresh - Values after null check:", { Datum_marende, Juha_m1, Glavno_jelo_m1, Salata_m1, Juha_m2, Glavno_jelo_m2, Salata_m2, ID_kuhara, username });
 
   if (!Datum_marende) {
-    return res.status(400).json({ message: 'Datum je obavezan.' })
+    return res.status(400).json({ message: 'Datum je obavezan.' });
   }
 
-  const today = dayjs().format('YYYY-MM-DD')
+  const today = dayjs().format('YYYY-MM-DD');
   if (dayjs(Datum_marende).isBefore(today, 'day')) {
-    return res.status(400).json({ message: 'Ne možete uređivati menije za prošle datume.' })
+    return res.status(400).json({ message: 'Ne možete uređivati menije za prošle datume.' });
   }
 
-  let connection
+  let connection;
   try {
-    connection = await getConnection()
+    connection = await getConnection();
 
     // Update Marenda1
     await connection.execute(
       `UPDATE Marenda1 SET Juha = ?, Glavno_jelo = ?, Salata = ?, ID_kuhara = ?, username = ? WHERE Datum_marende = ?`,
       [Juha_m1, Glavno_jelo_m1, Salata_m1, ID_kuhara, username, Datum_marende],
-    )
+    );
 
     // Update Marenda2
     await connection.execute(
       `UPDATE Marenda2 SET Juha = ?, Glavno_jelo = ?, Salata = ?, ID_kuhara = ?, username = ? WHERE Datum_marende = ?`,
       [Juha_m2, Glavno_jelo_m2, Salata_m2, ID_kuhara, username, Datum_marende],
-    )
+    );
 
-    res.json({ message: 'Meniji su uspješno ažurirani.' })
+    res.json({ message: 'Meniji su uspješno ažurirani.' });
   } catch (err) {
-    console.error('Greška kod ažuriranja menija:', err)
-    res.status(500).json({ message: 'Greška na serveru.' })
+    console.error('Greška kod ažuriranja menija:', err);
+    res.status(500).json({ message: 'Greška na serveru.' });
   }
-})
+});
 
 // DELETE - Delete menu entries from both Marenda1 and Marenda2
 router.delete('/menu/delete', async (req, res) => {
-  const datum = req.query.datum
+  const datum = req.query.datum;
 
   if (!datum) {
-    return res.status(400).json({ message: 'Datum je obavezan.' })
+    return res.status(400).json({ message: 'Datum je obavezan.' });
   }
 
-  const today = dayjs().format('YYYY-MM-DD')
+  const today = dayjs().format('YYYY-MM-DD');
   if (dayjs(datum).isBefore(today, 'day')) {
-    return res.status(400).json({ message: 'Ne možete brisati menije za prošle datume.' })
+    return res.status(400).json({ message: 'Ne možete brisati menije za prošle datume.' });
   }
 
-  let connection
+  let connection;
   try {
-    connection = await getConnection()
+    connection = await getConnection();
 
     // Delete from Marenda1
-    const [result1] = await connection.execute(`DELETE FROM Marenda1 WHERE Datum_marende = ?`, [datum])
+    const [result1] = await connection.execute(`DELETE FROM Marenda1 WHERE Datum_marende = ?`, [datum]);
 
     // Delete from Marenda2
-    const [result2] = await connection.execute(`DELETE FROM Marenda2 WHERE Datum_marende = ?`, [datum])
+    const [result2] = await connection.execute(`DELETE FROM Marenda2 WHERE Datum_marende = ?`, [datum]);
 
     if (result1.affectedRows + result2.affectedRows > 0) {
-      res.json({ message: 'Meniji su uspješno obrisani.' })
+      res.json({ message: 'Meniji su uspješno obrisani.' });
     } else {
-      res.status(404).json({ message: 'Nije pronađen meni za taj datum.' })
+      res.status(404).json({ message: 'Nije pronađen meni za taj datum.' });
     }
   } catch (err) {
-    console.error('Greška kod brisanja menija:', err)
-    res.status(500).json({ message: 'Greška na serveru.' })
+    console.error('Greška kod brisanja menija:', err);
+    res.status(500).json({ message: 'Greška na serveru.' });
   }
-})
+});
 
 // GET - Get menu history (from both Marenda1 and Marenda2)
 router.get('/menu/history', async (req, res) => {
-  let connection
+  let connection;
   try {
-    connection = await getConnection()
+    connection = await getConnection();
 
     // Fetch from Marenda1
     const [m1Results] = await connection.execute(
       `SELECT Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username FROM Marenda1 ORDER BY Datum_marende DESC`,
-    )
+    );
 
     // Fetch from Marenda2
     const [m2Results] = await connection.execute(
       `SELECT Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username FROM Marenda2 ORDER BY Datum_marende DESC`,
-    )
+    );
 
     // Combine the results.  Ideally, you'd merge based on Datum_marende.  For simplicity,
     // this just concatenates the arrays.
-    const combinedResults = [...m1Results, ...m2Results].sort((a, b) => (dayjs(a.Datum_marende).isBefore(b.Datum_marende) ? 1 : -1)) //Sort date from latest to oldest
+    const combinedResults = [...m1Results, ...m2Results].sort((a, b) => (dayjs(a.Datum_marende).isBefore(b.Datum_marende) ? 1 : -1)); //Sort date from latest to oldest
 
-    res.json(combinedResults)
+    res.json(combinedResults);
   } catch (err) {
-    console.error('Greška kod dohvata povijesti menija:', err)
-    res.status(500).json({ message: 'Greška na serveru.' })
+    console.error('Greška kod dohvata povijesti menija:', err);
+    res.status(500).json({ message: 'Greška na serveru.' });
   }
-})
+});
 
-export default router
+export default router;
