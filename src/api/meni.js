@@ -15,10 +15,10 @@ const validateDateFormat = (req, res, next) => {
 
 // POST - Create menu entries in both Marenda1 and Marenda2
 router.post('/menu', validateDateFormat, async (req, res) => {
-  console.log("POST /menu - req.body:", req.body); // Debugging log
+  console.log("POST /menu - req.body:", req.body);
 
-  const { Datum_marende, ID_kuhara } = req.body; // Extract these first
-  const username = req.body.username || null; // Ensure username is not undefined
+  const { Datum_marende, ID_kuhara } = req.body;
+  const username = req.body.username || null;
 
   const Juha_m1 = req.body.Juha_m1 || null;
   const Glavno_jelo_m1 = req.body.Glavno_jelo_m1 || null;
@@ -37,23 +37,58 @@ router.post('/menu', validateDateFormat, async (req, res) => {
   try {
     connection = await getConnection();
 
-    // Insert into Marenda1
-    await connection.execute(
-      `INSERT INTO Marenda1 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [Datum_marende, Juha_m1, Glavno_jelo_m1, Salata_m1, ID_kuhara, username],
+    // ** CHECK IF MENU ALREADY EXISTS IN Marenda1 **
+    const [existingMenu1] = await connection.execute(
+      `SELECT Datum_marende FROM Marenda1 WHERE Datum_marende = ?`,
+      [Datum_marende]
     );
 
-    // Insert into Marenda2
-    await connection.execute(
-      `INSERT INTO Marenda2 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [Datum_marende, Juha_m2, Glavno_jelo_m2, Salata_m2, ID_kuhara, username],
+    // ** CHECK IF MENU ALREADY EXISTS IN Marenda2 **
+    const [existingMenu2] = await connection.execute(
+      `SELECT Datum_marende FROM Marenda2 WHERE Datum_marende = ?`,
+      [Datum_marende]
     );
+
+    // DETERMINE INSERT OR UPDATE FOR MARENDA1
+    if (existingMenu1.length > 0) {
+      // UPDATE Marenda1
+      console.log(`Menu exists in Marenda1 for ${Datum_marende}.  Performing UPDATE.`);
+      await connection.execute(
+        `UPDATE Marenda1 SET Juha = ?, Glavno_jelo = ?, Salata = ?, ID_kuhara = ?, username = ? WHERE Datum_marende = ?`,
+        [Juha_m1, Glavno_jelo_m1, Salata_m1, ID_kuhara, username, Datum_marende],
+      );
+    } else {
+      // INSERT into Marenda1
+      console.log(`Menu does not exist in Marenda1 for ${Datum_marende}. Performing INSERT.`);
+      await connection.execute(
+        `INSERT INTO Marenda1 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [Datum_marende, Juha_m1, Glavno_jelo_m1, Salata_m1, ID_kuhara, username],
+      );
+    }
+
+    // DETERMINE INSERT OR UPDATE FOR MARENDA2
+    if (existingMenu2.length > 0) {
+      // UPDATE Marenda2
+      console.log(`Menu exists in Marenda2 for ${Datum_marende}.  Performing UPDATE.`);
+      await connection.execute(
+        `UPDATE Marenda2 SET Juha = ?, Glavno_jelo = ?, Salata = ?, ID_kuhara = ?, username = ? WHERE Datum_marende = ?`,
+        [Juha_m2, Glavno_jelo_m2, Salata_m2, ID_kuhara, username, Datum_marende],
+      );
+    } else {
+      // INSERT into Marenda2
+      console.log(`Menu does not exist in Marenda2 for ${Datum_marende}. Performing INSERT.`);
+      await connection.execute(
+        `INSERT INTO Marenda2 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [Datum_marende, Juha_m2, Glavno_jelo_m2, Salata_m2, ID_kuhara, username],
+      );
+    }
 
     res.json({ message: 'Meniji uspješno spremljeni.' });
+
   } catch (err) {
-    console.error('Greška kod unosa menija:', err);
+    console.error('Greška kod unosa/ažuriranja menija:', err);
     res.status(500).json({ message: 'Greška na serveru.' });
   }
 });
@@ -90,11 +125,10 @@ router.get('/menu/today', async (req, res) => {
 
 // PUT - Update menu entries in both Marenda1 and Marenda2
 router.put('/menu/fresh', validateDateFormat, async (req, res) => {
-  console.log("PUT /menu/fresh - req.body:", req.body);  // Debugging log
+  console.log("PUT /menu/fresh - req.body:", req.body);
 
-  const { Datum_marende, ID_kuhara } = req.body; // Extract these first
-    const username = req.body.username || null; // Ensure username is not undefined
-
+  const { Datum_marende, ID_kuhara } = req.body;
+  const username = req.body.username || null;
 
   const Juha_m1 = req.body.Juha_m1 || null;
   const Glavno_jelo_m1 = req.body.Glavno_jelo_m1 || null;
