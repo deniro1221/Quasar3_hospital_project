@@ -156,7 +156,7 @@ const submitManual = async () => {
     showMessage('Korisničko ime nije pronađeno. Molimo prijavite se ponovo.', false);
     // Optionally, redirect to the login page:
     // router.push('/login');
-    return; // Stop the submission
+    return;
   }
 
   try {
@@ -247,6 +247,15 @@ const azurirajMeni = async () => {
     return;
   }
 
+  // **GET USERNAME HERE - INSIDE THE FUNCTION**
+  const username = localStorage.getItem('loggedInUser');
+  if (!username) {
+    showMessage('Korisničko ime nije pronađeno. Molimo prijavite se ponovo.', false);
+    // Optionally, redirect to the login page:
+    // router.push('/login');
+    return;
+  }
+
   try {
     const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/fresh', {
       method: 'PUT',
@@ -260,7 +269,7 @@ const azurirajMeni = async () => {
         Glavno_jelo_m2: datumAktivnogMenija.value.Glavno_jelo_m2,
         Salata_m2: datumAktivnogMenija.value.Salata_m2,
         ID_kuhara: ID_kuhara,
-        username: username.value
+        username: username, // Use the username retrieved from localStorage
       }),
     });
 
