@@ -25,12 +25,12 @@
         />
       </template>
 
-      <template
+          <template
         v-slot:body-cell-Datum_menija="props"
         :props="props"
       >
         <q-td key="props.row.Datum_menija" auto-width>
-          {{ formatDate(props.row.Datum_menija) }}
+          {{ formatDate(props.row.Datum_marende) }}
         </q-td>
       </template>
 
@@ -39,11 +39,11 @@
         :props="props"
       >
         <q-td key="props.row.Datum_menija" auto-width>
-          Juha: {{ props.row.Juha }}
+          Juha: {{ props.row.Marenda1.Juha }}
           <br />
-          Glavno Jelo: {{ props.row.Glavno_jelo }}
+          Glavno Jelo: {{ props.row.Marenda1.Glavno_jelo }}
           <br />
-          Salata: {{ props.row.Salata }}
+          Salata: {{ props.row.Marenda1.Salata }}
         </q-td>
       </template>
 
@@ -52,11 +52,20 @@
         :props="props"
       >
         <q-td key="props.row.Datum_menija" auto-width>
-          Juha: {{ props.row.Juha }}
+          Juha: {{ props.row.Marenda2.Juha }}
           <br />
-          Glavno Jelo: {{ props.row.Glavno_jelo }}
+          Glavno Jelo: {{ props.row.Marenda2.Glavno_jelo }}
           <br />
-          Salata: {{ props.row.Salata }}
+          Salata: {{ props.row.Marenda2.Salata }}
+        </q-td>
+      </template>
+
+          <template
+        v-slot:body-cell-username="props"
+        :props="props"
+      >
+        <q-td key="props.row.Datum_menija" auto-width>
+          {{ props.row.username }}
         </q-td>
       </template>
 
@@ -95,7 +104,7 @@ const columns = [
   { name: 'Datum_menija', label: 'Datum', align: 'left' },
   { name: 'Marenda1', label: 'Marenda 1', align: 'left' },
   { name: 'Marenda2', label: 'Marenda 2', align: 'left' },
-  { name: 'ID_kuhara', label: 'ID Kuhara', align: 'left', field: 'ID_kuhara' },
+  { name: 'username', label: 'Kuhar', align: 'left' },
 ]
 
 // Dohvati meni sa servera
@@ -153,7 +162,7 @@ function izveziSvePDF() {
         <th>Datum</th>
         <th>Marenda 1</th>
         <th>Marenda 2</th>
-        <th>ID Kuhara</th>
+        <th>Kuhar</th>
       </tr>
     </thead>
     <tbody>
@@ -161,10 +170,19 @@ function izveziSvePDF() {
         .map(
           (row) => `
         <tr>
-          <td>${row.Datum_menija}</td>
-          <td>${row.Marenda1}</td>
-          <td>${row.Marenda2}</td>
-          <td>${row.ID_kuhara}</td>
+          <td>${row.Datum_marende}</td>
+          <td>${row.Marenda1.Juha}
+          <br/>
+          ${row.Marenda1.Glavno_jelo}
+          <br/>
+          ${row.Marenda1.Salata}
+          </td>
+          <td>${row.Marenda2.Juha}
+          <br/>
+          ${row.Marenda2.Glavno_jelo}
+          <br/>
+          ${row.Marenda2.Salata}</td>
+          <td>${row.username}</td>
         </tr>
       `,
         )
@@ -214,7 +232,7 @@ function izveziOznacenoPDF() {
         <th>Datum</th>
         <th>Marenda 1</th>
         <th>Marenda 2</th>
-        <th>ID Kuhara</th>
+        <th>Kuhar</th>
       </tr>
     </thead>
     <tbody>
@@ -222,10 +240,19 @@ function izveziOznacenoPDF() {
         .map(
           (row) => `
         <tr>
-          <td>${row.Datum_menija}</td>
-          <td>${row.Marenda1}</td>
-          <td>${row.Marenda2}</td>
-          <td>${row.ID_kuhara}</td>
+          <td>${row.Datum_marende}</td>
+          <td>${row.Marenda1.Juha}
+          <br/>
+          ${row.Marenda1.Glavno_jelo}
+          <br/>
+          ${row.Marenda1.Salata}
+          </td>
+          <td>${row.Marenda2.Juha}
+          <br/>
+          ${row.Marenda2.Glavno_jelo}
+          <br/>
+          ${row.Marenda2.Salata}</td>
+          <td>${row.username}</td>
         </tr>
       `,
         )
@@ -242,3 +269,29 @@ onMounted(() => {
   osvjeziMenije()
 })
 </script>
+<style scoped>
+    .q-table {
+      font-size: 16px; /* Increase the base font size for the table */
+    }
+
+    .q-table__title {
+      font-size: 20px; /* Increase the title font size */
+    }
+
+    .q-table th {
+      font-size: 14px;      /* Increase header font size */
+      font-weight: bold; /* Make header text bold */
+      background-color: #f2f2f2; /* Add a subtle background color */
+      padding: 12px 8px; /* Increase header padding */
+      text-transform: capitalize; /* Capitalize the text */
+    }
+      .q-table td {
+      padding: 10px 8px; /* Increase cell padding */
+      border-bottom: 1px solid #ddd; /* Add a subtle border between rows */
+    }
+
+    .q-table tbody tr:hover {
+      background-color: #f9f9f9; /* Add a subtle background color on hover */
+      cursor: pointer; /* Change the cursor to a pointer */
+    }
+</style>
