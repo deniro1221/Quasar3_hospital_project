@@ -17,7 +17,8 @@ const validateDateFormat = (req, res, next) => {
 router.post('/menu', validateDateFormat, async (req, res) => {
   console.log("POST /menu - req.body:", req.body); // Debugging log
 
-  const { Datum_marende, ID_kuhara, username } = req.body; // Extract these first
+  const { Datum_marende, ID_kuhara } = req.body; // Extract these first
+  const username = req.body.username || null; // Ensure username is not undefined
 
   const Juha_m1 = req.body.Juha_m1 || null;
   const Glavno_jelo_m1 = req.body.Glavno_jelo_m1 || null;
@@ -91,7 +92,9 @@ router.get('/menu/today', async (req, res) => {
 router.put('/menu/fresh', validateDateFormat, async (req, res) => {
   console.log("PUT /menu/fresh - req.body:", req.body);  // Debugging log
 
-  const { Datum_marende, ID_kuhara, username } = req.body; // Extract these first
+  const { Datum_marende, ID_kuhara } = req.body; // Extract these first
+    const username = req.body.username || null; // Ensure username is not undefined
+
 
   const Juha_m1 = req.body.Juha_m1 || null;
   const Glavno_jelo_m1 = req.body.Glavno_jelo_m1 || null;

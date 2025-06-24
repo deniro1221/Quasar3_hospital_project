@@ -128,7 +128,6 @@ const juha_m2 = ref('');
 const glavno_jelo_m2 = ref('');
 const salata_m2 = ref('');
 const idKuhara = localStorage.getItem('userID');
-const username = localStorage.getItem('loggedInUser');
 
 // Dialog and active menu
 const dialogAktivniMeni = ref(false);
@@ -152,6 +151,14 @@ const submitManual = async () => {
     return;
   }
 
+  const username = localStorage.getItem('loggedInUser');
+  if (!username) {
+    showMessage('Korisničko ime nije pronađeno. Molimo prijavite se ponovo.', false);
+    // Optionally, redirect to the login page:
+    // router.push('/login');
+    return; // Stop the submission
+  }
+
   try {
     const response = await fetch('https://backend-hospital-n9to.onrender.com/menu', {
       method: 'POST',
@@ -165,7 +172,7 @@ const submitManual = async () => {
         Glavno_jelo_m2: glavno_jelo_m2.value,
         Salata_m2: salata_m2.value,
         ID_kuhara: idKuhara,
-        username: username.value
+        username: username, // Use the username retrieved from localStorage
       }),
     });
 
