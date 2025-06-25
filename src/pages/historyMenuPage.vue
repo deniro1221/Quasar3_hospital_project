@@ -1,94 +1,74 @@
 <template>
-  <div class="q-pa-md q-gutter-md">
-    <q-btn label="Osvježi" color="primary" @click="fetchData" />
+  <div class="q-pa-md">
+    <q-btn label="Osvježi podataka" color="primary" @click="fetchData" />
 
     <q-table
-      class="my-custom-table"
       :rows="rows"
       :columns="columns"
-      row-key="id"
+      row-key="Datum"
+      class="my-table"
       flat
-      :visible-columns="columns.map(c => c.name)"
-    >
-      <template v-slot:body="props">
-        <q-tr :props="props">
-          <q-td
-            v-for="col in columns"
-            :key="col.name"
-            :props="props"
-            class="text-base text-left px-4 py-3"
-          >
-            {{ props.row[col.field] }}
-          </q-td>
-        </q-tr>
-      </template>
-    </q-table>
+    />
+
+    <!-- Napomena: Možeš dodati stilove ili druga poboljšanja -->
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useIntervalFn } from '@vueuse/core'
 import axios from 'axios'
 
-// Podaci za tablicu
-const rows = ref([])
-
+// Definiramo stupce tablice
 const columns = [
-  { name: 'tip', label: 'Tip', field: 'tip', align: 'left', sortable: false },
-  { name: 'Juha', label: 'Juha', field: 'Juha', align: 'left' },
-  { name: 'Glavno_jelo', label: 'Glavno jelo', field: 'Glavno_jelo', align: 'left' },
-  { name: 'Salata', label: 'Salata', field: 'Salata', align: 'left' },
+  { name: 'Datum', label: 'Datum', field: 'Datum', align: 'left', sortable: true },
+  { name: 'Kuhar', label: 'Kuhar', field: 'Kuhar', align: 'left', sortable: true },
+
+  { name: 'Juha_M1', label: 'Marenda 1 - Juha', field: 'Juha_M1', align: 'left' },
+  { name: 'Glavno_jelo_M1', label: 'Marenda 1 - Glavno', field: 'Glavno_jelo_M1', align: 'left' },
+  { name: 'Salata_M1', label: 'Marenda 1 - Salata', field: 'Salata_M1', align: 'left' },
+
+  { name: 'Juha_M2', label: 'Marenda 2 - Juha', field: 'Juha_M2', align: 'left' },
+  { name: 'Glavno_jelo_M2', label: 'Marenda 2 - Glavno', field: 'Glavno_jelo_M2', align: 'left' },
+  { name: 'Salata_M2', label: 'Marenda 2 - Salata', field: 'Salata_M2', align: 'left' },
 ]
 
-// Funkcija za dohvat podataka
+const rows = ref([])
+
+// Funkcija za dohvat i preradu podataka
 const fetchData = async () => {
   try {
-    const res = await axios.get('/api/menu/history')
-    const data = res.data
+    // Zamijeni s vlastitim API endpointom
+    const response = await axios.get('https://backend-hospital-n9to.onrender.com/history_menu')
+    // očekujemo da response.data bude niz objekata s odgovorima npr.
+    // [{ Datum_marende: '2025-06-25', Juha: 'k', Glavno_jelo: 'j', Salata: 'l', Kuhar: 'marin' }, ...]
+    const data = response.data
 
-    const flattened = data.flatMap(item => {
-      return [
-        {
-          tip: 'Marenda 1',
-          Juha: item.Juha,
-          Glavno_jelo: item.Glavno_jelo,
-          Salata: item.Salata,
-        },
-        {
-          tip: 'Marenda 2',
-          Juha: item.Juha,
-          Glavno_jelo: item.Glavno_jelo,
-          Salata: item.Salata,
-        },
-      ]
-    })
-
-    rows.value = flattened
+    // Transformiraj podatke u format prikladan za tablicu
+    rows.value = data.map(item => ({
+      Datum: item.Datum_marende,
+      Kuhar: item.Kuhar,
+      Juha_M1: item.Juha,
+      Glavno_jelo_M1: item.Glavno_jelo,
+      Salata_M1: item.Salata,
+      Juha_M2: item.Juha,
+      Glavno_jelo_M2: item.Glavno_jelo,
+      Salata_M2: item.Salata,
+    }))
   } catch (err) {
-    console.error('Greška kod dohvata:', err)
+    console.error('Greška kod dohvata podataka:', err)
   }
 }
 
-// Osvježi odmah i svakih 60 sekundi
-onMounted(fetchData)
-useIntervalFn(fetchData, 60000)
+// Dohvati odmah po ulasku i automatski osvježava svakih 60 sekundi
+onMounted(() => {
+  fetchData()
+  setInterval(fetchData, 60000)
+})
 </script>
 
 <style scoped>
-.my-custom-table {
+.my-table {
   font-family: 'Arial', sans-serif;
-  font-size: 16px;
-}
-
-.my-custom-table th,
-.my-custom-table td {
-  padding: 12px;
-  border-bottom: 1px solid #ddd;
-}
-
-.my-custom-table thead {
-  background-color: #f0f0f0;
-  font-weight: bold;
+  font-size: 14px;
 }
 </style>
