@@ -10,39 +10,51 @@
       </button>
     </div>
 
-    <table class="min-w-full bg-white border border-gray-300 shadow-md rounded">
-      <thead>
-        <tr class="bg-gray-100 text-left text-sm font-semibold text-gray-700">
-          <th class="px-4 py-3 border">Datum</th>
-          <th class="px-4 py-3 border">Marenda 1</th>
-          <th class="px-4 py-3 border">Marenda 2</th>
-          <th class="px-4 py-3 border">Kuhar</th>
+    <table class="min-w-full bg-white border border-gray-200 shadow-md rounded">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Datum
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Marenda 1
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Marenda 2
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Kuhar
+          </th>
         </tr>
       </thead>
-      <tbody>
-        <tr
-          v-for="(row, index) in meni"
-          :key="index"
-          class="border-t hover:bg-gray-50 transition"
-        >
-          <td class="px-4 py-3 border font-medium text-sm">{{ row.Datum_marende }}</td>
-          <td class="px-4 py-3 border text-sm">
-            <div v-if="row.Marenda1">
-              🍲 <span class="font-semibold">{{ row.Marenda1.Juha }}</span><br />
-              🍛 {{ row.Marenda1.Glavno_jelo }}<br />
-              🥗 {{ row.Marenda1.Salata }}
-            </div>
-            <div v-else class="text-gray-400">N/A</div>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr v-for="(row, index) in meni" :key="index" class="hover:bg-gray-50">
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ row.Datum_marende }}</div>
           </td>
-          <td class="px-4 py-3 border text-sm">
-            <div v-if="row.Marenda2">
-              🍲 <span class="font-semibold">{{ row.Marenda2.Juha }}</span><br />
-              🍛 {{ row.Marenda2.Glavno_jelo }}<br />
-              🥗 {{ row.Marenda2.Salata }}
+          <td class="px-6 py-4">
+            <div class="text-sm text-gray-900">
+              <div v-if="row.Marenda1" class="leading-relaxed">
+                <span class="font-semibold">🍲 Juha:</span> {{ row.Marenda1.Juha }}<br />
+                <span class="font-semibold">🍛 Glavno:</span> {{ row.Marenda1.Glavno_jelo }}<br />
+                <span class="font-semibold">🥗 Salata:</span> {{ row.Marenda1.Salata }}
+              </div>
+              <div v-else class="text-gray-400">N/A</div>
             </div>
-            <div v-else class="text-gray-400">N/A</div>
           </td>
-          <td class="px-4 py-3 border text-sm">{{ row.username }}</td>
+          <td class="px-6 py-4">
+            <div class="text-sm text-gray-900">
+              <div v-if="row.Marenda2" class="leading-relaxed">
+                <span class="font-semibold">🍲 Juha:</span> {{ row.Marenda2.Juha }}<br />
+                <span class="font-semibold">🍛 Glavno:</span> {{ row.Marenda2.Glavno_jelo }}<br />
+                <span class="font-semibold">🥗 Salata:</span> {{ row.Marenda2.Salata }}
+              </div>
+              <div v-else class="text-gray-400">N/A</div>
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {{ row.username }}
+          </td>
         </tr>
       </tbody>
     </table>
@@ -127,11 +139,11 @@ const generatePDF = () => {
     startY: 20,
     styles: { fontSize: 8, cellWidth: 'auto' },
     columnStyles: {
-          0: { cellWidth: 25 },   // Datum
-          1: { cellWidth: 50 },   // Marenda 1
-          2: { cellWidth: 50 },   // Marenda 2
-          3: { cellWidth: 25 },   // Kuhar
-      },
+      0: { cellWidth: 25 },   // Datum
+      1: { cellWidth: 50 },   // Marenda 1
+      2: { cellWidth: 50 },   // Marenda 2
+      3: { cellWidth: 25 },    // Kuhar
+    },
   });
 
   doc.save("povijest_marendi.pdf");
@@ -139,7 +151,5 @@ const generatePDF = () => {
 </script>
 
 <style scoped>
-table {
-  border-collapse: collapse;
-}
+/* This style is no longer needed, moved to Tailwind */
 </style>
