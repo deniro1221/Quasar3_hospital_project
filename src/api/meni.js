@@ -1,6 +1,6 @@
-import { getConnection } from './db.js';
 import { Router } from 'express';
 import dayjs from 'dayjs';
+import pool, { getConnection } from './db.js'; // Import pool
 
 const router = Router();
 
@@ -21,7 +21,7 @@ router.post('/menu', validateDateFormat, async (req, res) => {
   const username = req.body.username || null;
 
   const Juha_m1 = req.body.Juha_m1 || null;
-  const Glavno_jelo_m1 = req.body.Glavno_jelo_m1 || null;
+  const Glavno_jelo_m1 = req.body.Glavno_jelo_m1 = null;
   const Salata_m1 = req.body.Salata_m1 || null;
   const Juha_m2 = req.body.Juha_m2 || null;
   const Glavno_jelo_m2 = req.body.Glavno_jelo_m2 || null;
@@ -35,7 +35,7 @@ router.post('/menu', validateDateFormat, async (req, res) => {
 
   let connection;
   try {
-    connection = await getConnection();
+    connection = await pool.getConnection(); // Get connection from pool
 
     // ** CHECK IF MENU ALREADY EXISTS IN Marenda1 **
     const [existingMenu1] = await connection.execute(
@@ -85,6 +85,7 @@ router.post('/menu', validateDateFormat, async (req, res) => {
       );
     }
 
+    await connection.release(); // Release the connection back to the pool
     res.json({ message: 'Meniji uspješno spremljeni.' });
 
   } catch (err) {
@@ -99,7 +100,7 @@ router.get('/menu/today', async (req, res) => {
 
   let connection;
   try {
-    connection = await getConnection();
+    connection = await pool.getConnection(); // Get connection from pool
 
     // Fetch from Marenda1
     const [m1Results] = await connection.execute(
@@ -112,6 +113,8 @@ router.get('/menu/today', async (req, res) => {
       `SELECT Juha, Glavno_jelo, Salata FROM Marenda2 WHERE Datum_marende = ?`,
       [today],
     );
+
+    await connection.release(); // Release the connection back to the pool
 
     const marenda1 = m1Results[0] || {};
     const marenda2 = m2Results[0] || {};
@@ -150,7 +153,7 @@ router.put('/menu/fresh', validateDateFormat, async (req, res) => {
 
   let connection;
   try {
-    connection = await getConnection();
+    connection = await pool.getConnection(); // Get connection from pool
 
     // Update Marenda1
     await connection.execute(
@@ -163,6 +166,8 @@ router.put('/menu/fresh', validateDateFormat, async (req, res) => {
       `UPDATE Marenda2 SET Juha = ?, Glavno_jelo = ?, Salata = ?, ID_kuhara = ?, username = ? WHERE Datum_marende = ?`,
       [Juha_m2, Glavno_jelo_m2, Salata_m2, ID_kuhara, username, Datum_marende],
     );
+
+    await connection.release(); // Release the connection back to the pool
 
     res.json({ message: 'Meniji su uspješno ažurirani.' });
   } catch (err) {
@@ -186,13 +191,15 @@ router.delete('/menu/delete', async (req, res) => {
 
   let connection;
   try {
-    connection = await getConnection();
+    connection = await pool.getConnection(); // Get connection from pool
 
     // Delete from Marenda1
     const [result1] = await connection.execute(`DELETE FROM Marenda1 WHERE Datum_marende = ?`, [datum]);
 
     // Delete from Marenda2
     const [result2] = await connection.execute(`DELETE FROM Marenda2 WHERE Datum_marende = ?`, [datum]);
+
+    await connection.release(); // Release the connection back to the pool
 
     if (result1.affectedRows + result2.affectedRows > 0) {
       res.json({ message: 'Meniji su uspješno obrisani.' });
@@ -209,7 +216,7 @@ router.delete('/menu/delete', async (req, res) => {
 router.get('/menu/history', async (req, res) => {
   let connection;
   try {
-    connection = await getConnection();
+    connection = await pool.getConnection(); // Get connection from pool
 
     // Fetch from Marenda1
     const [m1Results] = await connection.execute(
@@ -220,6 +227,8 @@ router.get('/menu/history', async (req, res) => {
     const [m2Results] = await connection.execute(
       `SELECT Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username FROM Marenda2 ORDER BY Datum_marende DESC`,
     );
+
+    await connection.release(); // Release the connection back to the pool
 
     // Dodajemo polje marenda u svaki zapis
     const m1WithLabel = m1Results.map(item => ({ ...item, marenda: 'Marenda 1' }));
