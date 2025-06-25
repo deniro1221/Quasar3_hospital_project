@@ -2,7 +2,7 @@
   <div class="q-pa-md container">
     <div class="tables-wrapper">
       <div class="table-box">
-        <h2>Marenda 1</h2>
+        <h4>Marenda 1</h4>
         <q-table
           :rows="rowsMarenda1"
           :columns="columns"
@@ -12,7 +12,7 @@
         />
       </div>
       <div class="table-box">
-        <h2>Marenda 2</h2>
+        <h4>Marenda 2</h4>
         <q-table
           :rows="rowsMarenda2"
           :columns="columns"
