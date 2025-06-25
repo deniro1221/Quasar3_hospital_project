@@ -125,7 +125,7 @@ loadAllData()
 
 .col-md-6 {
   width: 50%; /* Dvije tablice jedna pored druge na medium i većim ekranima */
-  padding: 10px;
+  padding: 5px; /* Smanjeno padding radi smanjenja prostora */
   box-sizing: border-box;
 }
 
@@ -135,7 +135,7 @@ loadAllData()
 
 .my-table {
   width: 100%;
-  font-size: 16px;
+  font-size: 14px; /* Smanjen font */
   font-family: Arial, sans-serif;
   border-collapse: collapse; /* Spaja obrube ćelija */
 }
@@ -143,16 +143,19 @@ loadAllData()
 .my-table thead th {
   background-color: #f0f0f0;
   font-weight: bold;
-  padding: 10px;
-  border: 2px solid #ccc; /* Jači obrub */
+  padding: 8px; /* Smanjeno padding */
+  border: 2px solid #888; /* Jači i tamniji obrub */
+  font-weight: bold; /* Podebljan font */
 }
 
 .my-table td {
-  padding: 10px;
-  border: 1px solid #ccc; /* Jači obrub */
+  padding: 8px; /* Smanjeno padding */
+  border: 1.5px solid #888; /* Jači i tamniji obrub */
+  font-weight: bold; /* Podebljan font */
 }
 
 .my-table tbody tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 </style>
+
