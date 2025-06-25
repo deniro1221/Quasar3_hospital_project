@@ -18,6 +18,7 @@ import axios from 'axios'
 
 const columns = [
   { name: 'Datum', label: 'Datum', field: 'Datum', align: 'left' },
+  { name: 'Marenda', label: 'Marenda', field: 'marenda', align: 'left' },
   { name: 'Kuhar', label: 'Kuhar', field: 'username', align: 'left' },
   { name: 'Juha', label: 'Juha', field: 'Juha', align: 'left' },
   { name: 'Glavno', label: 'Glavno jelo', field: 'Glavno_jelo', align: 'left' },
@@ -31,6 +32,7 @@ const loadData = async () => {
     const response = await axios.get('https://backend-hospital-n9to.onrender.com/menu/history')
     rows.value = response.data.map(item => ({
       Datum: new Date(item.Datum_marende).toLocaleDateString(),
+      marenda: item.marenda,
       username: item.username,
       Juha: item.Juha,
       Glavno_jelo: item.Glavno_jelo,
@@ -45,34 +47,11 @@ loadData()
 </script>
 
 <style scoped>
-.container {
-  max-width: 100%;
-  padding: 10px;
-}
-
-.my-table {
-  font-size: 15px;
-  font-family: Arial, sans-serif;
-  border-collapse: collapse;
-  width: 100%;
-  border: 2px solid #000;
+.my-table td {
+  font-weight: 600;
 }
 
 .my-table thead th {
-  background-color: #e0e0e0;
-  font-weight: bold;
-  padding: 8px;
-  border: 2px solid #000;
-  text-align: left;
-}
-
-.my-table td {
-  padding: 8px;
-  border: 2px solid #000;
-  font-weight: bold;
-}
-
-.my-table tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
+  font-weight: 700;
 }
 </style>

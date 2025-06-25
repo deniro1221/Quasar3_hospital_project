@@ -221,9 +221,14 @@ router.get('/menu/history', async (req, res) => {
       `SELECT Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username FROM Marenda2 ORDER BY Datum_marende DESC`,
     );
 
-    // Combine the results.  Ideally, you'd merge based on Datum_marende.  For simplicity,
-    // this just concatenates the arrays.
-    const combinedResults = [...m1Results, ...m2Results].sort((a, b) => (dayjs(a.Datum_marende).isBefore(b.Datum_marende) ? 1 : -1)); //Sort date from latest to oldest
+    // Dodajemo polje marenda u svaki zapis
+    const m1WithLabel = m1Results.map(item => ({ ...item, marenda: 'Marenda 1' }));
+    const m2WithLabel = m2Results.map(item => ({ ...item, marenda: 'Marenda 2' }));
+
+    // Spajanje i sortiranje od najnovijeg do najstarijeg
+    const combinedResults = [...m1WithLabel, ...m2WithLabel].sort((a, b) =>
+      dayjs(a.Datum_marende).isBefore(b.Datum_marende) ? 1 : -1
+    );
 
     res.json(combinedResults);
   } catch (err) {
