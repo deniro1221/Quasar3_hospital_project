@@ -38,7 +38,7 @@ const rows = ref([])
 const fetchData = async () => {
   try {
     // Zamijeni s vlastitim API endpointom
-    const response = await axios.get('https://backend-hospital-n9to.onrender.com/history_menu')
+    const response = await axios.get('https://backend-hospital-n9to.onrender.com/menu/history')
     // očekujemo da response.data bude niz objekata s odgovorima npr.
     // [{ Datum_marende: '2025-06-25', Juha: 'k', Glavno_jelo: 'j', Salata: 'l', Kuhar: 'marin' }, ...]
     const data = response.data
