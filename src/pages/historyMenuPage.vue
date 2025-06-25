@@ -1,60 +1,60 @@
 <template v-slot:body-cell-Marenda1="props">
   <q-td :props="props" class="q-pa-md">
     <div v-if="props.row.Marenda1">
-      <table class="w-full text-sm table-auto border border-gray-300 rounded overflow-hidden">
-        <thead class="bg-gray-100">
+      <table class="w-full text-base table-fixed border border-gray-400 rounded-lg overflow-hidden">
+        <thead class="bg-gray-200 text-center font-medium text-lg">
           <tr>
-            <th class="p-2 border border-gray-300 text-left">Jelo</th>
-            <th class="p-2 border border-gray-300 text-left">Sastojak</th>
+            <th class="p-4 border border-gray-400">Jelo</th>
+            <th class="p-4 border border-gray-400">Sastojak</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="text-center">
           <tr>
-            <td class="p-2 border border-gray-300">Juha</td>
-            <td class="p-2 border border-gray-300">{{ props.row.Marenda1.Juha }}</td>
+            <td class="p-4 border border-gray-400">Juha</td>
+            <td class="p-4 border border-gray-400">{{ props.row.Marenda1.Juha }}</td>
           </tr>
           <tr>
-            <td class="p-2 border border-gray-300">Glavno jelo</td>
-            <td class="p-2 border border-gray-300">{{ props.row.Marenda1.Glavno_jelo }}</td>
+            <td class="p-4 border border-gray-400">Glavno jelo</td>
+            <td class="p-4 border border-gray-400">{{ props.row.Marenda1.Glavno_jelo }}</td>
           </tr>
           <tr>
-            <td class="p-2 border border-gray-300">Salata</td>
-            <td class="p-2 border border-gray-300">{{ props.row.Marenda1.Salata }}</td>
+            <td class="p-4 border border-gray-400">Salata</td>
+            <td class="p-4 border border-gray-400">{{ props.row.Marenda1.Salata }}</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div v-else class="text-gray-400">N/A</div>
+    <div v-else class="text-gray-400 text-center text-lg">N/A</div>
   </q-td>
 </template>
 
 <template v-slot:body-cell-Marenda2="props">
   <q-td :props="props" class="q-pa-md">
     <div v-if="props.row.Marenda2">
-      <table class="w-full text-sm table-auto border border-gray-300 rounded overflow-hidden">
-        <thead class="bg-gray-100">
+      <table class="w-full text-base table-fixed border border-gray-400 rounded-lg overflow-hidden">
+        <thead class="bg-gray-200 text-center font-medium text-lg">
           <tr>
-            <th class="p-2 border border-gray-300 text-left">Jelo</th>
-            <th class="p-2 border border-gray-300 text-left">Sastojak</th>
+            <th class="p-4 border border-gray-400">Jelo</th>
+            <th class="p-4 border border-gray-400">Sastojak</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="text-center">
           <tr>
-            <td class="p-2 border border-gray-300">Juha</td>
-            <td class="p-2 border border-gray-300">{{ props.row.Marenda2.Juha }}</td>
+            <td class="p-4 border border-gray-400">Juha</td>
+            <td class="p-4 border border-gray-400">{{ props.row.Marenda2.Juha }}</td>
           </tr>
           <tr>
-            <td class="p-2 border border-gray-300">Glavno jelo</td>
-            <td class="p-2 border border-gray-300">{{ props.row.Marenda2.Glavno_jelo }}</td>
+            <td class="p-4 border border-gray-400">Glavno jelo</td>
+            <td class="p-4 border border-gray-400">{{ props.row.Marenda2.Glavno_jelo }}</td>
           </tr>
           <tr>
-            <td class="p-2 border border-gray-300">Salata</td>
-            <td class="p-2 border border-gray-300">{{ props.row.Marenda2.Salata }}</td>
+            <td class="p-4 border border-gray-400">Salata</td>
+            <td class="p-4 border border-gray-400">{{ props.row.Marenda2.Salata }}</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div v-else class="text-gray-400">N/A</div>
+    <div v-else class="text-gray-400 text-center text-lg">N/A</div>
   </q-td>
 </template>
 
@@ -126,6 +126,7 @@ onUnmounted(() => {
 
 const generatePDF = () => {
   const doc = new jsPDF();
+  doc.setFontSize(12);
   doc.text("Povijest marendi", 14, 16);
 
   const body = [];
@@ -133,19 +134,19 @@ const generatePDF = () => {
   meni.value.forEach(row => {
     const marenda1 = row.Marenda1
       ? [
-        `Juha: ${row.Marenda1.Juha}`,
-        `Glavno: ${row.Marenda1.Glavno_jelo}`,
-        `Salata: ${row.Marenda1.Salata}`
-      ]
-      : ["N/A"];
+          `Juha: ${row.Marenda1.Juha}`,
+          `Glavno: ${row.Marenda1.Glavno_jelo}`,
+          `Salata: ${row.Marenda1.Salata}`
+        ]
+      : ["N/A", "", ""];
 
     const marenda2 = row.Marenda2
       ? [
-        `Juha: ${row.Marenda2.Juha}`,
-        `Glavno: ${row.Marenda2.Glavno_jelo}`,
-        `Salata: ${row.Marenda2.Salata}`
-      ]
-      : ["N/A"];
+          `Juha: ${row.Marenda2.Juha}`,
+          `Glavno: ${row.Marenda2.Glavno_jelo}`,
+          `Salata: ${row.Marenda2.Salata}`
+        ]
+      : ["N/A", "", ""];
 
     body.push([row.Datum_marende, ...marenda1, ...marenda2, row.username]);
   });
@@ -154,16 +155,16 @@ const generatePDF = () => {
     head: [["Datum", "Marenda 1 - Juha", "Marenda 1 - Glavno", "Marenda 1 - Salata", "Marenda 2 - Juha", "Marenda 2 - Glavno", "Marenda 2 - Salata", "Kuhar"]],
     body,
     startY: 20,
-    styles: { fontSize: 8, cellWidth: 'auto' },
+    styles: { fontSize: 10 },
     columnStyles: {
-      0: { cellWidth: 22 },
-      1: { cellWidth: 30 },
-      2: { cellWidth: 30 },
-      3: { cellWidth: 30 },
-      4: { cellWidth: 30 },
-      5: { cellWidth: 30 },
-      6: { cellWidth: 30 },
-      7: { cellWidth: 22 },
+      0: { cellWidth: 25 },
+      1: { cellWidth: 35 },
+      2: { cellWidth: 35 },
+      3: { cellWidth: 35 },
+      4: { cellWidth: 35 },
+      5: { cellWidth: 35 },
+      6: { cellWidth: 35 },
+      7: { cellWidth: 25 },
     },
   });
 
