@@ -1,150 +1,94 @@
 <template>
-  <div class="p-6">
-    <div class="flex justify-between items-center mb-4">
-      <h1 class="text-2xl font-bold">Povijest marendi</h1>
-      <button @click="generatePDF" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded">
-        Preuzmi PDF
-      </button>
-    </div>
+  <div class="q-pa-md q-gutter-md">
+    <q-btn label="Osvježi" color="primary" @click="fetchData" />
 
-    <div class="overflow-x-auto">
-      <table class="min-w-full bg-white border border-gray-300 shadow-md rounded">
-        <thead>
-          <tr class="bg-gray-100 text-left text-sm font-semibold text-gray-700">
-            <th scope="col" class="px-4 py-3 border">Datum</th>
-            <th scope="col" class="px-4 py-3 border">Marenda 1</th>
-            <th scope="col" class="px-4 py-3 border">Marenda 2</th>
-            <th scope="col" class="px-4 py-3 border">Kuhar</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="loading">
-            <td colspan="4" class="px-4 py-3 text-center">Loading...</td>
-          </tr>
-          <tr v-if="!loading && error">
-            <td colspan="4" class="px-4 py-3 text-center text-red-600">{{ errorMessage }}</td>
-          </tr>
-          <tr v-for="(row, index) in meni" :key="index" class="border-t hover:bg-gray-50 transition">
-            <td class="px-4 py-3 border font-medium text-sm">{{ row.Datum_marende }}</td>
-            <td class="px-4 py-3 border text-sm">{{ formatMarenda(row.Marenda1) }}</td>
-            <td class="px-4 py-3 border text-sm">{{ formatMarenda(row.Marenda2) }}</td>
-            <td class="px-4 py-3 border text-sm">{{ row.username }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <q-table
+      class="my-custom-table"
+      :rows="rows"
+      :columns="columns"
+      row-key="id"
+      flat
+      :visible-columns="columns.map(c => c.name)"
+    >
+      <template v-slot:body="props">
+        <q-tr :props="props">
+          <q-td
+            v-for="col in columns"
+            :key="col.name"
+            :props="props"
+            class="text-base text-left px-4 py-3"
+          >
+            {{ props.row[col.field] }}
+          </q-td>
+        </q-tr>
+      </template>
+    </q-table>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import { ref, onMounted } from 'vue'
+import { useIntervalFn } from '@vueuse/core'
+import axios from 'axios'
 
-const meni = ref([]);
-const loading = ref(true);
-const error = ref(false);
-const errorMessage = "Greška kod dohvaćanja menija.";
+// Podaci za tablicu
+const rows = ref([])
 
-let intervalId = null;
+const columns = [
+  { name: 'tip', label: 'Tip', field: 'tip', align: 'left', sortable: false },
+  { name: 'Juha', label: 'Juha', field: 'Juha', align: 'left' },
+  { name: 'Glavno_jelo', label: 'Glavno jelo', field: 'Glavno_jelo', align: 'left' },
+  { name: 'Salata', label: 'Salata', field: 'Salata', align: 'left' },
+]
 
-const fetchMeniji = async () => {
-  loading.value = true;
-  error.value = false;
+// Funkcija za dohvat podataka
+const fetchData = async () => {
   try {
-    const response = await fetch("https://backend-hospital-n9to.onrender.com/menu/history");
-    const data = await response.json();
-    const grouped = groupAndCombineData(data);
-    meni.value = grouped;
+    const res = await axios.get('/api/menu/history')
+    const data = res.data
+
+    const flattened = data.flatMap(item => {
+      return [
+        {
+          tip: 'Marenda 1',
+          Juha: item.Juha,
+          Glavno_jelo: item.Glavno_jelo,
+          Salata: item.Salata,
+        },
+        {
+          tip: 'Marenda 2',
+          Juha: item.Juha,
+          Glavno_jelo: item.Glavno_jelo,
+          Salata: item.Salata,
+        },
+      ]
+    })
+
+    rows.value = flattened
   } catch (err) {
-    console.error(errorMessage, err);
-    error.value = true;
-  } finally {
-    loading.value = false;
-
+    console.error('Greška kod dohvata:', err)
   }
-};
+}
 
-const groupAndCombineData = (data) => {
-  const grouped = [];
-  data.forEach(row => {
-    const date = row.Datum_marende.split("T")[0];
-    const user = row.username;
-    const key = `${date}-${user}`;
-    const marenda = {
-      Juha: row.Juha,
-      Glavno_jelo: row.Glavno_jelo,
-      Salata: row.Salata
-    };
-    const existing = grouped.find(entry => entry.key === key);
-    if (existing) {
-      existing.Marenda2 = marenda;
-    } else {
-      grouped.push({
-        key,
-        Datum_marende: date,
-        Marenda1: marenda,
-        Marenda2: null,
-        username: user
-      });
-    }
-  });
-  return grouped;
-};
-
-// Helper function to format "Marenda" data
-const formatMarenda = (marenda) => {
-  if (marenda) {
-    return `🍲 Juha: ${marenda.Juha}<br />🍛 Glavno: ${marenda.Glavno_jelo}<br />🥗 Salata: ${marenda.Salata}`;
-  }
-  return "<span class='text-gray-400'>N/A</span>";
-};
-
-// Automatsko osvježavanje svakih 10 sekundi
-onMounted(() => {
-  fetchMeniji();
-  intervalId = setInterval(fetchMeniji, 10000);
-});
-
-onUnmounted(() => {
-  clearInterval(intervalId);
-});
-
-const generatePDF = () => {
-  const doc = new jsPDF();
-  doc.text("Povijest marendi", 14, 16);
-
-  const body = meni.value.map(row => {
-    const m1 = row.Marenda1
-      ? `Juha: ${row.Marenda1.Juha}, Glavno: ${row.Marenda1.Glavno_jelo}, Salata: ${row.Marenda1.Salata}`
-      : "N/A";
-
-    const m2 = row.Marenda2
-      ? `Juha: ${row.Marenda2.Juha}, Glavno: ${row.Marenda2.Glavno_jelo}, Salata: ${row.Marenda2.Salata}`
-      : "N/A";
-
-    return [row.Datum_marende, m1, m2, row.username];
-  });
-
-  autoTable(doc, {
-    head: [["Datum", "Marenda 1", "Marenda 2", "Kuhar"]],
-    body,
-    startY: 20,
-    styles: { fontSize: 8, cellWidth: 'auto' },
-    columnStyles: {
-      0: { cellWidth: 25 },   // Datum
-      1: { cellWidth: 50 },   // Marenda 1
-      2: { cellWidth: 50 },   // Marenda 2
-      3: { cellWidth: 25 },   // Kuhar
-    },
-  });
-
-  doc.save("povijest_marendi.pdf");
-};
+// Osvježi odmah i svakih 60 sekundi
+onMounted(fetchData)
+useIntervalFn(fetchData, 60000)
 </script>
 
 <style scoped>
-table {
-  border-collapse: collapse;
+.my-custom-table {
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+}
+
+.my-custom-table th,
+.my-custom-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.my-custom-table thead {
+  background-color: #f0f0f0;
+  font-weight: bold;
 }
 </style>
