@@ -1,77 +1,61 @@
-<template>
-  <q-page padding>
-    <div class="flex justify-between items-center mb-4">
-      <h1 class="text-2xl font-bold">Povijest marendi</h1>
-      <q-btn color="primary" @click="generatePDF">Preuzmi PDF</q-btn>
+<template v-slot:body-cell-Marenda1="props">
+  <q-td :props="props" class="q-pa-md">
+    <div v-if="props.row.Marenda1">
+      <table class="w-full text-sm table-auto border border-gray-300 rounded overflow-hidden">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="p-2 border border-gray-300 text-left">Jelo</th>
+            <th class="p-2 border border-gray-300 text-left">Sastojak</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="p-2 border border-gray-300">Juha</td>
+            <td class="p-2 border border-gray-300">{{ props.row.Marenda1.Juha }}</td>
+          </tr>
+          <tr>
+            <td class="p-2 border border-gray-300">Glavno jelo</td>
+            <td class="p-2 border border-gray-300">{{ props.row.Marenda1.Glavno_jelo }}</td>
+          </tr>
+          <tr>
+            <td class="p-2 border border-gray-300">Salata</td>
+            <td class="p-2 border border-gray-300">{{ props.row.Marenda1.Salata }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+    <div v-else class="text-gray-400">N/A</div>
+  </q-td>
+</template>
 
-    <q-table
-      title="Povijest marendi"
-      :rows="meni"
-      :columns="columns"
-      row-key="key"
-      :loading="loading"
-      class="shadow-24"
-    >
-      <template v-slot:body-cell-Marenda1="props">
-        <q-td :props="props" class="q-pa-md">
-          <div v-if="props.row.Marenda1">
-            <q-table
-              :rows="[
-                { jelo: 'Juha', sastojak: props.row.Marenda1.Juha },
-                { jelo: 'Glavno jelo', sastojak: props.row.Marenda1.Glavno_jelo },
-                { jelo: 'Salata', sastojak: props.row.Marenda1.Salata }
-              ]"
-              :columns="[
-                { name: 'jelo', label: 'Jelo', field: 'jelo' },
-                { name: 'sastojak', label: 'Sastojak', field: 'sastojak' }
-              ]"
-              row-key="jelo"
-              dense
-              flat
-              bordered
-            />
-          </div>
-          <div v-else class="text-gray-400">N/A</div>
-        </q-td>
-      </template>
-
-      <template v-slot:body-cell-Marenda2="props">
-        <q-td :props="props" class="q-pa-md">
-          <div v-if="props.row.Marenda2">
-            <q-table
-              :rows="[
-                { jelo: 'Juha', sastojak: props.row.Marenda2.Juha },
-                { jelo: 'Glavno jelo', sastojak: props.row.Marenda2.Glavno_jelo },
-                { jelo: 'Salata', sastojak: props.row.Marenda2.Salata }
-              ]"
-              :columns="[
-                { name: 'jelo', label: 'Jelo', field: 'jelo' },
-                { name: 'sastojak', label: 'Sastojak', field: 'sastojak' }
-              ]"
-              row-key="jelo"
-              dense
-              flat
-              bordered
-            />
-          </div>
-          <div v-else class="text-gray-400">N/A</div>
-        </q-td>
-      </template>
-
-      <template v-slot:body-cell-Datum_marende="props">
-        <q-td :props="props">
-          {{ props.row.Datum_marende }}
-        </q-td>
-      </template>
-
-      <template v-slot:body-cell-username="props">
-        <q-td :props="props">
-          {{ props.row.username }}
-        </q-td>
-      </template>
-    </q-table>
-  </q-page>
+<template v-slot:body-cell-Marenda2="props">
+  <q-td :props="props" class="q-pa-md">
+    <div v-if="props.row.Marenda2">
+      <table class="w-full text-sm table-auto border border-gray-300 rounded overflow-hidden">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="p-2 border border-gray-300 text-left">Jelo</th>
+            <th class="p-2 border border-gray-300 text-left">Sastojak</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="p-2 border border-gray-300">Juha</td>
+            <td class="p-2 border border-gray-300">{{ props.row.Marenda2.Juha }}</td>
+          </tr>
+          <tr>
+            <td class="p-2 border border-gray-300">Glavno jelo</td>
+            <td class="p-2 border border-gray-300">{{ props.row.Marenda2.Glavno_jelo }}</td>
+          </tr>
+          <tr>
+            <td class="p-2 border border-gray-300">Salata</td>
+            <td class="p-2 border border-gray-300">{{ props.row.Marenda2.Salata }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div v-else class="text-gray-400">N/A</div>
+  </q-td>
 </template>
 
 <script setup>
