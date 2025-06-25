@@ -13,25 +13,69 @@
       :loading="loading"
       class="shadow-24"
     >
-      <template v-slot:body-cell-Marenda1="props">
+      <template v-slot:body-cell-Datum_marende="props">
         <q-td :props="props">
-          <div v-if="props.row.Marenda1" class="leading-relaxed">
-            <span class="font-semibold">🍲 Juha:</span> {{ props.row.Marenda1.Juha }}<br />
-            <span class="font-semibold">🍛 Glavno:</span> {{ props.row.Marenda1.Glavno_jelo }}<br />
-            <span class="font-semibold">🥗 Salata:</span> {{ props.row.Marenda1.Salata }}
+          {{ props.row.Datum_marende }}
+        </q-td>
+      </template>
+
+      <template v-slot:body-cell-Marenda1="props">
+        <q-td :props="props" class="q-pa-md">
+          <div v-if="props.row.Marenda1">
+            <q-list separator>
+              <q-item>
+                <q-item-section>
+                  <q-item-label><span class="font-semibold">🍲 Juha:</span> {{ props.row.Marenda1.Juha }}</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item>
+                <q-item-section>
+                  <q-item-label><span class="font-semibold">🍛 Glavno:</span> {{ props.row.Marenda1.Glavno_jelo }}</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item>
+                <q-item-section>
+                  <q-item-label><span class="font-semibold">🥗 Salata:</span> {{ props.row.Marenda1.Salata }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
           </div>
           <div v-else class="text-gray-400">N/A</div>
         </q-td>
       </template>
 
       <template v-slot:body-cell-Marenda2="props">
-        <q-td :props="props">
-          <div v-if="props.row.Marenda2" class="leading-relaxed">
-            <span class="font-semibold">🍲 Juha:</span> {{ props.row.Marenda2.Juha }}<br />
-            <span class="font-semibold">🍛 Glavno:</span> {{ props.row.Marenda2.Glavno_jelo }}<br />
-            <span class="font-semibold">🥗 Salata:</span> {{ props.row.Marenda2.Salata }}
+        <q-td :props="props" class="q-pa-md">
+          <div v-if="props.row.Marenda2">
+            <q-list separator>
+              <q-item>
+                <q-item-section>
+                  <q-item-label><span class="font-semibold">🍲 Juha:</span> {{ props.row.Marenda2.Juha }}</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item>
+                <q-item-section>
+                  <q-item-label><span class="font-semibold">🍛 Glavno:</span> {{ props.row.Marenda2.Glavno_jelo }}</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item>
+                <q-item-section>
+                  <q-item-label><span class="font-semibold">🥗 Salata:</span> {{ props.row.Marenda2.Salata }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
           </div>
           <div v-else class="text-gray-400">N/A</div>
+        </q-td>
+      </template>
+
+      <template v-slot:body-cell-username="props">
+        <q-td :props="props">
+          {{ props.row.username }}
         </q-td>
       </template>
     </q-table>
@@ -44,7 +88,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 const meni = ref([]);
-const loading = ref(false); // Dodano za prikazivanje stanja učitavanja
+const loading = ref(false);
 let intervalId = null;
 
 const columns = ref([
@@ -55,7 +99,7 @@ const columns = ref([
 ]);
 
 const fetchMeniji = async () => {
-  loading.value = true; // Postavi stanje učitavanja na true prije dohvaćanja podataka
+  loading.value = true;
   try {
     const response = await fetch("https://backend-hospital-n9to.onrender.com/menu/history");
     const data = await response.json();
@@ -91,7 +135,7 @@ const fetchMeniji = async () => {
   } catch (error) {
     console.error("Greška kod dohvaćanja menija:", error);
   } finally {
-    loading.value = false; // Postavi stanje učitavanja na false nakon dohvaćanja podataka
+    loading.value = false;
   }
 };
 
@@ -108,28 +152,42 @@ const generatePDF = () => {
   const doc = new jsPDF();
   doc.text("Povijest marendi", 14, 16);
 
-  const body = meni.value.map(row => {
-    const m1 = row.Marenda1
-      ? `Juha: ${row.Marenda1.Juha}, Glavno: ${row.Marenda1.Glavno_jelo}, Salata: ${row.Marenda1.Salata}`
-      : "N/A";
+  const body = [];
 
-    const m2 = row.Marenda2
-      ? `Juha: ${row.Marenda2.Juha}, Glavno: ${row.Marenda2.Glavno_jelo}, Salata: ${row.Marenda2.Salata}`
-      : "N/A";
+  meni.value.forEach(row => {
+    const marenda1 = row.Marenda1
+      ? [
+        `Juha: ${row.Marenda1.Juha}`,
+        `Glavno: ${row.Marenda1.Glavno_jelo}`,
+        `Salata: ${row.Marenda1.Salata}`
+      ]
+      : ["N/A"];
 
-    return [row.Datum_marende, m1, m2, row.username];
+    const marenda2 = row.Marenda2
+      ? [
+        `Juha: ${row.Marenda2.Juha}`,
+        `Glavno: ${row.Marenda2.Glavno_jelo}`,
+        `Salata: ${row.Marenda2.Salata}`
+      ]
+      : ["N/A"];
+
+    body.push([row.Datum_marende, ...marenda1, ...marenda2, row.username]);
   });
 
   autoTable(doc, {
-    head: [["Datum", "Marenda 1", "Marenda 2", "Kuhar"]],
+    head: [["Datum", "Marenda 1 - Juha", "Marenda 1 - Glavno", "Marenda 1 - Salata", "Marenda 2 - Juha", "Marenda 2 - Glavno", "Marenda 2 - Salata", "Kuhar"]],
     body,
     startY: 20,
     styles: { fontSize: 8, cellWidth: 'auto' },
     columnStyles: {
-      0: { cellWidth: 25 },   // Datum
-      1: { cellWidth: 50 },   // Marenda 1
-      2: { cellWidth: 50 },   // Marenda 2
-      3: { cellWidth: 25 },    // Kuhar
+      0: { cellWidth: 22 },
+      1: { cellWidth: 30 },
+      2: { cellWidth: 30 },
+      3: { cellWidth: 30 },
+      4: { cellWidth: 30 },
+      5: { cellWidth: 30 },
+      6: { cellWidth: 30 },
+      7: { cellWidth: 22 },
     },
   });
 
