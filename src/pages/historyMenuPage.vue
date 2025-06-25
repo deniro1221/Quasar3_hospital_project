@@ -1,26 +1,29 @@
 <template>
   <div class="q-pa-md">
-
-    <h2>Marenda 1</h2>
-    <q-table
-      :rows="rowsMarenda1"
-      :columns="columns"
-      row-key="Datum"
-      class="my-table"
-      flat
-    />
-
-    <h2>Marenda 2</h2>
-    <q-table
-      :rows="rowsMarenda2"
-      :columns="columns"
-      row-key="Datum"
-      class="my-table"
-      flat
-    />
+    <div class="row">
+      <div class="col-md-6 col-12">
+        <h2>Marenda 1</h2>
+        <q-table
+          :rows="rowsMarenda1"
+          :columns="columns"
+          row-key="Datum"
+          class="my-table marenda-table"
+          flat
+        />
+      </div>
+      <div class="col-md-6 col-12">
+        <h2>Marenda 2</h2>
+        <q-table
+          :rows="rowsMarenda2"
+          :columns="columns"
+          row-key="Datum"
+          class="my-table marenda-table"
+          flat
+        />
+      </div>
+    </div>
 
     <q-btn label="Osvježi podatke" color="primary" @click="loadAllData" class="q-mt-md"/>
-
   </div>
 </template>
 
@@ -115,18 +118,41 @@ loadAllData()
 </script>
 
 <style scoped>
+.row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.col-md-6 {
+  width: 50%; /* Dvije tablice jedna pored druge na medium i većim ekranima */
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.col-12 {
+  width: 100%; /* Jedna ispod druge na manjim ekranima */
+}
+
 .my-table {
+  width: 100%;
   font-size: 16px;
   font-family: Arial, sans-serif;
+  border-collapse: collapse; /* Spaja obrube ćelija */
 }
 
 .my-table thead th {
   background-color: #f0f0f0;
   font-weight: bold;
   padding: 10px;
+  border: 2px solid #ccc; /* Jači obrub */
 }
 
 .my-table td {
   padding: 10px;
+  border: 1px solid #ccc; /* Jači obrub */
+}
+
+.my-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
 }
 </style>
