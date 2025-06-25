@@ -13,34 +13,24 @@
       :loading="loading"
       class="shadow-24"
     >
-      <template v-slot:body-cell-Datum_marende="props">
-        <q-td :props="props">
-          {{ props.row.Datum_marende }}
-        </q-td>
-      </template>
-
       <template v-slot:body-cell-Marenda1="props">
         <q-td :props="props" class="q-pa-md">
           <div v-if="props.row.Marenda1">
-            <q-list separator>
-              <q-item>
-                <q-item-section>
-                  <q-item-label><span class="font-semibold">🍲 Juha:</span> {{ props.row.Marenda1.Juha }}</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section>
-                  <q-item-label><span class="font-semibold">🍛 Glavno:</span> {{ props.row.Marenda1.Glavno_jelo }}</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section>
-                  <q-item-label><span class="font-semibold">🥗 Salata:</span> {{ props.row.Marenda1.Salata }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
+            <q-table
+              :rows="[
+                { jelo: 'Juha', sastojak: props.row.Marenda1.Juha },
+                { jelo: 'Glavno jelo', sastojak: props.row.Marenda1.Glavno_jelo },
+                { jelo: 'Salata', sastojak: props.row.Marenda1.Salata }
+              ]"
+              :columns="[
+                { name: 'jelo', label: 'Jelo', field: 'jelo' },
+                { name: 'sastojak', label: 'Sastojak', field: 'sastojak' }
+              ]"
+              row-key="jelo"
+              dense
+              flat
+              bordered
+            />
           </div>
           <div v-else class="text-gray-400">N/A</div>
         </q-td>
@@ -49,27 +39,29 @@
       <template v-slot:body-cell-Marenda2="props">
         <q-td :props="props" class="q-pa-md">
           <div v-if="props.row.Marenda2">
-            <q-list separator>
-              <q-item>
-                <q-item-section>
-                  <q-item-label><span class="font-semibold">🍲 Juha:</span> {{ props.row.Marenda2.Juha }}</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section>
-                  <q-item-label><span class="font-semibold">🍛 Glavno:</span> {{ props.row.Marenda2.Glavno_jelo }}</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item>
-                <q-item-section>
-                  <q-item-label><span class="font-semibold">🥗 Salata:</span> {{ props.row.Marenda2.Salata }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
+            <q-table
+              :rows="[
+                { jelo: 'Juha', sastojak: props.row.Marenda2.Juha },
+                { jelo: 'Glavno jelo', sastojak: props.row.Marenda2.Glavno_jelo },
+                { jelo: 'Salata', sastojak: props.row.Marenda2.Salata }
+              ]"
+              :columns="[
+                { name: 'jelo', label: 'Jelo', field: 'jelo' },
+                { name: 'sastojak', label: 'Sastojak', field: 'sastojak' }
+              ]"
+              row-key="jelo"
+              dense
+              flat
+              bordered
+            />
           </div>
           <div v-else class="text-gray-400">N/A</div>
+        </q-td>
+      </template>
+
+      <template v-slot:body-cell-Datum_marende="props">
+        <q-td :props="props">
+          {{ props.row.Datum_marende }}
         </q-td>
       </template>
 
