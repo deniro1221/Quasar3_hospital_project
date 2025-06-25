@@ -1,61 +1,39 @@
-<template v-slot:body-cell-Marenda1="props">
-  <q-td :props="props" class="q-pa-md">
-    <div v-if="props.row.Marenda1">
-      <table class="w-full text-base table-fixed border border-gray-400 rounded-lg overflow-hidden">
-        <thead class="bg-gray-200 text-center font-medium text-lg">
-          <tr>
-            <th class="p-4 border border-gray-400">Jelo</th>
-            <th class="p-4 border border-gray-400">Sastojak</th>
-          </tr>
-        </thead>
-        <tbody class="text-center">
-          <tr>
-            <td class="p-4 border border-gray-400">Juha</td>
-            <td class="p-4 border border-gray-400">{{ props.row.Marenda1.Juha }}</td>
-          </tr>
-          <tr>
-            <td class="p-4 border border-gray-400">Glavno jelo</td>
-            <td class="p-4 border border-gray-400">{{ props.row.Marenda1.Glavno_jelo }}</td>
-          </tr>
-          <tr>
-            <td class="p-4 border border-gray-400">Salata</td>
-            <td class="p-4 border border-gray-400">{{ props.row.Marenda1.Salata }}</td>
-          </tr>
-        </tbody>
-      </table>
+<template>
+  <div class="p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-2xl font-bold">Povijest marendi</h1>
+      <button @click="generatePDF" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded">
+        Preuzmi PDF
+      </button>
     </div>
-    <div v-else class="text-gray-400 text-center text-lg">N/A</div>
-  </q-td>
-</template>
 
-<template v-slot:body-cell-Marenda2="props">
-  <q-td :props="props" class="q-pa-md">
-    <div v-if="props.row.Marenda2">
-      <table class="w-full text-base table-fixed border border-gray-400 rounded-lg overflow-hidden">
-        <thead class="bg-gray-200 text-center font-medium text-lg">
-          <tr>
-            <th class="p-4 border border-gray-400">Jelo</th>
-            <th class="p-4 border border-gray-400">Sastojak</th>
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white border border-gray-300 shadow-md rounded">
+        <thead>
+          <tr class="bg-gray-100 text-left text-sm font-semibold text-gray-700">
+            <th scope="col" class="px-4 py-3 border">Datum</th>
+            <th scope="col" class="px-4 py-3 border">Marenda 1</th>
+            <th scope="col" class="px-4 py-3 border">Marenda 2</th>
+            <th scope="col" class="px-4 py-3 border">Kuhar</th>
           </tr>
         </thead>
-        <tbody class="text-center">
-          <tr>
-            <td class="p-4 border border-gray-400">Juha</td>
-            <td class="p-4 border border-gray-400">{{ props.row.Marenda2.Juha }}</td>
+        <tbody>
+          <tr v-if="loading">
+            <td colspan="4" class="px-4 py-3 text-center">Loading...</td>
           </tr>
-          <tr>
-            <td class="p-4 border border-gray-400">Glavno jelo</td>
-            <td class="p-4 border border-gray-400">{{ props.row.Marenda2.Glavno_jelo }}</td>
+          <tr v-if="!loading && error">
+            <td colspan="4" class="px-4 py-3 text-center text-red-600">{{ errorMessage }}</td>
           </tr>
-          <tr>
-            <td class="p-4 border border-gray-400">Salata</td>
-            <td class="p-4 border border-gray-400">{{ props.row.Marenda2.Salata }}</td>
+          <tr v-for="(row, index) in meni" :key="index" class="border-t hover:bg-gray-50 transition">
+            <td class="px-4 py-3 border font-medium text-sm">{{ row.Datum_marende }}</td>
+            <td class="px-4 py-3 border text-sm">{{ formatMarenda(row.Marenda1) }}</td>
+            <td class="px-4 py-3 border text-sm">{{ formatMarenda(row.Marenda2) }}</td>
+            <td class="px-4 py-3 border text-sm">{{ row.username }}</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div v-else class="text-gray-400 text-center text-lg">N/A</div>
-  </q-td>
+  </div>
 </template>
 
 <script setup>
@@ -64,57 +42,65 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 const meni = ref([]);
-const loading = ref(false);
-let intervalId = null;
+const loading = ref(true);
+const error = ref(false);
+const errorMessage = "Greška kod dohvaćanja menija.";
 
-const columns = ref([
-  { name: "Datum_marende", required: true, label: "Datum", align: "left", field: row => row.Datum_marende, format: val => val, sortable: true },
-  { name: "Marenda1", label: "Marenda 1", align: "left", field: 'Marenda1' },
-  { name: "Marenda2", label: "Marenda 2", align: "left", field: 'Marenda2' },
-  { name: "username", label: "Kuhar", align: "left", field: row => row.username, format: val => val, sortable: true }
-]);
+let intervalId = null;
 
 const fetchMeniji = async () => {
   loading.value = true;
+  error.value = false;
   try {
     const response = await fetch("https://backend-hospital-n9to.onrender.com/menu/history");
     const data = await response.json();
-
-    const grouped = [];
-
-    data.forEach(row => {
-      const date = row.Datum_marende.split("T")[0];
-      const user = row.username;
-      const key = `${date}-${user}`;
-
-      const marenda = {
-        Juha: row.Juha,
-        Glavno_jelo: row.Glavno_jelo,
-        Salata: row.Salata
-      };
-
-      const existing = grouped.find(entry => entry.key === key);
-      if (existing) {
-        existing.Marenda2 = marenda;
-      } else {
-        grouped.push({
-          key,
-          Datum_marende: date,
-          Marenda1: marenda,
-          Marenda2: null,
-          username: user
-        });
-      }
-    });
-
+    const grouped = groupAndCombineData(data);
     meni.value = grouped;
-  } catch (error) {
-    console.error("Greška kod dohvaćanja menija:", error);
+  } catch (err) {
+    console.error(errorMessage, err);
+    error.value = true;
   } finally {
     loading.value = false;
+
   }
 };
 
+const groupAndCombineData = (data) => {
+  const grouped = [];
+  data.forEach(row => {
+    const date = row.Datum_marende.split("T")[0];
+    const user = row.username;
+    const key = `${date}-${user}`;
+    const marenda = {
+      Juha: row.Juha,
+      Glavno_jelo: row.Glavno_jelo,
+      Salata: row.Salata
+    };
+    const existing = grouped.find(entry => entry.key === key);
+    if (existing) {
+      existing.Marenda2 = marenda;
+    } else {
+      grouped.push({
+        key,
+        Datum_marende: date,
+        Marenda1: marenda,
+        Marenda2: null,
+        username: user
+      });
+    }
+  });
+  return grouped;
+};
+
+// Helper function to format "Marenda" data
+const formatMarenda = (marenda) => {
+  if (marenda) {
+    return `🍲 Juha: ${marenda.Juha}<br />🍛 Glavno: ${marenda.Glavno_jelo}<br />🥗 Salata: ${marenda.Salata}`;
+  }
+  return "<span class='text-gray-400'>N/A</span>";
+};
+
+// Automatsko osvježavanje svakih 10 sekundi
 onMounted(() => {
   fetchMeniji();
   intervalId = setInterval(fetchMeniji, 10000);
@@ -126,48 +112,39 @@ onUnmounted(() => {
 
 const generatePDF = () => {
   const doc = new jsPDF();
-  doc.setFontSize(12);
   doc.text("Povijest marendi", 14, 16);
 
-  const body = [];
+  const body = meni.value.map(row => {
+    const m1 = row.Marenda1
+      ? `Juha: ${row.Marenda1.Juha}, Glavno: ${row.Marenda1.Glavno_jelo}, Salata: ${row.Marenda1.Salata}`
+      : "N/A";
 
-  meni.value.forEach(row => {
-    const marenda1 = row.Marenda1
-      ? [
-          `Juha: ${row.Marenda1.Juha}`,
-          `Glavno: ${row.Marenda1.Glavno_jelo}`,
-          `Salata: ${row.Marenda1.Salata}`
-        ]
-      : ["N/A", "", ""];
+    const m2 = row.Marenda2
+      ? `Juha: ${row.Marenda2.Juha}, Glavno: ${row.Marenda2.Glavno_jelo}, Salata: ${row.Marenda2.Salata}`
+      : "N/A";
 
-    const marenda2 = row.Marenda2
-      ? [
-          `Juha: ${row.Marenda2.Juha}`,
-          `Glavno: ${row.Marenda2.Glavno_jelo}`,
-          `Salata: ${row.Marenda2.Salata}`
-        ]
-      : ["N/A", "", ""];
-
-    body.push([row.Datum_marende, ...marenda1, ...marenda2, row.username]);
+    return [row.Datum_marende, m1, m2, row.username];
   });
 
   autoTable(doc, {
-    head: [["Datum", "Marenda 1 - Juha", "Marenda 1 - Glavno", "Marenda 1 - Salata", "Marenda 2 - Juha", "Marenda 2 - Glavno", "Marenda 2 - Salata", "Kuhar"]],
+    head: [["Datum", "Marenda 1", "Marenda 2", "Kuhar"]],
     body,
     startY: 20,
-    styles: { fontSize: 10 },
+    styles: { fontSize: 8, cellWidth: 'auto' },
     columnStyles: {
-      0: { cellWidth: 25 },
-      1: { cellWidth: 35 },
-      2: { cellWidth: 35 },
-      3: { cellWidth: 35 },
-      4: { cellWidth: 35 },
-      5: { cellWidth: 35 },
-      6: { cellWidth: 35 },
-      7: { cellWidth: 25 },
+      0: { cellWidth: 25 },   // Datum
+      1: { cellWidth: 50 },   // Marenda 1
+      2: { cellWidth: 50 },   // Marenda 2
+      3: { cellWidth: 25 },   // Kuhar
     },
   });
 
   doc.save("povijest_marendi.pdf");
 };
 </script>
+
+<style scoped>
+table {
+  border-collapse: collapse;
+}
+</style>
