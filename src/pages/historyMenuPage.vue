@@ -1,35 +1,33 @@
 <template>
-  <div class="q-pa-md">
-    <div class="row">
-      <div class="col-md-6 col-12">
+  <div class="q-pa-md container">
+    <div class="tables-wrapper">
+      <div class="table-box">
         <h2>Marenda 1</h2>
         <q-table
           :rows="rowsMarenda1"
           :columns="columns"
           row-key="Datum"
-          class="my-table marenda-table"
+          class="my-table"
           flat
         />
       </div>
-      <div class="col-md-6 col-12">
+      <div class="table-box">
         <h2>Marenda 2</h2>
         <q-table
           :rows="rowsMarenda2"
           :columns="columns"
           row-key="Datum"
-          class="my-table marenda-table"
+          class="my-table"
           flat
         />
       </div>
     </div>
-
     <q-btn label="Osvježi podatke" color="primary" @click="loadAllData" class="q-mt-md"/>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
 
 // Definiramo stupce
 const columns = [
@@ -118,44 +116,67 @@ loadAllData()
 </script>
 
 <style scoped>
-.row {
+.container {
+  max-width: 100%;
+  padding: 10px;
+}
+
+/* Flex wrapper za tablice */
+.tables-wrapper {
   display: flex;
+  justify-content: space-between;
   flex-wrap: wrap;
+  gap: 20px;
 }
 
-.col-md-6 {
-  width: 50%; /* Dvije tablice jedna pored druge na medium i većim ekranima */
-  padding: 5px; /* Smanjeno padding radi smanjenja prostora */
+/* Pojedinačni kontejner za tablicu */
+.table-box {
+  flex: 1 1 48%;
+  border: 3px solid #333;
+  padding: 10px;
   box-sizing: border-box;
+  min-width: 300px;
+  background-color: #fff;
 }
 
-.col-12 {
-  width: 100%; /* Jedna ispod druge na manjim ekranima */
-}
-
+/* QTable stilovi */
 .my-table {
-  width: 100%;
-  font-size: 14px; /* Smanjen font */
+  font-size: 15px;
   font-family: Arial, sans-serif;
-  border-collapse: collapse; /* Spaja obrube ćelija */
+  border-collapse: collapse;
+  width: 100%;
+  border: 2px solid #000;
 }
 
+/* Header */
 .my-table thead th {
-  background-color: #f0f0f0;
+  background-color: #e0e0e0;
   font-weight: bold;
-  padding: 8px; /* Smanjeno padding */
-  border: 2px solid #888; /* Jači i tamniji obrub */
-  font-weight: bold; /* Podebljan font */
+  padding: 8px;
+  border: 2px solid #000;
+  text-align: left;
 }
 
+/* Ćelije */
 .my-table td {
-  padding: 8px; /* Smanjeno padding */
-  border: 1.5px solid #888; /* Jači i tamniji obrub */
-  font-weight: bold; /* Podebljan font */
+  padding: 8px;
+  border: 2px solid #000;
+  font-weight: bold;
 }
 
+/* Zebra efekt */
 .my-table tbody tr:nth-child(even) {
   background-color: #f9f9f9;
 }
-</style>
 
+/* Mobilni prikaz - jedna ispod druge */
+@media (max-width: 768px) {
+  .tables-wrapper {
+    flex-direction: column;
+  }
+
+  .table-box {
+    flex: 1 1 100%;
+  }
+}
+</style>
