@@ -8,6 +8,7 @@
           :columns="columns"
           row-key="Datum"
           class="my-table"
+          :key="tableKey1"
           flat
         />
       </div>
@@ -18,18 +19,24 @@
           :columns="columns"
           row-key="Datum"
           class="my-table"
+          :key="tableKey2"
           flat
         />
       </div>
     </div>
-    <q-btn label="Osvježi podatke" color="primary" @click="loadAllData" class="q-mt-md"/>
+    <q-btn
+      label="Osvježi podatke"
+      color="primary"
+      @click="loadAllData"
+      class="q-mt-md"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 
-// Definiramo stupce
+// Kolone tablice
 const columns = [
   { name: 'Datum', label: 'Datum', field: 'Datum', align: 'left' },
   { name: 'Kuhar', label: 'Kuhar', field: 'Kuhar', align: 'left' },
@@ -38,11 +45,13 @@ const columns = [
   { name: 'Salata', label: 'Salata', field: 'Salata', align: 'left' },
 ]
 
-// Liste za podatke
+// Reaktivne varijable
 const rowsMarenda1 = ref([])
 const rowsMarenda2 = ref([])
+const tableKey1 = ref(0)
+const tableKey2 = ref(0)
 
-// Mock funkcije za dohvat podataka
+// MOCK dohvat podataka (tu zamijeni s axios.get ako želiš)
 const fetchMarenda1 = async () => {
   try {
     const response = {
@@ -50,19 +59,20 @@ const fetchMarenda1 = async () => {
         {
           Datum_marende: '2025-06-25',
           Kuhar: 'marin',
-          Juha: 'k',
-          Glavno_jelo: 'j',
-          Salata: 'l',
+          Juha: 'goveđa',
+          Glavno_jelo: 'pašticada',
+          Salata: 'kupus',
         },
         {
           Datum_marende: '2025-06-24',
-          Kuhar: 'marin',
-          Juha: 'r',
-          Glavno_jelo: 'rr',
-          Salata: 'r',
+          Kuhar: 'ana',
+          Juha: 'povrtna',
+          Glavno_jelo: 'piletina',
+          Salata: 'zelena',
         },
-      ]
+      ],
     }
+
     rowsMarenda1.value = response.data.map(item => ({
       Datum: item.Datum_marende,
       Kuhar: item.Kuhar,
@@ -81,20 +91,21 @@ const fetchMarenda2 = async () => {
       data: [
         {
           Datum_marende: '2025-06-25',
-          Kuhar: 'marin',
-          Juha: 'm',
-          Glavno_jelo: 'o',
-          Salata: 'm',
+          Kuhar: 'ivana',
+          Juha: 'rajčica',
+          Glavno_jelo: 'brancin',
+          Salata: 'rikola',
         },
         {
           Datum_marende: '2025-06-24',
-          Kuhar: 'marin',
+          Kuhar: 'igor',
           Juha: 'minestrone',
-          Glavno_jelo: 'brancin',
-          Salata: 'm ovako',
+          Glavno_jelo: 'rižoto',
+          Salata: 'miješana',
         },
-      ]
+      ],
     }
+
     rowsMarenda2.value = response.data.map(item => ({
       Datum: item.Datum_marende,
       Kuhar: item.Kuhar,
@@ -107,9 +118,12 @@ const fetchMarenda2 = async () => {
   }
 }
 
+// Osvježavanje
 const loadAllData = async () => {
   await fetchMarenda1()
   await fetchMarenda2()
+  tableKey1.value++
+  tableKey2.value++
 }
 
 loadAllData()
@@ -139,7 +153,7 @@ loadAllData()
   background-color: #fff;
 }
 
-/* QTable stilovi */
+/* Stilovi za q-table */
 .my-table {
   font-size: 15px;
   font-family: Arial, sans-serif;
@@ -169,7 +183,7 @@ loadAllData()
   background-color: #f9f9f9;
 }
 
-/* Mobilni prikaz - jedna ispod druge */
+/* Mobilni prikaz */
 @media (max-width: 768px) {
   .tables-wrapper {
     flex-direction: column;
