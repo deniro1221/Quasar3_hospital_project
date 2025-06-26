@@ -137,7 +137,7 @@ router.delete('/menu/delete', async (req, res) => {
 });
 
 // GET - Povijest menija
-router.get('/menu', async (req, res) => {
+router.get('/menu/history', async (req, res) => {
     const today = dayjs().format('YYYY-MM-DD');
     const connection = await pool.getConnection();
     try {

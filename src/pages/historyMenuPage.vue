@@ -36,7 +36,7 @@ const filteredRows = computed(() =>
 const loadData = async () => {
   loading.value = true;
   try {
-    const { data } = await axios.get(`${apiUrl}/menu`);
+    const { data } = await axios.get(`${apiUrl}/menu/history`);
     rows.value = data;
   } catch (err) {
     console.error('Greška kod dohvata:', err);
