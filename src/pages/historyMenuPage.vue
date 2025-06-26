@@ -33,8 +33,8 @@
             </div>
 
             <div style="margin-top: 20px; display: flex; gap: 10px">
-              <q-btn label="Prikaži aktivni meni" color="primary" @click="otkrijAktivniMeni" />
-              <q-btn label="Obriši meni" color="negative" @click="otvoriDijalogBrisanje" />
+              <q-btn label="Prikaži aktivni meni" color="primary" @click="otvoriPregledDijalog" />
+              <q-btn label="Obriši meni" color="negative" @click="otvoriBrisanjeDijalog" />
             </div>
           </q-form>
         </q-card>
@@ -50,53 +50,56 @@
       </div>
     </div>
 
-    <!-- Dialog za aktivni meni -->
-    <q-dialog v-model="dialogAktivniMeni" persistent>
+    <!-- Jedan Dijaloški Okvir -->
+    <q-dialog v-model="dialogVisible" persistent>
       <q-card style="min-width: 400px">
         <q-card-section>
-          <div class="text-h6">Aktivni meni</div>
-        </q-card-section>
-
-        <q-card-section>
-          <p><strong>Datum:</strong> {{ datumAktivnogMenija.Datum_marende }}</p>
-          <q-input v-model="datumAktivnogMenija.Datum_marende" label="Datum" readonly />
-
-          <div class="row">
-            <div class="col-6">
-              <div class="text-subtitle1">Marenda 1</div>
-              <q-input v-model="datumAktivnogMenija.Juha_m1" label="Juha" />
-              <q-input v-model="datumAktivnogMenija.Glavno_jelo_m1" label="Glavno jelo" />
-              <q-input v-model="datumAktivnogMenija.Salata_m1" label="Salata" />
-            </div>
-            <div class="col-6">
-              <div class="text-subtitle1">Marenda 2</div>
-              <q-input v-model="datumAktivnogMenija.Juha_m2" label="Juha" />
-              <q-input v-model="datumAktivnogMenija.Glavno_jelo_m2" label="Glavno jelo" />
-              <q-input v-model="datumAktivnogMenija.Salata_m2" label="Salata" />
-            </div>
-          </div>
-        </q-card-section>
-
-        <q-card-actions align="around">
-          <q-btn label="Odustani" color="negative" @click="dialogAktivniMeni = false" />
-          <q-btn label="Spremi" color="primary" @click="azurirajMeni" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-    <!-- Delete Confirmation Dialog -->
-    <q-dialog v-model="dialogObrisiMeni" persistent>
-      <q-card style="min-width: 400px">
-        <q-card-section>
-          <div class="text-h6">
+          <div class="text-h6" v-if="dialogMode === 'pregled'">Aktivni meni</div>
+          <div class="text-h6" v-else-if="dialogMode === 'brisanje'">
             Jeste li sigurni da želite obrisati meni za datum
             {{ datumAktivnogMenija.Datum_marende }}?
           </div>
         </q-card-section>
 
+        <q-card-section>
+          <!-- Sadržaj za Pregled -->
+          <div v-if="dialogMode === 'pregled'">
+            <p><strong>Datum:</strong> {{ datumAktivnogMenija.Datum_marende }}</p>
+            <q-input v-model="datumAktivnogMenija.Datum_marende" label="Datum" readonly />
+
+            <div class="row">
+              <div class="col-6">
+                <div class="text-subtitle1">Marenda 1</div>
+                <q-input v-model="datumAktivnogMenija.Juha_m1" label="Juha" />
+                <q-input v-model="datumAktivnogMenija.Glavno_jelo_m1" label="Glavno jelo" />
+                <q-input v-model="datumAktivnogMenija.Salata_m1" label="Salata" />
+              </div>
+              <div class="col-6">
+                <div class="text-subtitle1">Marenda 2</div>
+                <q-input v-model="datumAktivnogMenija.Juha_m2" label="Juha" />
+                <q-input v-model="datumAktivnogMenija.Glavno_jelo_m2" label="Glavno jelo" />
+                <q-input v-model="datumAktivnogMenija.Salata_m2" label="Salata" />
+              </div>
+            </div>
+          </div>
+          <!-- Sadržaj za Brisanje -->
+          <div v-else-if="dialogMode === 'brisanje'">
+            <p>
+              Ova akcija će trajno obrisati meni za odabrani datum. Jeste li sigurni da želite
+              nastaviti?
+            </p>
+          </div>
+        </q-card-section>
+
         <q-card-actions align="around">
-          <q-btn label="Odustani" color="negative" @click="dialogObrisiMeni = false" />
-          <q-btn label="Obriši" color="primary" @click="obrisiMeni" />
+          <q-btn label="Odustani" color="negative" @click="zatvoriDijalog" />
+          <q-btn
+            v-if="dialogMode === 'pregled'"
+            label="Spremi"
+            color="primary"
+            @click="azurirajMeni"
+          />
+          <q-btn v-else-if="dialogMode === 'brisanje'" label="Obriši" color="primary" @click="obrisiMeni" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -138,8 +141,11 @@ const glavno_jelo_m2 = ref('');
 const salata_m2 = ref('');
 const idKuhara = localStorage.getItem('userID');
 
-// Dialog and active menu data
-const dialogAktivniMeni = ref(false);
+// Dialog control
+const dialogVisible = ref(false);
+const dialogMode = ref('pregled'); // 'pregled' ili 'brisanje'
+
+// Active menu data
 const datumAktivnogMenija = ref({
   Datum_marende: '',
   Juha_m1: '',
@@ -149,9 +155,6 @@ const datumAktivnogMenija = ref({
   Glavno_jelo_m2: '',
   Salata_m2: '',
 });
-
-// Delete Confirmation Dialog
-const dialogObrisiMeni = ref(false);
 
 // Povijest Jelovnika data
 const columns = [
@@ -217,7 +220,7 @@ const submitManual = async () => {
   }
 };
 
-const otkrijAktivniMeni = async (openDialog = true) => {
+const otkrijAktivniMeni = async () => {
   try {
     const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/today');
     const data = await response.json();
@@ -244,14 +247,27 @@ const otkrijAktivniMeni = async (openDialog = true) => {
         Salata_m2: '',
       };
     }
-
-    if (openDialog) {
-      dialogAktivniMeni.value = true;
-    }
   } catch (err) {
     console.error('Greška:', err);
     showMessage('Greška pri učitavanju menija!', false);
   }
+};
+
+// Functions to open the dialog in different modes
+const otvoriPregledDijalog = async () => {
+  await otkrijAktivniMeni();
+  dialogMode.value = 'pregled';
+  dialogVisible.value = true;
+};
+
+const otvoriBrisanjeDijalog = async () => {
+  await otkrijAktivniMeni();
+  dialogMode.value = 'brisanje';
+  dialogVisible.value = true;
+};
+
+const zatvoriDijalog = () => {
+  dialogVisible.value = false;
 };
 
 // ✅ Function to update active menu
@@ -296,7 +312,7 @@ const azurirajMeni = async () => {
 
     if (response.ok) {
       showMessage('Meni je ažuriran!', true);
-      dialogAktivniMeni.value = false;
+      zatvoriDijalog();
       loadData(); // Refresh the history after updating
     } else {
       showMessage('Greška pri ažuriranju!', false);
@@ -305,22 +321,6 @@ const azurirajMeni = async () => {
     console.error('Greška:', err);
     showMessage('Greška na serveru!', false);
   }
-};
-
-const otvoriDijalogBrisanje = async () => {
-  await otkrijAktivniMeni(false);
-  if (!datumAktivnogMenija.value.Datum_marende) {
-    showMessage('Nema aktivnog menija za danas!', false);
-    return;
-  }
-
-  const selectedDate = dayjs(datumAktivnogMenija.value.Datum_marende);
-  if (selectedDate.isBefore(dayjs(), 'day')) {
-    showMessage('Ne možete obrisati meni za prošli datum!', false);
-    return;
-  }
-
-  dialogObrisiMeni.value = true;
 };
 
 const obrisiMeni = async () => {
@@ -346,7 +346,7 @@ const obrisiMeni = async () => {
 
     if (response.ok) {
       showMessage('Meni je uspješno obrisan!', true);
-      dialogObrisiMeni.value = false;
+      zatvoriDijalog();
       datumAktivnogMenija.value = {
         Datum_marende: '',
         Juha_m1: '',
