@@ -12,7 +12,14 @@
         <!-- Povijest Jelovnika -->
         <div class="q-pa-md">
           <h4>Menu History</h4>
-          <q-table :rows="rows" :columns="columns" row-key="Datum" class="my-table" flat />
+          <q-table
+            :rows="filteredRows"
+            :columns="columns"
+            row-key="Datum"
+            class="my-table"
+            flat
+            @row-dblclick="onRowDblClick"
+          />
           <q-btn label="Osvježi podatke" color="primary" @click="loadData" class="q-mt-md" />
         </div>
       </div>
@@ -114,7 +121,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import dayjs from 'dayjs';
 import axios from 'axios';
@@ -174,16 +181,14 @@ const columns = [
   { name: 'Juha', label: 'Juha', field: 'Juha', align: 'left' },
   { name: 'Glavno', label: 'Glavno jelo', field: 'Glavno_jelo', align: 'left' },
   { name: 'Salata', label: 'Salata', field: 'Salata', align: 'left' },
-  {
-    name: 'active',
-    label: 'Aktivan',
-    field: 'isActive',
-    align: 'center',
-    format: val => (val ? '✓' : ''), // Prikazuje "✓" ako je aktivan, inače prazno
-  },
 ];
 
 const rows = ref([]);
+
+const filteredRows = computed(() => {
+  const today = dayjs().format('YYYY-MM-DD');
+  return rows.value.filter(row => dayjs(row.Datum).isSameOrAfter(today, 'day'));
+});
 
 // ✅ Function to submit manual
 const submitManual = async () => {
@@ -419,6 +424,21 @@ const loadData = async () => {
   } catch (error) {
     console.error('Greška pri dohvaćanju podataka:', error);
   }
+};
+
+const onRowDblClick = (evt, row) => {
+  // Populate the active menu dialog with the selected row's data
+  datumAktivnogMenija.value = {
+    Datum_marende: dayjs(row.Datum).format('YYYY-MM-DD'), // Format date for the backend
+    Juha_m1: row.marenda === 'Marenda 1' ? row.Juha : '',
+    Glavno_jelo_m1: row.marenda === 'Marenda 1' ? row.Glavno_jelo : '',
+    Salata_m1: row.marenda === 'Marenda 1' ? row.Salata : '',
+    Juha_m2: row.marenda === 'Marenda 2' ? row.Juha : '',
+    Glavno_jelo_m2: row.marenda === 'Marenda 2' ? row.Glavno_jelo : '',
+    Salata_m2: row.marenda === 'Marenda 2' ? row.Salata : '',
+  };
+
+  otvoriPregledDijalog(); // Open the dialog for editing
 };
 
 loadData();
