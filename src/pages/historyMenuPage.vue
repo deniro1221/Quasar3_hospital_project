@@ -2,6 +2,9 @@
 import { ref, computed, onMounted } from 'vue';
 import dayjs from 'dayjs';
 import axios from 'axios';
+import { useQuasar } from 'quasar';
+
+const $q = useQuasar()
 
 const unosDijalog = ref(false);
 const datum = ref(dayjs().format('YYYY-MM-DD'));
@@ -9,7 +12,10 @@ const juha_m1 = ref(''), glavno_jelo_m1 = ref(''), salata_m1 = ref('');
 const juha_m2 = ref(''), glavno_jelo_m2 = ref(''), salata_m2 = ref('');
 const rows = ref([]);
 const editingCell = ref(null);
-const message = ref(''), isSuccess = ref(false);
+const message = ref('');
+const isSuccess = ref(false);
+const loading = ref(false);
+const apiUrl = 'https://backend-hospital-n9to.onrender.com'; // corrected api url
 
 const columns = [
   { name: 'Datum', label: 'Datum', field: 'Datum', align: 'left' },
@@ -25,11 +31,20 @@ const filteredRows = computed(() =>
 );
 
 const loadData = async () => {
+  loading.value = true;
   try {
-    const { data } = await axios.get('https://backend-hospital-n9to.onrender.com/menu/history');
+    const { data } = await axios.get(`${apiUrl}/menu/history`);
     rows.value = data;
   } catch (err) {
     console.error('Greška kod dohvata:', err);
+    $q.notify({
+      color: 'red-5',
+      textColor: 'white',
+      icon: 'warning',
+      message: 'Failed to load data',
+    })
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -43,7 +58,7 @@ const submitManual = async () => {
   const username = localStorage.getItem('loggedInUser');
   const ID_kuhara = localStorage.getItem('userID');
   try {
-    await axios.post('https://backend-hospital-n9to.onrender.com/menu', {
+    await axios.post(`${apiUrl}/menu`, {
       Datum_marende: datum.value,
       Juha_m1: juha_m1.value,
       Glavno_jelo_m1: glavno_jelo_m1.value,
@@ -68,7 +83,7 @@ const isEditing = (row, col) => editingCell.value?.row === row && editingCell.va
 const stopEditing = async (row, col) => {
   editingCell.value = null;
   try {
-    await axios.put('https://backend-hospital-n9to.onrender.com/menu/fresh', {
+    await axios.put(`${apiUrl}/menu/fresh`, {
       Datum_marende: row.Datum,
       [`${col.field}_m${row.marenda.endsWith('1') ? '1' : '2'}`]: row[col.field]
     });
@@ -80,16 +95,20 @@ const stopEditing = async (row, col) => {
 };
 
 const otvoriUnosDijalog = () => unosDijalog.value = true;
+
+onMounted(() => {
+  loadData();
+});
 </script>
 
 <template>
   <q-page padding>
     <q-btn label="Unesi novi jelovnik" color="primary" @click="otvoriUnosDijalog" />
 
-    <q-table :rows="filteredRows" :columns="columns" row-key="Datum" class="q-mt-md">
+    <q-table :rows="filteredRows" :columns="columns" row-key="Datum" class="q-mt-md" :loading="loading">
       <template v-slot:body-cell="props">
         <q-td :props="props">
-          <div v-if="isEditing(props.row, props.col)">
+          <div v-if="isEditing(props.row, props.col)" class="editing-cell">
             <q-input v-model="props.row[props.col.field]" dense autofocus
               @blur="stopEditing(props.row, props.col)" @keyup.enter="stopEditing(props.row, props.col)" />
           </div>
@@ -131,7 +150,6 @@ const otvoriUnosDijalog = () => unosDijalog.value = true;
   </q-page>
 </template>
 
-
 <style scoped>
 .my-table {
   width: auto;
@@ -144,5 +162,9 @@ const otvoriUnosDijalog = () => unosDijalog.value = true;
 
 .my-table thead th {
   font-weight: 700;
+}
+
+.editing-cell {
+  background-color: #f0f0f0;
 }
 </style>
