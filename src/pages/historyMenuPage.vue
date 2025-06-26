@@ -1,12 +1,14 @@
 <template>
   <q-page padding>
     <div class="row">
-      <div class="col-12 col-md-6">
+      <div class="col-12 text-left">
         <!-- Gumb za otvaranje dijaloškog okvira za unos -->
         <q-btn label="Unesi novi jelovnik" color="primary" @click="otvoriUnosDijalog" />
       </div>
+    </div>
 
-      <div class="col-12 col-md-6">
+    <div class="row">
+      <div class="col-12">
         <!-- Povijest Jelovnika -->
         <div class="q-pa-md">
           <h4>Menu History</h4>
@@ -417,8 +419,8 @@ loadData();
 
 <style scoped>
 .my-table {
-  width: 100%;
-  max-width: 100%;
+  width: auto; /* Vraća tablicu u stvarnu veličinu */
+  max-width: none; /* Uklanja maksimalnu širinu */
 }
 
 .positive {
