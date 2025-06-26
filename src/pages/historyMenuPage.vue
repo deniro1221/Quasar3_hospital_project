@@ -1,13 +1,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import dayjs from 'dayjs';
-import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'; // Import the plugin
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import axios from 'axios';
 import { useQuasar } from 'quasar';
 
 const $q = useQuasar()
 
-dayjs.extend(isSameOrAfter); // Extend dayjs with the plugin
+dayjs.extend(isSameOrAfter);
 
 const unosDijalog = ref(false);
 const datum = ref(dayjs().format('YYYY-MM-DD'));
@@ -18,7 +18,7 @@ const editingCell = ref(null);
 const message = ref('');
 const isSuccess = ref(false);
 const loading = ref(false);
-const apiUrl = 'https://backend-hospital-n9to.onrender.com'; // corrected api url
+const apiUrl = 'https://backend-hospital-n9to.onrender.com';
 
 const columns = [
   { name: 'Datum', label: 'Datum', field: 'Datum', align: 'left' },
@@ -37,6 +37,7 @@ const loadData = async () => {
   loading.value = true;
   try {
     const { data } = await axios.get(`${apiUrl}/menu/history`);
+    console.log("Raw data from API:", data);
     rows.value = data;
   } catch (err) {
     console.error('Greška kod dohvata:', err);
@@ -103,3 +104,71 @@ onMounted(() => {
   loadData();
 });
 </script>
+
+<template>
+  <q-page padding>
+    <q-btn label="Unesi novi jelovnik" color="primary" @click="otvoriUnosDijalog" />
+
+    <q-table :rows="filteredRows" :columns="columns" row-key="Datum" class="q-mt-md" :loading="loading">
+      <template v-slot:body-cell="props">
+        <q-td :props="props">
+          <div v-if="isEditing(props.row, props.col)" class="editing-cell">
+            <q-input v-model="props.row[props.col.field]" dense autofocus
+              @blur="stopEditing(props.row, props.col)" @keyup.enter="stopEditing(props.row, props.col)" />
+          </div>
+          <div v-else @click="startEditing(props.row, props.col)">
+            {{ props.value }}
+          </div>
+        </q-td>
+      </template>
+    </q-table>
+
+    <q-dialog v-model="unosDijalog">
+      <q-card style="width: 500px">
+        <q-card-section>
+          <div class="text-h6">Unos novog jelovnika</div>
+        </q-card-section>
+        <q-card-section>
+          <q-form @submit.prevent="submitManual">
+            <q-input v-model="datum" type="date" label="Datum" />
+            <div class="row">
+              <div class="col-6">
+                <q-input v-model="juha_m1" label="Juha M1" />
+                <q-input v-model="glavno_jelo_m1" label="Glavno jelo M1" />
+                <q-input v-model="salata_m1" label="Salata M1" />
+              </div>
+              <div class="col-6">
+                <q-input v-model="juha_m2" label="Juha M2" />
+                <q-input v-model="glavno_jelo_m2" label="Glavno jelo M2" />
+                <q-input v-model="salata_m2" label="Salata M2" />
+              </div>
+            </div>
+            <q-btn label="Spremi" type="submit" color="primary" class="q-mt-md" />
+          </q-form>
+        </q-card-section>
+        <q-card-actions>
+          <q-btn flat label="Zatvori" @click="unosDijalog = false" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+  </q-page>
+</template>
+
+<style scoped>
+.my-table {
+  width: auto;
+  max-width: none;
+}
+
+.my-table td {
+  font-weight: 600;
+}
+
+.my-table thead th {
+  font-weight: 700;
+}
+
+.editing-cell {
+  background-color: #f0f0f0;
+}
+</style>
