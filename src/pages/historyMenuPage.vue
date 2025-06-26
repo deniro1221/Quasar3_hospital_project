@@ -2,12 +2,28 @@
   <q-page padding>
     <div class="row">
       <div class="col-12 col-md-6">
-        <!-- Unos/Uređivanje Jelovnika -->
-        <q-card>
-          <q-card-section>
-            <div class="text-h6">Unos/uređivanje jelovnika</div>
-          </q-card-section>
+        <!-- Gumb za otvaranje dijaloškog okvira za unos -->
+        <q-btn label="Unesi novi jelovnik" color="primary" @click="otvoriUnosDijalog" />
+      </div>
 
+      <div class="col-12 col-md-6">
+        <!-- Povijest Jelovnika -->
+        <div class="q-pa-md container">
+          <h4>Menu History</h4>
+          <q-table :rows="rows" :columns="columns" row-key="Datum" class="my-table" flat />
+          <q-btn label="Osvježi podatke" color="primary" @click="loadData" class="q-mt-md" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Dijaloški okvir za unos jelovnika -->
+    <q-dialog v-model="unosDijalog">
+      <q-card style="width: 500px; max-width: 80vw;">
+        <q-card-section>
+          <div class="text-h6">Unos novog jelovnika</div>
+        </q-card-section>
+
+        <q-card-section>
           <q-form @submit.prevent="submitManual">
             <q-input v-model="datum" type="date" label="Odaberite datum" />
 
@@ -29,28 +45,17 @@
             <div class="q-mt-md" style="display: flex; gap: 10px">
               <q-btn label="Spremi" type="submit" color="primary" />
               <q-btn label="Odustani" type="button" color="red" @click="odustani" />
-              <q-btn label="Natrag" type="button" color="primary" @click="natrag" />
-            </div>
-
-            <div style="margin-top: 20px; display: flex; gap: 10px">
-              <q-btn label="Prikaži aktivni meni" color="primary" @click="otvoriPregledDijalog" />
-              <q-btn label="Obriši meni" color="negative" @click="otvoriBrisanjeDijalog" />
             </div>
           </q-form>
-        </q-card>
-      </div>
+        </q-card-section>
 
-      <div class="col-12 col-md-6">
-        <!-- Povijest Jelovnika -->
-        <div class="q-pa-md container">
-          <h4>Menu History</h4>
-          <q-table :rows="rows" :columns="columns" row-key="Datum" class="my-table" flat />
-          <q-btn label="Osvježi podatke" color="primary" @click="loadData" class="q-mt-md" />
-        </div>
-      </div>
-    </div>
+        <q-card-actions align="right">
+          <q-btn flat label="Zatvori" color="primary" @click="unosDijalog = false" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 
-    <!-- Jedan Dijaloški Okvir -->
+    <!-- Dialog za aktivni meni -->
     <q-dialog v-model="dialogVisible" persistent>
       <q-card style="min-width: 400px">
         <q-card-section>
@@ -141,6 +146,9 @@ const glavno_jelo_m2 = ref('');
 const salata_m2 = ref('');
 const idKuhara = localStorage.getItem('userID');
 
+// Dijaloški okvir za unos
+const unosDijalog = ref(false);
+
 // Dialog control
 const dialogVisible = ref(false);
 const dialogMode = ref('pregled'); // 'pregled' ili 'brisanje'
@@ -211,6 +219,7 @@ const submitManual = async () => {
       glavno_jelo_m2.value = '';
       salata_m2.value = '';
       loadData(); // Refresh the history after submitting
+      unosDijalog.value = false; // Zatvori dijaloški okvir nakon spremanja
     } else {
       showMessage('Greška pri unosu!', false);
     }
@@ -268,6 +277,11 @@ const otvoriBrisanjeDijalog = async () => {
 
 const zatvoriDijalog = () => {
   dialogVisible.value = false;
+};
+
+// Funkcija za otvaranje dijaloškog okvira za unos
+const otvoriUnosDijalog = () => {
+  unosDijalog.value = true;
 };
 
 // ✅ Function to update active menu
