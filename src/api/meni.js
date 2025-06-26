@@ -137,19 +137,25 @@ router.delete('/menu/delete', async (req, res) => {
 });
 
 // GET - Povijest menija
-router.get('/menu/history', async (req, res) => {
+router.get('/menu', async (req, res) => {
     const today = dayjs().format('YYYY-MM-DD');
     const connection = await pool.getConnection();
     try {
-        const [m1] = await connection.execute(`
-            SELECT Datum_marende AS Datum, Juha, Glavno_jelo, Salata, ID_kuhara, username FROM Marenda1
-            WHERE Datum_marende >= ? ORDER BY Datum_marende DESC`, [today]);
-        const [m2] = await connection.execute(`
-            SELECT Datum_marende AS Datum, Juha, Glavno_jelo, Salata, ID_kuhara, username FROM Marenda2
-            WHERE Datum_marende >= ? ORDER BY Datum_marende DESC`, [today]);
+        const [menus] = await connection.execute(`
+            SELECT Datum_marende AS Datum, Juha, Glavno_jelo, Salata, ID_kuhara, username, 'Marenda' AS marenda
+            FROM (
+                SELECT Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username, 'Marenda 1' AS marenda
+                FROM Marenda1
+                WHERE Datum_marende >= ?
+                UNION ALL
+                SELECT Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username, 'Marenda 2' AS marenda
+                FROM Marenda2
+                WHERE Datum_marende >= ?
+            ) AS Meniji
+            ORDER BY Datum_marende DESC
+        `, [today, today]);
 
-        const data = [...m1.map(r => ({ ...r, marenda: 'Marenda 1' })), ...m2.map(r => ({ ...r, marenda: 'Marenda 2' }))];
-        res.json(data.sort((a, b) => dayjs(b.Datum).diff(dayjs(a.Datum))));
+        res.json(menus);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Greška na serveru.' });
