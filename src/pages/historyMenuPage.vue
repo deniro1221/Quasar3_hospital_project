@@ -416,14 +416,15 @@ const odustani = () => {
 const loadData = async () => {
   try {
     const response = await axios.get('https://backend-hospital-n9to.onrender.com/menu/history');
-    rows.value = response.data.map(item => ({
-      Datum: new Date(item.Datum_marende).toLocaleDateString(),
-      marenda: item.marenda,
-      username: item.username,
-      Juha: item.Juha,
-      Glavno_jelo: item.Glavno_jelo,
-      Salata: item.Salata,
-    }));
+        console.log("API Response:", response.data); // <--- ADD THIS LINE
+        rows.value = response.data.map(item => ({
+            Datum: dayjs(item.Datum_marende).format('YYYY-MM-DD'), // Format the date
+            marenda: item.marenda,
+            username: item.username,
+            Juha: item.Juha,
+            Glavno_jelo: item.Glavno_jelo,
+            Salata: item.Salata,
+        }));
   } catch (error) {
     console.error('Greška pri dohvaćanju podataka:', error);
   }

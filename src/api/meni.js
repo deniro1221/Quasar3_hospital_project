@@ -24,7 +24,7 @@ router.post('/menu', validateDateFormat, async (req, res) => {
     const Glavno_jelo_m1 = req.body.Glavno_jelo_m1 = null;
     const Salata_m1 = req.body.Salata_m1 || null;
     const Juha_m2 = req.body.Juha_m2 || null;
-    const Glavno_jelo_m2 = req.body.Glavno_jelo_m2 = null;
+    const Glavno_jelo_m2 = req.body.Glavno_jelo_m2 || null;
     const Salata_m2 = req.body.Salata_m2 || null;
 
     console.log("POST /menu - Values after null check:", { Datum_marende, Juha_m1, Glavno_jelo_m1, Salata_m1, Juha_m2, Glavno_jelo_m2, Salata_m2, ID_kuhara, username });
