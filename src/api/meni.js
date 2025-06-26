@@ -21,7 +21,7 @@ router.post('/menu', validateDateFormat, async (req, res) => {
     const username = req.body.username || null;
 
     const Juha_m1 = req.body.Juha_m1 || null;
-    const Glavno_jelo_m1 = req.body.Glavno_jelo_m1 = null;
+    const Glavno_jelo_m1 = req.body.Glavno_jelo_m1 || null;
     const Salata_m1 = req.body.Salata_m1 || null;
     const Juha_m2 = req.body.Juha_m2 || null;
     const Glavno_jelo_m2 = req.body.Glavno_jelo_m2 || null;
@@ -112,21 +112,11 @@ router.get('/menu/today', async (req, res) => {
     }
 });
 
-// PUT - Update menu entries in both Marenda1 and Marenda2
+// PUT - Update a SINGLE menu entry in either Marenda1 or Marenda2
 router.put('/menu/fresh', validateDateFormat, async (req, res) => {
     console.log("PUT /menu/fresh - req.body:", req.body);
 
-    const { Datum_marende, ID_kuhara } = req.body;
-    const username = req.body.username || null;
-
-    const Juha_m1 = req.body.Juha_m1 || null;
-    const Glavno_jelo_m1 = req.body.Glavno_jelo_m1 || null;
-    const Salata_m1 = req.body.Salata_m1 || null;
-    const Juha_m2 = req.body.Juha_m2 || null;
-    const Glavno_jelo_m2 = req.body.Glavno_jelo_m2 || null;
-    const Salata_m2 = req.body.Salata_m2 || null;
-
-    console.log("PUT /menu/fresh - Values after null check:", { Datum_marende, Juha_m1, Glavno_jelo_m1, Salata_m1, Juha_m2, Glavno_jelo_m2, Salata_m2, ID_kuhara, username });
+    const { Datum_marende } = req.body;
 
     if (!Datum_marende) {
         return res.status(400).json({ message: 'Datum je obavezan.' });
@@ -141,21 +131,43 @@ router.put('/menu/fresh', validateDateFormat, async (req, res) => {
     try {
         connection = await pool.getConnection(); // Get connection from pool
 
-        // Update Marenda1
-        await connection.execute(
-            `UPDATE Marenda1 SET Juha = ?, Glavno_jelo = ?, Salata = ?, ID_kuhara = ?, username = ? WHERE Datum_marende = ?`,
-            [Juha_m1, Glavno_jelo_m1, Salata_m1, ID_kuhara, username, Datum_marende],
-        );
+        // Determine which field is being updated (Juha_m1, Glavno_jelo_m2, etc.)
+        let updateField = null;
+        let updateValue = null;
+        let tableName = null;
 
-        // Update Marenda2
-        await connection.execute(
-            `UPDATE Marenda2 SET Juha = ?, Glavno_jelo = ?, Salata = ?, ID_kuhara = ?, username = ? WHERE Datum_marende = ?`,
-            [Juha_m2, Glavno_jelo_m2, Salata_m2, ID_kuhara, username, Datum_marende],
-        );
+        for (const key in req.body) {
+            if (key !== 'Datum_marende' && req.body.hasOwnProperty(key)) {
+                updateField = key;
+                updateValue = req.body[key];
+                break; // Exit loop after finding the field
+            }
+        }
+
+        if (!updateField) {
+            await connection.release();
+            return res.status(400).json({ message: 'Nema polja za ažuriranje.' });
+        }
+
+        // Determine table (Marenda1 or Marenda2) based on the field
+        if (updateField.endsWith('_m1')) {
+            tableName = 'Marenda1';
+        } else if (updateField.endsWith('_m2')) {
+            tableName = 'Marenda2';
+        } else {
+            await connection.release();
+            return res.status(400).json({ message: 'Neispravno polje za ažuriranje.' });
+        }
+
+        // Construct the SQL query
+        const sql = `UPDATE ${tableName} SET ${updateField.substring(0, updateField.length - 3)} = ? WHERE Datum_marende = ?`; // Remove '_m1' or '_m2' from field name
+
+        // Execute the query
+        await connection.execute(sql, [updateValue, Datum_marende]);
 
         await connection.release(); // Release the connection back to the pool
 
-        res.json({ message: 'Meniji su uspješno ažurirani.' });
+        res.json({ message: 'Meni je uspješno ažuriran.' });
     } catch (err) {
         console.error('Greška kod ažuriranja menija:', err);
         res.status(500).json({ message: 'Greška na serveru.' });
@@ -235,5 +247,4 @@ router.get('/menu/history', async (req, res) => {
         res.status(500).json({ message: 'Greška na serveru.' });
     }
 });
-
 export default router;

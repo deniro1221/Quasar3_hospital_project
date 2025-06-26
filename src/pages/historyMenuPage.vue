@@ -12,14 +12,25 @@
         <!-- Povijest Jelovnika -->
         <div class="q-pa-md">
           <h4>Menu History</h4>
-          <q-table
-            :rows="filteredRows"
-            :columns="columns"
-            row-key="Datum"
-            class="my-table"
-            flat
-            @row-dblclick="onRowDblClick"
-          />
+          <q-table :rows="filteredRows" :columns="columns" row-key="Datum" class="my-table" flat>
+            <template v-slot:body-cell="props">
+              <q-td :props="props">
+                <div v-if="isEditing(props.row, props.col)">
+                  <q-input
+                    v-model="props.row[props.col.field]"
+                    borderless
+                    dense
+                    autofocus
+                    @keyup.enter="stopEditing(props.row, props.col)"
+                    @blur="stopEditing(props.row, props.col)"
+                  />
+                </div>
+                <div v-else @click="startEditing(props.row, props.col)">
+                  {{ props.value }}
+                </div>
+              </q-td>
+            </template>
+          </q-table>
           <q-btn label="Osvježi podatke" color="primary" @click="loadData" class="q-mt-md" />
         </div>
       </div>
@@ -60,60 +71,6 @@
 
         <q-card-actions align="right">
           <q-btn flat label="Zatvori" color="primary" @click="unosDijalog = false" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-    <!-- Dialog za aktivni meni -->
-    <q-dialog v-model="dialogVisible" persistent>
-      <q-card style="min-width: 400px">
-        <q-card-section>
-          <div class="text-h6" v-if="dialogMode === 'pregled'">Aktivni meni</div>
-          <div class="text-h6" v-else-if="dialogMode === 'brisanje'">
-            Jeste li sigurni da želite obrisati meni za datum
-            {{ datumAktivnogMenija.Datum_marende }}?
-          </div>
-        </q-card-section>
-
-        <q-card-section>
-          <!-- Sadržaj za Pregled -->
-          <div v-if="dialogMode === 'pregled'">
-            <p><strong>Datum:</strong> {{ datumAktivnogMenija.Datum_marende }}</p>
-            <q-input v-model="datumAktivnogMenija.Datum_marende" label="Datum" readonly />
-
-            <div class="row">
-              <div class="col-6">
-                <div class="text-subtitle1">Marenda 1</div>
-                <q-input v-model="datumAktivnogMenija.Juha_m1" label="Juha" />
-                <q-input v-model="datumAktivnogMenija.Glavno_jelo_m1" label="Glavno jelo" />
-                <q-input v-model="datumAktivnogMenija.Salata_m1" label="Salata" />
-              </div>
-              <div class="col-6">
-                <div class="text-subtitle1">Marenda 2</div>
-                <q-input v-model="datumAktivnogMenija.Juha_m2" label="Juha" />
-                <q-input v-model="datumAktivnogMenija.Glavno_jelo_m2" label="Glavno jelo" />
-                <q-input v-model="datumAktivnogMenija.Salata_m2" label="Salata" />
-              </div>
-            </div>
-          </div>
-          <!-- Sadržaj za Brisanje -->
-          <div v-else-if="dialogMode === 'brisanje'">
-            <p>
-              Ova akcija će trajno obrisati meni za odabrani datum. Jeste li sigurni da želite
-              nastaviti?
-            </p>
-          </div>
-        </q-card-section>
-
-        <q-card-actions align="around">
-          <q-btn label="Odustani" color="negative" @click="zatvoriDijalog" />
-          <q-btn
-            v-if="dialogMode === 'pregled'"
-            label="Spremi"
-            color="primary"
-            @click="azurirajMeni"
-          />
-          <q-btn v-else-if="dialogMode === 'brisanje'" label="Obriši" color="primary" @click="obrisiMeni" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -161,20 +118,8 @@ const idKuhara = localStorage.getItem('userID');
 // Dijaloški okvir za unos
 const unosDijalog = ref(false);
 
-// Dialog control
-const dialogVisible = ref(false);
-const dialogMode = ref('pregled'); // 'pregled' ili 'brisanje'
-
-// Active menu data
-const datumAktivnogMenija = ref({
-  Datum_marende: '',
-  Juha_m1: '',
-  Glavno_jelo_m1: '',
-  Salata_m1: '',
-  Juha_m2: '',
-  Glavno_jelo_m2: '',
-  Salata_m2: '',
-});
+// In-cell editing state
+const editingCell = ref(null); // { row: rowObject, col: columnObject }
 
 // Povijest Jelovnika data
 const columns = [
@@ -182,7 +127,7 @@ const columns = [
   { name: 'Marenda', label: 'Marenda', field: 'marenda', align: 'left' },
   { name: 'Kuhar', label: 'Kuhar', field: 'username', align: 'left' },
   { name: 'Juha', label: 'Juha', field: 'Juha', align: 'left' },
-  { name: 'Glavno', label: 'Glavno jelo', field: 'Glavno_jelo', align: 'left' },
+  { name: 'Glavno_jelo', label: 'Glavno jelo', field: 'Glavno_jelo', align: 'left' },
   { name: 'Salata', label: 'Salata', field: 'Salata', align: 'left' },
 ];
 
@@ -192,6 +137,31 @@ const filteredRows = computed(() => {
   const today = dayjs().format('YYYY-MM-DD');
   return rows.value.filter(row => dayjs(row.Datum).isSameOrAfter(today, 'day'));
 });
+
+const startEditing = (row, col) => {
+  editingCell.value = { row, col };
+};
+
+const stopEditing = async (row, col) => {
+  editingCell.value = null;
+
+  // Perform API update here (replace with your actual API endpoint)
+  try {
+    await axios.put(`https://backend-hospital-n9to.onrender.com/menu/fresh`, {
+      Datum_marende: row.Datum, // Assuming row.Datum contains the date
+      [col.field]: row[col.field],  // Dynamically update the changed field
+    });
+    showMessage('Meni je ažuriran!', true);
+    loadData(); // Refresh data
+  } catch (error) {
+    console.error('Greška pri ažuriranju menija:', error);
+    showMessage('Greška na serveru!', false);
+  }
+};
+
+const isEditing = (row, col) => {
+  return editingCell.value && editingCell.value.row === row && editingCell.value.col === col;
+};
 
 // ✅ Function to submit manual
 const submitManual = async () => {
@@ -246,157 +216,26 @@ const submitManual = async () => {
   }
 };
 
-const otkrijAktivniMeni = async () => {
-  try {
-    const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/today');
-    const data = await response.json();
-
-    if (data) {
-      datumAktivnogMenija.value = {
-        Datum_marende: data.Datum_marende,
-        Juha_m1: data.Marenda1.Juha || '',
-        Glavno_jelo_m1: data.Marenda1.Glavno_jelo || '',
-        Salata_m1: data.Marenda1.Salata || '',
-        Juha_m2: data.Marenda2.Juha || '',
-        Glavno_jelo_m2: data.Marenda2.Glavno_jelo || '',
-        Salata_m2: data.Marenda2.Salata || '',
-      };
-    } else {
-      // Initialize if no data
-      datumAktivnogMenija.value = {
-        Datum_marende: getLocalDateFormatted(),
-        Juha_m1: '',
-        Glavno_jelo_m1: '',
-        Salata_m1: '',
-        Juha_m2: '',
-        Glavno_jelo_m2: '',
-        Salata_m2: '',
-      };
+// Load Povijest Jelovnika data
+const loadData = async () => {
+    try {
+        const response = await axios.get('https://backend-hospital-n9to.onrender.com/menu/history');
+        console.log("API Response:", response.data); // <--- ADD THIS LINE
+        rows.value = response.data.map(item => ({
+            Datum: dayjs(item.Datum_marende).format('YYYY-MM-DD'), // Format the date
+            marenda: item.marenda,
+            username: item.username,
+            Juha: item.Juha,
+            Glavno_jelo: item.Glavno_jelo,
+            Salata: item.Salata,
+        }));
+    } catch (error) {
+        console.error('Greška pri dohvaćanju podataka:', error);
     }
-  } catch (err) {
-    console.error('Greška:', err);
-    showMessage('Greška pri učitavanju menija!', false);
-  }
 };
 
-// Functions to open the dialog in different modes
-const otvoriPregledDijalog = async () => {
-  await otkrijAktivniMeni();
-  dialogMode.value = 'pregled';
-  dialogVisible.value = true;
-};
-
-const otvoriBrisanjeDijalog = async () => {
-  await otkrijAktivniMeni();
-  dialogMode.value = 'brisanje';
-  dialogVisible.value = true;
-};
-
-const zatvoriDijalog = () => {
-  dialogVisible.value = false;
-};
-
-// Funkcija za otvaranje dijaloškog okvira za unos
 const otvoriUnosDijalog = () => {
   unosDijalog.value = true;
-};
-
-// ✅ Function to update active menu
-const azurirajMeni = async () => {
-  if (!confirm('Jeste li sigurni da želite ažurirati meni?')) return;
-
-  const selectedDate = dayjs(datumAktivnogMenija.value.Datum_marende);
-  if (selectedDate.isBefore(dayjs(), 'day')) {
-    showMessage('Ne možete ažurirati meni za prošli datum!', false);
-    return;
-  }
-
-  const ID_kuhara = localStorage.getItem('userID');
-  if (!ID_kuhara) {
-    showMessage('ID kuhara nije pronađen!', false);
-    return;
-  }
-
-  // **GET USERNAME HERE - INSIDE THE FUNCTION**
-  const username = localStorage.getItem('loggedInUser');
-  if (!username) {
-    showMessage('Korisničko ime nije pronađeno. Molimo prijavite se ponovo.', false);
-    return;
-  }
-
-  try {
-    const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/fresh', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        Datum_marende: datumAktivnogMenija.value.Datum_marende,
-        Juha_m1: datumAktivnogMenija.value.Juha_m1,
-        Glavno_jelo_m1: datumAktivnogMenija.value.Glavno_jelo_m1,
-        Salata_m1: datumAktivnogMenija.value.Salata_m1,
-        Juha_m2: datumAktivnogMenija.value.Juha_m2,
-        Glavno_jelo_m2: datumAktivnogMenija.value.Glavno_jelo_m2,
-        Salata_m2: datumAktivnogMenija.value.Salata_m2,
-        ID_kuhara: ID_kuhara,
-        username: username,
-      }),
-    });
-
-    if (response.ok) {
-      showMessage('Meni je ažuriran!', true);
-      zatvoriDijalog();
-      loadData(); // Refresh the history after updating
-    } else {
-      showMessage('Greška pri ažuriranju!', false);
-    }
-  } catch (err) {
-    console.error('Greška:', err);
-    showMessage('Greška na serveru!', false);
-  }
-};
-
-const obrisiMeni = async () => {
-  const datumZaBrisanje = datumAktivnogMenija.value.Datum_marende;
-
-  const selectedDate = dayjs(datumZaBrisanje);
-  if (selectedDate.isBefore(dayjs(), 'day')) {
-    showMessage('Ne možete obrisati meni za prošli datum!', false);
-    return;
-  }
-
-  if (!confirm(`Jeste li sigurni da želite obrisati meni za datum ${datumZaBrisanje}?`)) {
-    return;
-  }
-
-  try {
-    const response = await fetch(
-      `https://backend-hospital-n9to.onrender.com/menu/delete?datum=${encodeURIComponent(
-        datumZaBrisanje,
-      )}`,
-      { method: 'DELETE' },
-    );
-
-    if (response.ok) {
-      showMessage('Meni je uspješno obrisan!', true);
-      zatvoriDijalog();
-      datumAktivnogMenija.value = {
-        Datum_marende: '',
-        Juha_m1: '',
-        Glavno_jelo_m1: '',
-        Salata_m1: '',
-        Juha_m2: '',
-        Glavno_jelo_m2: '',
-        Salata_m2: '',
-      };
-      loadData(); // Refresh the history after deleting
-    } else {
-      const errorText = await response.text();
-      console.error('Odgovor sa servera:', errorText);
-      showMessage('Greška pri brisanju menija!', false);
-    }
-  } catch (err) {
-    console.error('Greška:', err);
-    showMessage('Greška na serveru!', false);
-  }
 };
 
 const natrag = () => {
@@ -412,54 +251,13 @@ const odustani = () => {
   salata_m2.value = '';
 };
 
-// Load Povijest Jelovnika data
-const loadData = async () => {
-  try {
-    const response = await axios.get('https://backend-hospital-n9to.onrender.com/menu/history');
-        console.log("API Response:", response.data); // <--- ADD THIS LINE
-        rows.value = response.data.map(item => ({
-            Datum: dayjs(item.Datum_marende).format('YYYY-MM-DD'), // Format the date
-            marenda: item.marenda,
-            username: item.username,
-            Juha: item.Juha,
-            Glavno_jelo: item.Glavno_jelo,
-            Salata: item.Salata,
-        }));
-  } catch (error) {
-    console.error('Greška pri dohvaćanju podataka:', error);
-  }
-};
-
-const onRowDblClick = (evt, row) => {
-  // Populate the active menu dialog with the selected row's data
-  datumAktivnogMenija.value = {
-    Datum_marende: dayjs(row.Datum).format('YYYY-MM-DD'), // Format date for the backend
-    Juha_m1: row.marenda === 'Marenda 1' ? row.Juha : '',
-    Glavno_jelo_m1: row.marenda === 'Marenda 1' ? row.Glavno_jelo : '',
-    Salata_m1: row.marenda === 'Marenda 1' ? row.Salata : '',
-    Juha_m2: row.marenda === 'Marenda 2' ? row.Juha : '',
-    Glavno_jelo_m2: row.marenda === 'Marenda 2' ? row.Glavno_jelo : '',
-    Salata_m2: row.marenda === 'Marenda 2' ? row.Salata : '',
-  };
-
-  otvoriPregledDijalog(); // Open the dialog for editing
-};
-
 loadData();
 </script>
 
 <style scoped>
 .my-table {
-  width: auto; /* Vraća tablicu u stvarnu veličinu */
-  max-width: none; /* Uklanja maksimalnu širinu */
-}
-
-.positive {
-  color: green;
-}
-
-.negative {
-  color: red;
+  width: auto;
+  max-width: none;
 }
 
 .my-table td {
