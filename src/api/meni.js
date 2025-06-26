@@ -241,10 +241,17 @@ router.get('/menu/history', async (req, res) => {
 
     // Dodavanje isActive polja
     const today = dayjs().format('YYYY-MM-DD');
-    const resultsWithActive = combinedResults.map(item => ({
-      ...item,
-      isActive: dayjs(item.Datum_marende).isSameOrAfter(today, 'day')
-    }));
+    const resultsWithActive = combinedResults.map(item => {
+        const itemDate = dayjs(item.Datum_marende);
+        const todayDate = dayjs(today);
+
+        // Check if itemDate is a valid Dayjs object before comparing
+        const isActive = dayjs.isDayjs(itemDate) && itemDate.unix() >= todayDate.unix();
+        return {
+            ...item,
+            isActive: isActive,
+        };
+    });
 
     res.json(resultsWithActive);
   } catch (err) {
