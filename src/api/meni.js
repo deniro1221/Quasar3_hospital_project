@@ -239,7 +239,14 @@ router.get('/menu/history', async (req, res) => {
       dayjs(a.Datum_marende).isBefore(b.Datum_marende) ? 1 : -1
     );
 
-    res.json(combinedResults);
+    // Dodavanje isActive polja
+    const today = dayjs().format('YYYY-MM-DD');
+    const resultsWithActive = combinedResults.map(item => ({
+      ...item,
+      isActive: dayjs(item.Datum_marende).isSameOrAfter(today, 'day')
+    }));
+
+    res.json(resultsWithActive);
   } catch (err) {
     console.error('Greška kod dohvata povijesti menija:', err);
     res.status(500).json({ message: 'Greška na serveru.' });

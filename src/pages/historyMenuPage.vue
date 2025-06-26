@@ -174,6 +174,13 @@ const columns = [
   { name: 'Juha', label: 'Juha', field: 'Juha', align: 'left' },
   { name: 'Glavno', label: 'Glavno jelo', field: 'Glavno_jelo', align: 'left' },
   { name: 'Salata', label: 'Salata', field: 'Salata', align: 'left' },
+  {
+    name: 'active',
+    label: 'Aktivan',
+    field: 'isActive',
+    align: 'center',
+    format: val => (val ? '✓' : ''), // Prikazuje "✓" ako je aktivan, inače prazno
+  },
 ];
 
 const rows = ref([]);
