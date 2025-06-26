@@ -124,7 +124,10 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import dayjs from 'dayjs';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'; // Import the plugin
 import axios from 'axios';
+
+dayjs.extend(isSameOrAfter); // Extend dayjs - VERY IMPORTANT
 
 const router = useRouter();
 
