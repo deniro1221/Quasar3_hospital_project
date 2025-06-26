@@ -8,7 +8,7 @@
 
       <div class="col-12 col-md-6">
         <!-- Povijest Jelovnika -->
-        <div class="q-pa-md container">
+        <div class="q-pa-md">
           <h4>Menu History</h4>
           <q-table :rows="rows" :columns="columns" row-key="Datum" class="my-table" flat />
           <q-btn label="Osvježi podatke" color="primary" @click="loadData" class="q-mt-md" />
@@ -166,7 +166,7 @@ const datumAktivnogMenija = ref({
 
 // Povijest Jelovnika data
 const columns = [
-  { name: 'Datum', label: 'Datum', field: 'Datum', align: 'left' },
+  { name: 'Datum', label: 'Datum', field: 'Datum', align: 'left', style: 'width: 150px' },
   { name: 'Marenda', label: 'Marenda', field: 'marenda', align: 'left' },
   { name: 'Kuhar', label: 'Kuhar', field: 'username', align: 'left' },
   { name: 'Juha', label: 'Juha', field: 'Juha', align: 'left' },
@@ -416,6 +416,11 @@ loadData();
 </script>
 
 <style scoped>
+.my-table {
+  width: 100%;
+  max-width: 100%;
+}
+
 .positive {
   color: green;
 }
