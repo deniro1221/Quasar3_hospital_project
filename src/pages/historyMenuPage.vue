@@ -33,7 +33,7 @@
         <q-table
           :rows="menus"
           :columns="columns"
-          row-key="Datum_menija"
+          row-key="Datum_marende"
           :pagination="pagination"
         >
           <!-- Ažuriranje podataka -->
@@ -90,13 +90,13 @@ export default {
 
     // Kolone za tablicu
     const columns = [
-      { name: 'Datum_menija', label: 'Datum', field: 'Datum_menija', align: 'left', sortable: true },
-      { name: 'Juha_m1', label: 'Juha (Marenda 1)', field: 'Juha_m1', align: 'left', sortable: true },
-      { name: 'Glavno_jelo_m1', label: 'Glavno jelo (Marenda 1)', field: 'Glavno_jelo_m1', align: 'left', sortable: true },
-      { name: 'Salata_m1', label: 'Salata (Marenda 1)', field: 'Salata_m1', align: 'left', sortable: true },
-      { name: 'Juha_m2', label: 'Juha (Marenda 2)', field: 'Juha_m2', align: 'left', sortable: true },
-      { name: 'Glavno_jelo_m2', label: 'Glavno jelo (Marenda 2)', field: 'Glavno_jelo_m2', align: 'left', sortable: true },
-      { name: 'Salata_m2', label: 'Salata (Marenda 2)', field: 'Salata_m2', align: 'left', sortable: true },
+      { name: 'Datum_marende', label: 'Datum', field: 'Datum_marende', align: 'left', sortable: true },
+      { name: 'Juha_m1', label: 'Juha (Marenda 1)', field: row => row.Marenda1.Juha, align: 'left', sortable: true },
+      { name: 'Glavno_jelo_m1', label: 'Glavno jelo (Marenda 1)', field: row => row.Marenda1.Glavno_jelo, align: 'left', sortable: true },
+      { name: 'Salata_m1', label: 'Salata (Marenda 1)', field: row => row.Marenda1.Salata, align: 'left', sortable: true },
+      { name: 'Juha_m2', label: 'Juha (Marenda 2)', field: row => row.Marenda2.Juha, align: 'left', sortable: true },
+      { name: 'Glavno_jelo_m2', label: 'Glavno jelo (Marenda 2)', field: row => row.Marenda2.Glavno_jelo, align: 'left', sortable: true },
+      { name: 'Salata_m2', label: 'Salata (Marenda 2)', field: row => row.Marenda2.Salata, align: 'left', sortable: true },
       { name: 'actions', label: 'Akcije', field: 'actions', align: 'center' },
     ];
 
@@ -112,55 +112,55 @@ export default {
     };
 
     // Dohvaćanje menija iz backend-a
-   const fetchMenus = async () => {
-  try {
-    const response = await fetch('/menu/history');
-    if (!response.ok) {
-      throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`);
-    }
-    const data = await response.json();
+    const fetchMenus = async () => {
+      try {
+        const response = await fetch('/menu/history');
+        if (!response.ok) {
+          throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
 
-    // Transformacija podataka
-    const groupedMenus = data.reduce((acc, menu) => {
-      const date = menu.Datum.split('T')[0]; // Uklanjanje vremenskog dijela iz datuma
-      if (!acc[date]) {
-        acc[date] = {
-          Datum_menija: date,
-          Marenda1: {},
-          Marenda2: {},
-          username: menu.username,
-          ID_kuhara: menu.ID_kuhara,
-        };
+        // Transformacija podataka
+        const groupedMenus = data.reduce((acc, menu) => {
+          const date = menu.Datum_marende.split('T')[0]; // Uklanjanje vremenskog dijela iz datuma
+          if (!acc[date]) {
+            acc[date] = {
+              Datum_marende: date,
+              Marenda1: {},
+              Marenda2: {},
+              username: menu.username,
+              ID_kuhara: menu.ID_kuhara,
+            };
+          }
+
+          if (menu.marenda === 'Marenda1') {
+            acc[date].Marenda1 = {
+              Juha: menu.Juha,
+              Glavno_jelo: menu.Glavno_jelo,
+              Salata: menu.Salata,
+            };
+          } else if (menu.marenda === 'Marenda2') {
+            acc[date].Marenda2 = {
+              Juha: menu.Juha,
+              Glavno_jelo: menu.Glavno_jelo,
+              Salata: menu.Salata,
+            };
+          }
+
+          return acc;
+        }, {});
+
+        // Pretvaranje objekta u niz
+        menus.value = Object.values(groupedMenus).map(menu => ({
+          ...menu,
+          editing: false, // Dodajemo stanje za uređivanje
+        }));
+
+      } catch (error) {
+        console.error(error.message);
+        alert('Greška pri dohvaćanju menija: ' + error.message);
       }
-
-      if (menu.marenda === 'Marenda1') {
-        acc[date].Marenda1 = {
-          Juha: menu.Juha_m1,
-          Glavno_jelo: menu.Glavno_jelo_m1,
-          Salata: menu.Salata_m1,
-        };
-      } else if (menu.marenda === 'Marenda2') {
-        acc[date].Marenda2 = {
-          Juha: menu.Juha_m1,
-          Glavno_jelo: menu.Glavno_jelo_m1,
-          Salata: menu.Salata_m1,
-        };
-      }
-
-      return acc;
-    }, {});
-
-    // Pretvaranje objekta u niz
-    menus.value = Object.values(groupedMenus).map(menu => ({
-      ...menu,
-      editing: false, // Dodajemo stanje za uređivanje
-    }));
-
-  } catch (error) {
-    console.error(error.message);
-    alert('Greška pri dohvaćanju menija: ' + error.message);
-  }
-};
+    };
 
     // Dodavanje menija
     const addMenu = async () => {
@@ -170,16 +170,26 @@ export default {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             Datum_marende: form.value.date,
-            Juha_m1: form.value.juha_m1,
-            Glavno_jelo_m1: form.value.glavno_jelo_m1,
-            Salata_m1: form.value.salata_m1,
-            Juha_m2: form.value.juha_m2,
-            Glavno_jelo_m2: form.value.glavno_jelo_m2,
-            Salata_m2: form.value.salata_m2,
+            Juha: form.value.juha_m1,
+            Glavno_jelo: form.value.glavno_jelo_m1,
+            Salata: form.value.salata_m1,
+            marenda: 'Marenda1',
           }),
         });
 
-        if (response.ok) {
+        const response2 = await fetch('/menu', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            Datum_marende: form.value.date,
+            Juha: form.value.juha_m2,
+            Glavno_jelo: form.value.glavno_jelo_m2,
+            Salata: form.value.salata_m2,
+            marenda: 'Marenda2',
+          }),
+        });
+
+        if (response.ok && response2.ok) {
           alert('Meni uspješno dodan!');
           fetchMenus();
         } else {
@@ -198,17 +208,27 @@ export default {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            Datum_marende: menu.Datum_menija,
-            Juha_m1: menu.Juha_m1,
-            Glavno_jelo_m1: menu.Glavno_jelo_m1,
-            Salata_m1: menu.Salata_m1,
-            Juha_m2: menu.Juha_m2,
-            Glavno_jelo_m2: menu.Glavno_jelo_m2,
-            Salata_m2: menu.Salata_m2,
+            Datum_marende: menu.Datum_marende,
+            Juha: menu.Marenda1.Juha,
+            Glavno_jelo: menu.Marenda1.Glavno_jelo,
+            Salata: menu.Marenda1.Salata,
+            marenda: 'Marenda1',
           }),
         });
 
-        if (response.ok) {
+        const response2 = await fetch('/menu/fresh', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            Datum_marende: menu.Datum_marende,
+            Juha: menu.Marenda2.Juha,
+            Glavno_jelo: menu.Marenda2.Glavno_jelo,
+            Salata: menu.Marenda2.Salata,
+            marenda: 'Marenda2',
+          }),
+        });
+
+        if (response.ok && response2.ok) {
           alert('Meni uspješno ažuriran!');
           fetchMenus();
         } else {
@@ -225,7 +245,7 @@ export default {
       try {
         const confirmDelete = confirm('Jeste li sigurni da želite obrisati meni?');
         if (confirmDelete) {
-          const response = await fetch(`/menu/delete?datum=${menu.Datum_menija}`, {
+          const response = await fetch(`/menu/delete?datum=${menu.Datum_marende}`, {
             method: 'DELETE',
           });
 
