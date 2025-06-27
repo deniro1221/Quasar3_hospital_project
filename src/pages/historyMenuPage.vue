@@ -20,7 +20,12 @@
       <template v-slot:body="props">
         <q-tr :props="props">
           <q-td v-for="col in columns" :key="col.name" :props="props">
-            {{ formatDate(props.row[col.field], col.name) }}
+            <div v-if="col.name === 'marenda'">
+              {{ formatMarenda(props.row[col.field]) }}
+            </div>
+            <div v-else>
+              {{ formatDate(props.row[col.field], col.name) }}
+            </div>
           </q-td>
         </q-tr>
       </template>
@@ -52,7 +57,6 @@ const columns = [
   { name: 'Juha', label: 'Juha', align: 'left', field: 'Juha' },
   { name: 'Glavno_jelo', label: 'Glavno jelo', align: 'left', field: 'Glavno_jelo' },
   { name: 'Salata', label: 'Salata', align: 'left', field: 'Salata' },
-  { name: 'ID_kuhara', label: 'ID Kuhara', align: 'left', field: 'ID_kuhara' },
   { name: 'username', label: 'Korisnik', align: 'left', field: 'username' },
   { name: 'marenda', label: 'Marenda', align: 'left', field: 'marenda' },
 ]
@@ -85,10 +89,14 @@ async function showMenu() {
 
 // Format Date
 function formatDate(value, columnName) {
-    if (columnName === 'Datum' && value) {
-        return dayjs(value).format('DD-MM-YYYY');
-    }
-    return value;
+  if (columnName === 'Datum' && value) {
+    return dayjs(value).format('DD-MM-YYYY')
+  }
+  return value
+}
+
+function formatMarenda(value) {
+  return value === 'Marenda 1' ? 'Marenda 1' : 'Marenda 2'
 }
 
 // Logout Function
