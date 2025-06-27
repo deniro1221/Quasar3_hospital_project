@@ -143,47 +143,42 @@ router.delete('/menu/delete', async (req, res) => {
     }
 });
 
-// GET - Povijest menija
 router.get('/menu/history', async (req, res) => {
-    const today = dayjs().format('YYYY-MM-DD');
-    const connection = await pool.getConnection();
-    try {
-        console.log("Dohvaćam povijest menija za datum:", today); // Dodano
+  const today = dayjs().format('YYYY-MM-DD');
+  const connection = await pool.getConnection();
+  try {
+    const [menus] = await connection.execute(`
+      SELECT
+          Datum_marende AS Datum,
+          Juha AS Juha_m1,
+          Glavno_jelo AS Glavno_jelo_m1,
+          Salata AS Salata_m1,
+          ID_kuhara,
+          username,
+          'Marenda1' AS marenda
+      FROM Marenda1
+      WHERE Datum_marende >= ?
+      UNION ALL
+      SELECT
+          Datum_marende AS Datum,
+          Juha AS Juha_m2,
+          Glavno_jelo AS Glavno_jelo_m2,
+          Salata AS Salata_m2,
+          ID_kuhara,
+          username,
+          'Marenda2' AS marenda
+      FROM Marenda2
+      WHERE Datum_marende >= ?
+      ORDER BY Datum DESC  <!-- Koristimo "Datum" umjesto "Datum_marende" -->
+    `, [today, today]);
 
-        const [menus] = await connection.execute(`
-            SELECT
-                Datum_marende AS Datum,
-                Juha AS Juha_m1,
-                Glavno_jelo AS Glavno_jelo_m1,
-                Salata AS Salata_m1,
-                ID_kuhara,
-                username,
-                'Marenda1' AS marenda
-            FROM Marenda1
-            WHERE Datum_marende >= ?
-            UNION ALL
-            SELECT
-                Datum_marende AS Datum,
-                Juha AS Juha_m2,
-                Glavno_jelo AS Glavno_jelo_m2,
-                Salata AS Salata_m2,
-                ID_kuhara,
-                username,
-                'Marenda2' AS marenda
-            FROM Marenda2
-            WHERE Datum_marende >= ?
-            ORDER BY Datum_marende DESC
-        `, [today, today]);
-
-        console.log("Rezultat upita:", menus); // Dodano
-
-        res.json(menus);
-    } catch (err) {
-        console.error("Greška pri dohvaćanju povijesti menija:", err); // Dodano
-        res.status(500).json({ message: 'Greška na serveru.' });
-    } finally {
-        connection.release();
-    }
+    res.json(menus);
+  } catch (err) {
+    console.error("Greška pri dohvaćanju povijesti menija:", err);
+    res.status(500).json({ message: 'Greška na serveru.' });
+  } finally {
+    connection.release();
+  }
 });
 
 export default router;
