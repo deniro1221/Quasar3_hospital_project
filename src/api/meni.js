@@ -87,20 +87,26 @@ router.put('/menu/fresh', validateDateFormat, async (req, res) => {
         return res.status(400).json({ message: 'Ne možete uređivati menije za prošle datume.' });
     }
 
-    const entry = Object.entries(req.body).find(([key]) => key !== 'Datum_marende');
-    if (!entry) return res.status(400).json({ message: 'Nema podataka za ažuriranje.' });
+    // Validate that only one field (other than Datum_marende) is being updated
+    const allowedFields = ['Juha_m1', 'Glavno_jelo_m1', 'Salata_m1', 'Juha_m2', 'Glavno_jelo_m2', 'Salata_m2'];
+    const updateFields = Object.keys(req.body).filter(key => key !== 'Datum_marende');
 
-    const [field, value] = entry;
+    if (updateFields.length !== 1 || !allowedFields.includes(updateFields[0])) {
+        return res.status(400).json({ message: 'Možete ažurirati samo jedno polje (Juha, Glavno_jelo, Salata) odjednom.' });
+    }
+
+    const [field, value] = [updateFields[0], req.body[updateFields[0]]];
     const isM1 = field.endsWith('_m1');
-    const table = isM1 ? 'Marenda1' : field.endsWith('_m2') ? 'Marenda2' : null;
-    if (!table) return res.status(400).json({ message: 'Neispravno polje.' });
-
+    const table = isM1 ? 'Marenda1' : 'Marenda2';
     const column = field.replace('_m1', '').replace('_m2', '');
     const sql = `UPDATE ${table} SET ${column} = ? WHERE Datum_marende = ?`;
 
     const connection = await pool.getConnection();
     try {
-        await connection.execute(sql, [value, Datum_marende]);
+        const [result] = await connection.execute(sql, [value, Datum_marende]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Meni nije pronađen za taj datum.' });
+        }
         res.json({ message: 'Meni je uspješno ažuriran.' });
     } catch (err) {
         console.error(err);
@@ -109,6 +115,7 @@ router.put('/menu/fresh', validateDateFormat, async (req, res) => {
         connection.release();
     }
 });
+
 
 // DELETE - Briši meni
 router.delete('/menu/delete', async (req, res) => {
@@ -142,16 +149,27 @@ router.get('/menu/history', async (req, res) => {
     const connection = await pool.getConnection();
     try {
         const [menus] = await connection.execute(`
-            SELECT Datum_marende AS Datum, Juha, Glavno_jelo, Salata, ID_kuhara, username, 'Marenda' AS marenda
-            FROM (
-                SELECT Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username, 'Marenda 1' AS marenda
-                FROM Marenda1
-                WHERE Datum_marende >= ?
-                UNION ALL
-                SELECT Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username, 'Marenda 2' AS marenda
-                FROM Marenda2
-                WHERE Datum_marende >= ?
-            ) AS Meniji
+            SELECT
+                Datum_marende AS Datum,
+                Juha AS Juha_m1,
+                Glavno_jelo AS Glavno_jelo_m1,
+                Salata AS Salata_m1,
+                ID_kuhara,
+                username,
+                'Marenda1' AS marenda
+            FROM Marenda1
+            WHERE Datum_marende >= ?
+            UNION ALL
+            SELECT
+                Datum_marende AS Datum,
+                Juha AS Juha_m2,
+                Glavno_jelo AS Glavno_jelo_m2,
+                Salata AS Salata_m2,
+                ID_kuhara,
+                username,
+                'Marenda2' AS marenda
+            FROM Marenda2
+            WHERE Datum_marende >= ?
             ORDER BY Datum_marende DESC
         `, [today, today]);
 
