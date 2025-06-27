@@ -161,12 +161,15 @@ async function confirmUpdate() {
 
     //Construct the URL for the PUT request
     const url = `https://backend-hospital-n9to.onrender.com/menu/fresh`;  // Adapt this to your API's URL
-    try {
+     try {
+      console.log("Šaljem PUT zahtjev na:", url, "s podacima:", payload);  //dodano
       const response = await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
+
+      console.log("Odgovor s backenda:", response);  //dodano
 
       if (response.ok) {
         successCount++
