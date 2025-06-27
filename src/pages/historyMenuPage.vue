@@ -20,7 +20,27 @@
       <template v-slot:body="props">
         <q-tr :props="props">
           <q-td v-for="col in columns" :key="col.name" :props="props">
-            {{ formatDate(props.row[col.field], col.name) }}
+            <!-- Editing on Double Click -->
+            <div
+              v-if="editingCell.rowId === props.row.Datum && editingCell.col === col.name"
+            >
+              <input
+                v-model="props.row[col.field]"
+                @blur="onCellInput(props.row, col, $event)"
+                @keydown.enter="onCellInput(props.row, col, $event)"
+                @keydown.esc="cancelEdit()"
+                autofocus
+                style="width: 100%"
+              />
+            </div>
+            <div
+              v-else
+              @dblclick="onCellDblClick(props.row, col)"
+              style="min-width: 80px; cursor: pointer; user-select: none"
+              title="Dvoklik za uređivanje"
+            >
+              {{ formatDate(props.row[col.field], col.name) }}
+            </div>
           </q-td>
         </q-tr>
       </template>
@@ -28,6 +48,7 @@
 
     <!-- Combined Button Group -->
     <div class="q-gutter-sm button-group">
+      <q-btn label="Ažuriraj" color="primary" @click="confirmUpdate" />
       <q-btn label="Odjavi se" color="negative" @click="logout" />
     </div>
   </q-page>
@@ -40,6 +61,8 @@ import dayjs from 'dayjs'
 
 // Data
 const meni = ref([])
+const editingCell = ref({})
+const changesMap = ref({})
 const message = ref('')
 const isSuccess = ref(false)
 
@@ -87,6 +110,90 @@ function formatDate(value, columnName) {
     return dayjs(value).format('DD-MM-YYYY')
   }
   return value
+}
+
+// Cell Double Click
+function onCellDblClick(row, column) {
+  if (['Datum', 'username'].includes(column.name)) return // Don't edit Datum and username
+  editingCell.value = { rowId: row.Datum, col: column.name }
+}
+
+// Cell Input
+function onCellInput(row, column, event) {
+  const newVal = event.target.value || event.target.innerText
+
+  if (!changesMap.value[row.Datum]) {
+    changesMap.value[row.Datum] = { ...row }
+  }
+
+  changesMap.value[row.Datum][column.field] = newVal
+  editingCell.value = {}
+}
+
+// Cancel Edit
+function cancelEdit() {
+  editingCell.value = {}
+}
+
+// Confirm Update
+async function confirmUpdate() {
+  if (!Object.keys(changesMap.value).length) {
+    message.value = 'Nema promjena za ažurirati.'
+    return
+  }
+
+  if (!confirm('Jeste li sigurni za ažuriranje?')) return
+
+  let successCount = 0
+  let failCount = 0
+
+  for (const rowId in changesMap.value) {
+    const updatedRow = { ...changesMap.value[rowId] }
+
+    // Prepare data for the PUT request.  Adapt this to your API's expected format
+    const payload = {
+        Datum_marende: updatedRow.Datum,
+        [`${updatedRow.Juha ? 'Juha_m1' : 'Juha_m2'}`]: updatedRow.Juha,  // Assuming you know which Marenda it is
+        [`${updatedRow.Glavno_jelo ? 'Glavno_jelo_m1' : 'Glavno_jelo_m2'}`]: updatedRow.Glavno_jelo,
+        [`${updatedRow.Salata ? 'Salata_m1' : 'Salata_m2'}`]: updatedRow.Salata
+    };
+    console.log("Payload za update:", payload);
+
+    //Construct the URL for the PUT request
+    const url = `https://backend-hospital-n9to.onrender.com/menu/fresh`;  // Adapt this to your API's URL
+    try {
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      if (response.ok) {
+        successCount++
+        const index = meni.value.findIndex((r) => r.Datum === rowId)
+        if (index !== -1) {
+          meni.value[index] = {
+            ...meni.value[index],
+            ...updatedRow,
+          }
+        }
+      } else {
+        failCount++
+        const errMsg = await response.json()
+        alert(`Greška kod Datuma ${rowId}: ${errMsg.message}`)
+      }
+    } catch (err) {
+      failCount++
+      alert(`Neuspješno slanje za Datum ${rowId}: ${err.message}`)
+    }
+  }
+
+  // Refresh data after all update attempts, regardless of success or failure
+  await showMenu()
+
+  message.value = `Uspješno ažurirano: ${successCount}, Neuspješno: ${failCount}.`
+  changesMap.value = {}
+  editingCell.value = {}
 }
 
 // Logout Function
