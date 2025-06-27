@@ -169,7 +169,7 @@ router.get('/menu/history', async (req, res) => {
           'Marenda2' AS marenda
       FROM Marenda2
       WHERE Datum_marende >= ?
-      ORDER BY Datum DESC  <!-- Koristimo "Datum" umjesto "Datum_marende" -->
+      ORDER BY Datum DESC  -- Koristimo "Datum" umjesto "Datum_marende"
     `, [today, today]);
 
     res.json(menus);
