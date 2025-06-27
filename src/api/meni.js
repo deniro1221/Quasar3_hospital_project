@@ -148,6 +148,8 @@ router.get('/menu/history', async (req, res) => {
     const today = dayjs().format('YYYY-MM-DD');
     const connection = await pool.getConnection();
     try {
+        console.log("Dohvaćam povijest menija za datum:", today); // Dodano
+
         const [menus] = await connection.execute(`
             SELECT
                 Datum_marende AS Datum,
@@ -173,9 +175,11 @@ router.get('/menu/history', async (req, res) => {
             ORDER BY Datum_marende DESC
         `, [today, today]);
 
+        console.log("Rezultat upita:", menus); // Dodano
+
         res.json(menus);
     } catch (err) {
-        console.error(err);
+        console.error("Greška pri dohvaćanju povijesti menija:", err); // Dodano
         res.status(500).json({ message: 'Greška na serveru.' });
     } finally {
         connection.release();
