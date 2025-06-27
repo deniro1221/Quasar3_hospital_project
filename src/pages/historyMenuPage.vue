@@ -1,174 +1,141 @@
-<script setup>
-import { ref, computed, onMounted } from 'vue';
-import dayjs from 'dayjs';
-import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
-import axios from 'axios';
-import { useQuasar } from 'quasar';
-
-const $q = useQuasar()
-
-dayjs.extend(isSameOrAfter);
-
-const unosDijalog = ref(false);
-const datum = ref(dayjs().format('YYYY-MM-DD'));
-const juha_m1 = ref(''), glavno_jelo_m1 = ref(''), salata_m1 = ref('');
-const juha_m2 = ref(''), glavno_jelo_m2 = ref(''), salata_m2 = ref('');
-const rows = ref([]);
-const editingCell = ref(null);
-const message = ref('');
-const isSuccess = ref(false);
-const loading = ref(false);
-const apiUrl = 'https://backend-hospital-n9to.onrender.com';
-
-const columns = [
-  { name: 'Datum', label: 'Datum', field: 'Datum', align: 'left' },
-  { name: 'marenda', label: 'Marenda', field: 'marenda', align: 'left' },
-  { name: 'username', label: 'Kuhar', field: 'username', align: 'left' },
-  { name: 'Juha', label: 'Juha', field: 'Juha', align: 'left' },
-  { name: 'Glavno_jelo', label: 'Glavno jelo', field: 'Glavno_jelo', align: 'left' },
-  { name: 'Salata', label: 'Salata', field: 'Salata', align: 'left' },
-];
-
-const filteredRows = computed(() =>
-  rows.value.filter(row => dayjs(row.Datum).isSameOrAfter(dayjs(), 'day'))
-);
-
-const loadData = async () => {
-  loading.value = true;
-  try {
-    const { data } = await axios.get(`${apiUrl}/menu/history`);
-    console.log("Raw data from API:", data);
-    rows.value = data;
-  } catch (err) {
-    console.error('Greška kod dohvata:', err);
-    $q.notify({
-      color: 'red-5',
-      textColor: 'white',
-      icon: 'warning',
-      message: 'Failed to load data',
-    })
-  } finally {
-    loading.value = false;
-  }
-};
-
-const showMessage = (txt, success = true) => {
-  message.value = txt;
-  isSuccess.value = success;
-  setTimeout(() => (message.value = ''), 3000);
-};
-
-const submitManual = async () => {
-  const username = localStorage.getItem('loggedInUser');
-  const ID_kuhara = localStorage.getItem('userID');
-  try {
-    await axios.post(`${apiUrl}/menu`, {
-      Datum_marende: datum.value,
-      Juha_m1: juha_m1.value,
-      Glavno_jelo_m1: glavno_jelo_m1.value,
-      Salata_m1: salata_m1.value,
-      Juha_m2: juha_m2.value,
-      Glavno_jelo_m2: glavno_jelo_m2.value,
-      Salata_m2: salata_m2.value,
-      ID_kuhara,
-      username
-    });
-    showMessage('Jelovnik spremljen!');
-    unosDijalog.value = false;
-    loadData();
-  } catch (err) {
-    showMessage('Greška pri spremanju', false);
-  }
-};
-
-const startEditing = (row, col) => editingCell.value = { row, col };
-const isEditing = (row, col) => editingCell.value?.row === row && editingCell.value.col === col;
-
-const stopEditing = async (row, col) => {
-  editingCell.value = null;
-  try {
-    await axios.put(`${apiUrl}/menu/fresh`, {
-      Datum_marende: row.Datum,
-      [`${col.field}_m${row.marenda.endsWith('1') ? '1' : '2'}`]: row[col.field]
-    });
-    showMessage('Ažurirano');
-    loadData();
-  } catch (err) {
-    showMessage('Greška kod ažuriranja', false);
-  }
-};
-
-const otvoriUnosDijalog = () => unosDijalog.value = true;
-
-onMounted(() => {
-  loadData();
-});
-</script>
-
 <template>
   <q-page padding>
-    <q-btn label="Unesi novi jelovnik" color="primary" @click="otvoriUnosDijalog" />
+    <h4>Pregled Menija</h4>
 
-    <q-table :rows="filteredRows" :columns="columns" row-key="Datum" class="q-mt-md" :loading="loading">
-      <template v-slot:body-cell="props">
-        <q-td :props="props">
-          <div v-if="isEditing(props.row, props.col)" class="editing-cell">
-            <q-input v-model="props.row[props.col.field]" dense autofocus
-              @blur="stopEditing(props.row, props.col)" @keyup.enter="stopEditing(props.row, props.col)" />
-          </div>
-          <div v-else @click="startEditing(props.row, props.col)">
-            {{ props.value }}
-          </div>
-        </q-td>
+    <!-- User Info Display -->
+    <div class="q-mb-md">
+      <p v-if="loggedInUser">Korisnik: {{ loggedInUser }}</p>
+    </div>
+
+    <!-- Message Display -->
+    <div
+      v-if="message"
+      :class="isSuccess ? 'bg-green-2 text-green-10' : 'bg-red-2 text-red-10'"
+      class="q-pa-md q-mb-md rounded-borders"
+    >
+      {{ message }}
+    </div>
+
+    <q-table :rows="meni" :columns="columns" row-key="Datum" class="styled-table">
+      <template v-slot:body="props">
+        <q-tr :props="props">
+          <q-td v-for="col in columns" :key="col.name" :props="props">
+            {{ formatDate(props.row[col.field], col.name) }}
+          </q-td>
+        </q-tr>
       </template>
     </q-table>
 
-    <q-dialog v-model="unosDijalog">
-      <q-card style="width: 500px">
-        <q-card-section>
-          <div class="text-h6">Unos novog jelovnika</div>
-        </q-card-section>
-        <q-card-section>
-          <q-form @submit.prevent="submitManual">
-            <q-input v-model="datum" type="date" label="Datum" />
-            <div class="row">
-              <div class="col-6">
-                <q-input v-model="juha_m1" label="Juha M1" />
-                <q-input v-model="glavno_jelo_m1" label="Glavno jelo M1" />
-                <q-input v-model="salata_m1" label="Salata M1" />
-              </div>
-              <div class="col-6">
-                <q-input v-model="juha_m2" label="Juha M2" />
-                <q-input v-model="glavno_jelo_m2" label="Glavno jelo M2" />
-                <q-input v-model="salata_m2" label="Salata M2" />
-              </div>
-            </div>
-            <q-btn label="Spremi" type="submit" color="primary" class="q-mt-md" />
-          </q-form>
-        </q-card-section>
-        <q-card-actions>
-          <q-btn flat label="Zatvori" @click="unosDijalog = false" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <!-- Combined Button Group -->
+    <div class="q-gutter-sm button-group">
+      <q-btn label="Odjavi se" color="negative" @click="logout" />
+    </div>
   </q-page>
 </template>
 
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import dayjs from 'dayjs'
+
+// Data
+const meni = ref([])
+const message = ref('')
+const isSuccess = ref(false)
+
+// User Info
+const loggedInUser = ref('')
+
+// Columns definition
+const columns = [
+  { name: 'Datum', label: 'Datum', align: 'left', field: 'Datum' },
+  { name: 'Juha', label: 'Juha', align: 'left', field: 'Juha' },
+  { name: 'Glavno_jelo', label: 'Glavno jelo', align: 'left', field: 'Glavno_jelo' },
+  { name: 'Salata', label: 'Salata', align: 'left', field: 'Salata' },
+  { name: 'ID_kuhara', label: 'ID Kuhara', align: 'left', field: 'ID_kuhara' },
+  { name: 'username', label: 'Korisnik', align: 'left', field: 'username' },
+  { name: 'marenda', label: 'Marenda', align: 'left', field: 'marenda' },
+]
+
+// Router
+const router = useRouter()
+
+// Functions
+
+// Show Message
+function showMessage(txt, success = true) {
+  isSuccess.value = success
+  message.value = txt
+  setTimeout(() => {
+    message.value = ''
+  }, 3000)
+}
+
+// Fetch Menu Data
+async function showMenu() {
+  try {
+    const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/history') // Prilagodite URL
+    const data = await response.json()
+    meni.value = Array.isArray(data) ? data : data ? [data] : []
+  } catch (error) {
+    console.error('Greška pri učitavanju podataka.', error)
+  }
+  console.log('Prikaz podataka: ', meni.value)
+}
+
+// Format Date
+function formatDate(value, columnName) {
+    if (columnName === 'Datum' && value) {
+        return dayjs(value).format('DD-MM-YYYY');
+    }
+    return value;
+}
+
+// Logout Function
+const logout = () => {
+  localStorage.removeItem('loggedInUser')
+  router.push('/login_nurse')
+}
+
+// Lifecycle Hook
+onMounted(() => {
+  loggedInUser.value = localStorage.getItem('loggedInUser')
+
+  if (!loggedInUser.value) {
+    router.push('/login_nurse')
+  }
+  showMenu()
+})
+</script>
+
 <style scoped>
-.my-table {
-  width: auto;
-  max-width: none;
+.rounded-borders {
+  border-radius: 8px;
 }
 
-.my-table td {
-  font-weight: 600;
+/* Styled Table */
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.my-table thead th {
-  font-weight: 700;
+.styled-table th,
+.styled-table td {
+  border: 1px solid #ddd; /* Light gray border */
+  padding: 8px;
+  text-align: left;
 }
 
-.editing-cell {
-  background-color: #f0f0f0;
+.styled-table th {
+  background-color: #f2f2f2; /* Light gray background for header */
+  font-weight: bold;
+}
+
+/* Button Group Styling */
+.button-group {
+  display: flex;
+  justify-content: start; /* Align buttons to the left */
+  gap: 10px; /* Space between buttons */
+  margin-bottom: 10px; /* Space below the button group */
 }
 </style>
