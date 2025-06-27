@@ -112,22 +112,55 @@ export default {
     };
 
     // Dohvaćanje menija iz backend-a
-    const fetchMenus = async () => {
-      try {
-        const response = await fetch('/menu/history');
-        if (!response.ok) {
-          throw new Error('Greška pri dohvaćanju menija');
-        }
-        const data = await response.json();
-        menus.value = data.map(menu => ({
-          ...menu,
-          editing: false, // Dodajemo stanje za uređivanje
-        }));
-      } catch (error) {
-        console.error(error.message);
-        alert('Greška pri dohvaćanju menija');
+   const fetchMenus = async () => {
+  try {
+    const response = await fetch('/menu/history');
+    if (!response.ok) {
+      throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`);
+    }
+    const data = await response.json();
+
+    // Transformacija podataka
+    const groupedMenus = data.reduce((acc, menu) => {
+      const date = menu.Datum.split('T')[0]; // Uklanjanje vremenskog dijela iz datuma
+      if (!acc[date]) {
+        acc[date] = {
+          Datum_menija: date,
+          Marenda1: {},
+          Marenda2: {},
+          username: menu.username,
+          ID_kuhara: menu.ID_kuhara,
+        };
       }
-    };
+
+      if (menu.marenda === 'Marenda1') {
+        acc[date].Marenda1 = {
+          Juha: menu.Juha_m1,
+          Glavno_jelo: menu.Glavno_jelo_m1,
+          Salata: menu.Salata_m1,
+        };
+      } else if (menu.marenda === 'Marenda2') {
+        acc[date].Marenda2 = {
+          Juha: menu.Juha_m1,
+          Glavno_jelo: menu.Glavno_jelo_m1,
+          Salata: menu.Salata_m1,
+        };
+      }
+
+      return acc;
+    }, {});
+
+    // Pretvaranje objekta u niz
+    menus.value = Object.values(groupedMenus).map(menu => ({
+      ...menu,
+      editing: false, // Dodajemo stanje za uređivanje
+    }));
+
+  } catch (error) {
+    console.error(error.message);
+    alert('Greška pri dohvaćanju menija: ' + error.message);
+  }
+};
 
     // Dodavanje menija
     const addMenu = async () => {
