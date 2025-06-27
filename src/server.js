@@ -16,7 +16,14 @@ const app = express()
 
 const port = process.env.PORT || 10000
 
-app.use(cors())
+const corsOptions = {
+  origin: 'https://thalassockmenu.netlify.app', // Točna domena tvog frontenda
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true, // Ako koristiš kolačiće ili Authorization headere
+  optionsSuccessStatus: 204, // Neki stariji browseri zahtijevaju 204 umjesto 200
+}
+
+app.use(cors(corsOptions)) // Koristi corsOptions
 
 app.use(bodyParser.json())
 
