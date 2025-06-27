@@ -3,7 +3,7 @@
     <!-- Unos menija -->
     <q-card class="q-mb-md">
       <q-card-section>
-        <div class="text-h4">Dodaj meni</div>
+        <div class="text-h6">Dodaj meni</div>
       </q-card-section>
       <q-card-section>
         <q-form @submit="addMenu">
@@ -71,12 +71,9 @@
 
 <script>
 import { ref, onMounted } from 'vue';
-import { useQuasar } from 'quasar';
 
 export default {
   setup() {
-    const $q = useQuasar();
-
     // Stanje forme za unos menija
     const form = ref({
       date: new Date().toISOString().slice(0, 10),
@@ -118,16 +115,17 @@ export default {
     const fetchMenus = async () => {
       try {
         const response = await fetch('/menu/history');
+        if (!response.ok) {
+          throw new Error('Greška pri dohvaćanju menija');
+        }
         const data = await response.json();
         menus.value = data.map(menu => ({
           ...menu,
           editing: false, // Dodajemo stanje za uređivanje
         }));
       } catch (error) {
-        $q.notify({
-          type: 'negative',
-          message: 'Greška pri dohvaćanju menija',
-        });
+        console.error(error.message);
+        alert('Greška pri dohvaćanju menija');
       }
     };
 
@@ -149,22 +147,14 @@ export default {
         });
 
         if (response.ok) {
-          $q.notify({
-            type: 'positive',
-            message: 'Meni uspješno dodan!',
-          });
+          alert('Meni uspješno dodan!');
           fetchMenus();
         } else {
-          $q.notify({
-            type: 'negative',
-            message: 'Greška pri dodavanju menija!',
-          });
+          throw new Error('Greška pri dodavanju menija');
         }
       } catch (error) {
-        $q.notify({
-          type: 'negative',
-          message: 'Greška pri dodavanju menija!',
-        });
+        console.error(error.message);
+        alert('Greška pri dodavanju menija');
       }
     };
 
@@ -186,58 +176,36 @@ export default {
         });
 
         if (response.ok) {
-          $q.notify({
-            type: 'positive',
-            message: 'Meni uspješno ažuriran!',
-          });
+          alert('Meni uspješno ažuriran!');
           fetchMenus();
         } else {
-          $q.notify({
-            type: 'negative',
-            message: 'Greška pri ažuriranju menija!',
-          });
+          throw new Error('Greška pri ažuriranju menija');
         }
       } catch (error) {
-        $q.notify({
-          type: 'negative',
-          message: 'Greška pri ažuriranju menija!',
-        });
+        console.error(error.message);
+        alert('Greška pri ažuriranju menija');
       }
     };
 
     // Brisanje menija
     const deleteMenu = async (menu) => {
       try {
-        const confirmDelete = await $q.dialog({
-          title: 'Potvrda',
-          message: 'Jeste li sigurni da želite obrisati meni?',
-          cancel: true,
-          persistent: true,
-        });
-
+        const confirmDelete = confirm('Jeste li sigurni da želite obrisati meni?');
         if (confirmDelete) {
           const response = await fetch(`/menu/delete?datum=${menu.Datum_menija}`, {
             method: 'DELETE',
           });
 
           if (response.ok) {
-            $q.notify({
-              type: 'positive',
-              message: 'Meni uspješno obrisan!',
-            });
+            alert('Meni uspješno obrisan!');
             fetchMenus();
           } else {
-            $q.notify({
-              type: 'negative',
-              message: 'Greška pri brisanju menija!',
-            });
+            throw new Error('Greška pri brisanju menija');
           }
         }
       } catch (error) {
-        $q.notify({
-          type: 'negative',
-          message: 'Greška pri brisanju menija!',
-        });
+        console.error(error.message);
+        alert('Greška pri brisanju menija');
       }
     };
 
