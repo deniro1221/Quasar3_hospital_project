@@ -114,7 +114,7 @@ export default {
     // Dohvaćanje menija iz backend-a
     const fetchMenus = async () => {
       try {
-        const response = await fetch('/menu/history');
+        const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/history');
         if (!response.ok) {
           throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`);
         }
@@ -165,7 +165,7 @@ export default {
     // Dodavanje menija
     const addMenu = async () => {
       try {
-        const response = await fetch('/menu', {
+        const response = await fetch('https://backend-hospital-n9to.onrender.com/menu', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -177,7 +177,7 @@ export default {
           }),
         });
 
-        const response2 = await fetch('/menu', {
+        const response2 = await fetch('https://backend-hospital-n9to.onrender.com/menu', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -204,7 +204,7 @@ export default {
     // Ažuriranje menija
     const updateMenu = async (menu) => {
       try {
-        const response = await fetch('/menu/fresh', {
+        const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/fresh', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -216,7 +216,7 @@ export default {
           }),
         });
 
-        const response2 = await fetch('/menu/fresh', {
+        const response2 = await fetch('https://backend-hospital-n9to.onrender.com/menu/fresh', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -245,7 +245,7 @@ export default {
       try {
         const confirmDelete = confirm('Jeste li sigurni da želite obrisati meni?');
         if (confirmDelete) {
-          const response = await fetch(`/menu/delete?datum=${menu.Datum_marende}`, {
+          const response = await fetch(`https://backend-hospital-n9to.onrender.com/menu/delete?datum=${menu.Datum_marende}`, {
             method: 'DELETE',
           });
 
