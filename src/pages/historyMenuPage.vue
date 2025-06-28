@@ -41,6 +41,7 @@
               @dblclick="onCellDblClick(props.row, props.col)"
               style="cursor: pointer"
             >
+              <!-- Dodan style za bolji UX -->
               <div
                 v-if="
                   editingCell.rowId !== props.row.Datum_marende ||
@@ -52,8 +53,7 @@
               <q-input
                 v-else
                 v-model="props.row[props.col.field]"
-                @input="onCellInput(props.row, props.col, $event)"
-                @blur="cancelEdit()"
+                @update:model-value="onCellInput(props.row, props.col, $event)"
                 dense
                 autofocus
               />
