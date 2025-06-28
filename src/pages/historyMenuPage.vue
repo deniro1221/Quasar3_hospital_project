@@ -298,7 +298,9 @@ export default {
     // Funkcija za unos u ćeliju
     function onCellInput(row, column, event) {
       console.log('onCellInput pozvan', row, column, event)
-      let newVal = event.target.value || event.target.innerText
+      // let newVal = event.target.value || event.target.innerText; // Uklonjeno
+      let newVal = row[column.field] // Dohvati vrijednost izravno iz reda
+      console.log('newVal', newVal)
 
       if (!changesMap.value[row.Datum_marende]) {
         changesMap.value[row.Datum_marende] = { ...row }
