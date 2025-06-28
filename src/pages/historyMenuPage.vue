@@ -7,7 +7,6 @@
       </q-card-section>
       <q-card-section>
         <q-form @submit="addMenu" ref="menuForm">
-          <!-- Dodan ref na formu -->
           <q-input
             v-model="form.date"
             type="date"
@@ -16,6 +15,7 @@
               (val) => !!val || 'Datum je obavezan',
               (val) => isFutureDate(val) || 'Datum mora biti jednak ili veći od današnjeg',
             ]"
+            readonly
           />
           <q-input v-model="form.juha_m1" label="Juha (Marenda 1)" />
           <q-input v-model="form.glavno_jelo_m1" label="Glavno jelo (Marenda 1)" />
@@ -39,16 +39,13 @@
           <template v-slot:body-cell="props">
             <q-td
               :props="props"
-              @dblclick="enableEditing(props.row, props.col.name)"
+              @dblclick="onCellDblClick(props.row, props.col)"
               style="cursor: pointer"
             >
-              <!-- Dodan style za bolji UX -->
               <div
                 v-if="
-                  !props.row.editing ||
-                  props.col.name === 'Datum_marende' ||
-                  props.col.name === 'username' ||
-                  props.col.name === 'ID_kuhara'
+                  editingCell.rowId !== props.row.Datum_marende ||
+                  editingCell.col !== props.col.name
                 "
               >
                 {{ props.value }}
@@ -56,11 +53,8 @@
               <q-input
                 v-else
                 v-model="props.row[props.col.field]"
-                @blur="
-                  () => {
-                    updateMenu(props.row, props.col.field)
-                  }
-                "
+                @input="onCellInput(props.row, props.col, $event)"
+                @blur="cancelEdit()"
                 dense
                 autofocus
               />
@@ -74,6 +68,9 @@
             </q-td>
           </template>
         </q-table>
+      </q-card-section>
+      <q-card-section>
+        <q-btn color="primary" @click="confirmUpdate">Ažuriraj meni</q-btn>
       </q-card-section>
     </q-card>
   </q-page>
@@ -171,13 +168,11 @@ export default {
       rowsPerPage: 10,
     })
 
-    // Provjera da li je datum jednak ili veći od današnjeg
     const isFutureDate = (date) => {
       const today = new Date().toISOString().slice(0, 10)
       return date >= today
     }
 
-    // Dohvaćanje menija iz backend-a
     const fetchMenus = async () => {
       try {
         const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/history')
@@ -186,7 +181,6 @@ export default {
         }
         const data = await response.json()
 
-        // Grupiraj podatke po datumu
         const groupedMenus = data.reduce((acc, menu) => {
           const date = menu.Datum.split('T')[0]
           if (!acc[date]) {
@@ -220,7 +214,6 @@ export default {
           return acc
         }, {})
 
-        // Pretvoriti objekt u niz
         menus.value = Object.values(groupedMenus)
       } catch (error) {
         console.error(error.message)
@@ -228,16 +221,12 @@ export default {
       }
     }
 
-    // Dodavanje menija
     const addMenu = async () => {
       try {
-        // Provjera postoji li meni za taj datum
         const existingMenu = menus.value.find((menu) => menu.Datum_marende === form.value.date)
 
         if (existingMenu) {
-          // Ako meni postoji, prikaži poruku o grešci
           alert('Meni za taj datum već postoji.')
-          // Resetiranje forme
           form.value = {
             date: new Date().toISOString().slice(0, 10),
             juha_m1: '',
@@ -247,10 +236,9 @@ export default {
             glavno_jelo_m2: '',
             salata_m2: '',
           }
-          return // Prekini funkciju
+          return
         }
 
-        // Ako meni ne postoji, pošalji zahtjev za dodavanje
         const response = await fetch('https://backend-hospital-n9to.onrender.com/menu', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -271,7 +259,6 @@ export default {
           alert('Meni uspješno dodan!')
           fetchMenus()
 
-          // Resetiranje forme
           form.value = {
             date: new Date().toISOString().slice(0, 10),
             juha_m1: '',
@@ -293,52 +280,92 @@ export default {
       }
     }
 
-    // Ažuriranje menija
-    const updateMenu = async (menu, field) => {
-      try {
-        const originalValue = menus.value.find((m) => m.Datum_marende === menu.Datum_marende)[field] // Dohvati originalnu vrijednost
+    // Ref za trenutno uređenu ćeliju
+    const editingCell = ref({ rowId: null, col: null })
 
-        const value = menu[field]
-        if (value === originalValue) {
-          // Ako se vrijednost nije promijenila, nemoj ažurirati
-          menu.editing = false // Onemogući uređivanje
-          return
-        }
+    // Mapa za praćenje promjena
+    const changesMap = ref({})
 
-        const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/fresh', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            Datum_marende: menu.Datum_marende,
-            [field]: value,
-          }),
-        })
-
-        if (response.ok) {
-          alert('Meni uspješno ažuriran!')
-          fetchMenus()
-          menu.editing = false // Onemogući uređivanje
-        } else {
-          throw new Error('Greška pri ažuriranju menija')
-        }
-      } catch (error) {
-        console.error(error.message)
-        alert('Greška pri ažuriranju menija')
-      }
+    // Funkcija za dvoklik na ćeliju
+    function onCellDblClick(row, column) {
+      if (['Datum_marende', 'username', 'ID_kuhara', 'actions'].includes(column.name)) return
+      editingCell.value = { rowId: row.Datum_marende, col: column.name }
     }
 
-    const enableEditing = (row, columnName) => {
-      if (
-        columnName !== 'Datum_marende' &&
-        columnName !== 'actions' &&
-        columnName !== 'username' &&
-        columnName !== 'ID_kuhara'
-      ) {
-        row.editing = true
+    // Funkcija za unos u ćeliju
+    function onCellInput(row, column, event) {
+      let newVal = event.target.value || event.target.innerText
+
+      if (!changesMap.value[row.Datum_marende]) {
+        changesMap.value[row.Datum_marende] = { ...row }
       }
+
+      changesMap.value[row.Datum_marende][column.field] = newVal
     }
 
-    // Brisanje menija
+    // Funkcija za prekid uređivanja
+    function cancelEdit() {
+      editingCell.value = {}
+    }
+
+    // Funkcija za potvrdu ažuriranja
+    async function confirmUpdate() {
+      if (!Object.keys(changesMap.value).length) {
+        alert('Nema promjena za ažurirati.')
+        return
+      }
+
+      if (!confirm('Jeste li sigurni za ažuriranje?')) return
+
+      let successCount = 0
+      let failCount = 0
+
+      for (const rowId in changesMap.value) {
+        const updatedRow = { ...changesMap.value[rowId] }
+
+        // Pripremi podatke za slanje
+        const payload = {
+          Datum_marende: updatedRow.Datum_marende,
+          [updatedRow.col]: updatedRow[updatedRow.field], // Šalji samo promijenjeno polje
+        }
+
+        const url = `https://backend-hospital-n9to.onrender.com/menu/fresh`
+
+        try {
+          const response = await fetch(url, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          })
+
+          if (response.ok) {
+            successCount++
+            const index = menus.value.findIndex((r) => r.Datum_marende === rowId)
+            if (index !== -1) {
+              menus.value[index] = {
+                ...menus.value[index],
+                ...updatedRow,
+              }
+            }
+          } else {
+            failCount++
+            const errMsg = await response.json()
+            alert(`Greška kod datuma ${rowId}: ${errMsg.message}`)
+          }
+        } catch (err) {
+          failCount++
+          alert(`Neuspješno slanje za datum ${rowId}: ${err.message}`)
+        }
+      }
+
+      // Osvježi podatke nakon svih pokušaja ažuriranja
+      await fetchMenus()
+
+      alert(`Uspješno ažurirano: ${successCount}, Neuspješno: ${failCount}.`)
+      changesMap.value = {}
+      editingCell.value = {}
+    }
+
     const deleteMenu = async (menu) => {
       try {
         const confirmDelete = confirm('Jeste li sigurni da želite obrisati meni?')
@@ -363,7 +390,6 @@ export default {
       }
     }
 
-    // Učitavanje menija prilikom montiranja komponente
     onMounted(() => {
       fetchMenus()
     })
@@ -374,10 +400,14 @@ export default {
       columns,
       pagination,
       addMenu,
-      updateMenu,
       deleteMenu,
       isFutureDate,
-      enableEditing,
+      editingCell,
+      changesMap,
+      onCellDblClick,
+      onCellInput,
+      cancelEdit,
+      confirmUpdate,
     }
   },
 }
