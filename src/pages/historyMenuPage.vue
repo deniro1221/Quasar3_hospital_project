@@ -6,7 +6,8 @@
         <div class="text-h6">Dodaj meni</div>
       </q-card-section>
       <q-card-section>
-        <q-form @submit="addMenu">
+        <q-form @submit="addMenu" ref="menuForm">
+          <!-- Dodan ref na formu -->
           <q-input
             v-model="form.date"
             type="date"
@@ -42,6 +43,7 @@
               @dblclick="enableEditing(props.row, props.col.name)"
               style="cursor: pointer"
             >
+              <!-- Dodan style za bolji UX -->
               <div
                 v-if="
                   !props.row.editing ||
@@ -55,7 +57,11 @@
               <q-input
                 v-else
                 v-model="props.row[props.col.field]"
-                @blur="updateMenu(props.row, props.col.field)"
+                @blur="
+                  () => {
+                    updateMenu(props.row, props.col.field)
+                  }
+                "
                 dense
                 autofocus
               />
@@ -205,9 +211,9 @@ export default {
             acc[date].username = menu.username || ''
             acc[date].ID_kuhara = menu.ID_kuhara || ''
           } else if (menu.marenda === 'Marenda2') {
-            acc[date].Juha_m2 = menu.Juha_m1 || '' //Ispravljeno menu.Juha_m1 u menu.Juha_m2
-            acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || '' //Ispravljeno menu.Glavno_jelo_m1 u menu.Glavno_jelo_m2
-            acc[date].Salata_m2 = menu.Salata_m1 || '' //Ispravljeno menu.Salata_m1 u menu.Salata_m2
+            acc[date].Juha_m2 = menu.Juha_m1 || '' // Ispravljeno menu.Juha_m1 u menu.Juha_m2
+            acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || '' // Ispravljeno menu.Glavno_jelo_m1 u menu.Glavno_jelo_m2
+            acc[date].Salata_m2 = menu.Salata_m1 || '' // Ispravljeno menu.Salata_m1 u menu.Salata_m2
             acc[date].username = menu.username || ''
             acc[date].ID_kuhara = menu.ID_kuhara || ''
           }
@@ -281,7 +287,15 @@ export default {
     // Ažuriranje menija
     const updateMenu = async (menu, field) => {
       try {
+        const originalValue = menus.value.find((m) => m.Datum_marende === menu.Datum_marende)[field] // Dohvati originalnu vrijednost
+
         const value = menu[field]
+        if (value === originalValue) {
+          // Ako se vrijednost nije promijenila, nemoj ažurirati
+          menu.editing = false // Onemogući uređivanje
+          return
+        }
+
         const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/fresh', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -294,7 +308,7 @@ export default {
         if (response.ok) {
           alert('Meni uspješno ažuriran!')
           fetchMenus()
-          menu.editing = false
+          menu.editing = false // Onemogući uređivanje
         } else {
           throw new Error('Greška pri ažuriranju menija')
         }
