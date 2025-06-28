@@ -13,8 +13,7 @@
             label="Datum"
             :rules="[
               (val) => !!val || 'Datum je obavezan',
-              (val) =>
-                isFutureDate(val) || 'Datum mora biti jednak ili veći od današnjeg',
+              (val) => isFutureDate(val) || 'Datum mora biti jednak ili veći od današnjeg',
             ]"
           />
           <q-input v-model="form.juha_m1" label="Juha (Marenda 1)" />
@@ -34,12 +33,7 @@
         <div class="text-h6">Pregled menija</div>
       </q-card-section>
       <q-card-section>
-        <q-table
-          :rows="menus"
-          :columns="columns"
-          row-key="Datum_marende"
-          :pagination="pagination"
-        >
+        <q-table :rows="menus" :columns="columns" row-key="Datum_marende" :pagination="pagination">
           <!-- Ažuriranje podataka -->
           <template v-slot:body-cell="props">
             <q-td :props="props">
@@ -59,12 +53,7 @@
           <!-- Brisanje menija -->
           <template v-slot:body-cell-actions="props">
             <q-td :props="props">
-              <q-btn
-                @click="deleteMenu(props.row)"
-                color="negative"
-                label="Obriši"
-                size="sm"
-              />
+              <q-btn @click="deleteMenu(props.row)" color="negative" label="Obriši" size="sm" />
             </q-td>
           </template>
         </q-table>
@@ -74,7 +63,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted } from 'vue'
 
 export default {
   setup() {
@@ -87,10 +76,10 @@ export default {
       juha_m2: '',
       glavno_jelo_m2: '',
       salata_m2: '',
-    });
+    })
 
     // Stanje tablice s menijima
-    const menus = ref([]);
+    const menus = ref([])
 
     // Kolone za tablicu
     const columns = [
@@ -104,234 +93,206 @@ export default {
       {
         name: 'Juha_m1',
         label: 'Juha (Marenda 1)',
-        field: (row) => row.Marenda1.Juha,
+        field: 'Juha_m1',
         align: 'left',
         sortable: true,
       },
       {
         name: 'Glavno_jelo_m1',
         label: 'Glavno jelo (Marenda 1)',
-        field: (row) => row.Marenda1.Glavno_jelo,
+        field: 'Glavno_jelo_m1',
         align: 'left',
         sortable: true,
       },
       {
         name: 'Salata_m1',
         label: 'Salata (Marenda 1)',
-        field: (row) => row.Marenda1.Salata,
+        field: 'Salata_m1',
         align: 'left',
         sortable: true,
       },
       {
         name: 'Juha_m2',
         label: 'Juha (Marenda 2)',
-        field: (row) => row.Marenda2.Juha,
+        field: 'Juha_m2',
         align: 'left',
         sortable: true,
       },
       {
         name: 'Glavno_jelo_m2',
         label: 'Glavno jelo (Marenda 2)',
-        field: (row) => row.Marenda2.Glavno_jelo,
+        field: 'Glavno_jelo_m2',
         align: 'left',
         sortable: true,
       },
       {
         name: 'Salata_m2',
         label: 'Salata (Marenda 2)',
-        field: (row) => row.Marenda2.Salata,
+        field: 'Salata_m2',
         align: 'left',
         sortable: true,
       },
       { name: 'actions', label: 'Akcije', field: 'actions', align: 'center' },
-    ];
+    ]
 
     // Paginacija za tablicu
     const pagination = ref({
       rowsPerPage: 10,
-    });
+    })
 
     // Provjera da li je datum jednak ili veći od današnjeg
     const isFutureDate = (date) => {
-      const today = new Date().toISOString().slice(0, 10);
-      return date >= today;
-    };
+      const today = new Date().toISOString().slice(0, 10)
+      return date >= today
+    }
 
     // Dohvaćanje menija iz backend-a
     const fetchMenus = async () => {
       try {
-        const response = await fetch(
-          'https://backend-hospital-n9to.onrender.com/menu/history'
-        );
+        const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/history')
         if (!response.ok) {
-          throw new Error(
-            `Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`
-          );
+          throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
         }
-        const data = await response.json();
+        const data = await response.json()
 
-        // Transformacija podataka
+        // Grupiraj podatke po datumu
         const groupedMenus = data.reduce((acc, menu) => {
-          if (menu.Datum_marende) {
-            // Dodana provjera
-            const date = menu.Datum_marende.split('T')[0]; // Uklanjanje vremenskog dijela iz datuma
-            if (!acc[date]) {
-              acc[date] = {
-                Datum_marende: date,
-                Marenda1: {},
-                Marenda2: {},
-                username: menu.username,
-                ID_kuhara: menu.ID_kuhara,
-              };
-            }
-
-            if (menu.marenda === 'Marenda1') {
-              acc[date].Marenda1 = {
-                Juha: menu.Juha,
-                Glavno_jelo: menu.Glavno_jelo,
-                Salata: menu.Salata,
-              };
-            } else if (menu.marenda === 'Marenda2') {
-              acc[date].Marenda2 = {
-                Juha: menu.Juha,
-                Glavno_jelo: menu.Glavno_jelo,
-                Salata: menu.Salata,
-              };
+          const date = menu.Datum.split('T')[0]
+          if (!acc[date]) {
+            acc[date] = {
+              Datum_marende: date,
+              Juha_m1: '',
+              Glavno_jelo_m1: '',
+              Salata_m1: '',
+              Juha_m2: '',
+              Glavno_jelo_m2: '',
+              Salata_m2: '',
             }
           }
-          return acc;
-        }, {});
 
-        // Pretvaranje objekta u niz
-        menus.value = Object.values(groupedMenus).map((menu) => ({
-          ...menu,
-          editing: false, // Dodajemo stanje za uređivanje
-        }));
+          if (menu.marenda === 'Marenda1') {
+            acc[date].Juha_m1 = menu.Juha_m1 || ''
+            acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
+            acc[date].Salata_m1 = menu.Salata_m1 || ''
+          } else if (menu.marenda === 'Marenda2') {
+            acc[date].Juha_m2 = menu.Juha_m1 || '' //Ispravljeno menu.Juha_m1 u menu.Juha_m2
+            acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || '' //Ispravljeno menu.Glavno_jelo_m1 u menu.Glavno_jelo_m2
+            acc[date].Salata_m2 = menu.Salata_m1 || '' //Ispravljeno menu.Salata_m1 u menu.Salata_m2
+          }
+
+          return acc
+        }, {})
+
+        // Pretvoriti objekt u niz
+        menus.value = Object.values(groupedMenus)
       } catch (error) {
-        console.error(error.message);
-        alert('Greška pri dohvaćanju menija: ' + error.message);
+        console.error(error.message)
+        alert('Greška pri dohvaćanju menija: ' + error.message)
       }
-    };
+    }
 
     // Dodavanje menija
     const addMenu = async () => {
       try {
-        const response = await fetch(
-          'https://backend-hospital-n9to.onrender.com/menu',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              Datum_marende: form.value.date,
-              Juha: form.value.juha_m1,
-              Glavno_jelo: form.value.glavno_jelo_m1,
-              Salata: form.value.salata_m1,
-              marenda: 'Marenda1',
-            }),
-          }
-        );
+        const response = await fetch('https://backend-hospital-n9to.onrender.com/menu', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            Datum_marende: form.value.date,
+            ID_kuhara: 2, // Ili dohvati ID_kuhara dinamički
+            username: 'marin', // Ili dohvati username dinamički
+            Juha_m1: form.value.juha_m1,
+            Glavno_jelo_m1: form.value.glavno_jelo_m1,
+            Salata_m1: form.value.salata_m1,
+            Juha_m2: form.value.juha_m2,
+            Glavno_jelo_m2: form.value.glavno_jelo_m2,
+            Salata_m2: form.value.salata_m2,
+          }),
+        })
 
-        const response2 = await fetch(
-          'https://backend-hospital-n9to.onrender.com/menu',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              Datum_marende: form.value.date,
-              Juha: form.value.juha_m2,
-              Glavno_jelo: form.value.glavno_jelo_m2,
-              Salata: form.value.salata_m2,
-              marenda: 'Marenda2',
-            }),
-          }
-        );
-
-        if (response.ok && response2.ok) {
-          alert('Meni uspješno dodan!');
-          fetchMenus();
+        if (response.ok) {
+          alert('Meni uspješno dodan!')
+          fetchMenus()
         } else {
-          throw new Error('Greška pri dodavanju menija');
+          const errorData = await response.json() // Pokušaj dobiti detaljnije informacije o grešci
+          throw new Error(
+            `Greška pri dodavanju menija: ${response.status} ${JSON.stringify(errorData)}`,
+          )
         }
       } catch (error) {
-        console.error(error.message);
-        alert('Greška pri dodavanju menija');
+        console.error(error.message)
+        alert('Greška pri dodavanju menija: ' + error.message)
       }
-    };
+    }
 
     // Ažuriranje menija
     const updateMenu = async (menu) => {
       try {
-        const response = await fetch(
-          'https://backend-hospital-n9to.onrender.com/menu/fresh',
-          {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              Datum_marende: menu.Datum_marende,
-              Juha: menu.Marenda1.Juha,
-              Glavno_jelo: menu.Marenda1.Glavno_jelo,
-              Salata: menu.Marenda1.Salata,
-              marenda: 'Marenda1',
-            }),
-          }
-        );
+        const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/fresh', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            Datum_marende: menu.Datum_marende,
+            Juha: menu.Marenda1.Juha,
+            Glavno_jelo: menu.Marenda1.Glavno_jelo,
+            Salata: menu.Marenda1.Salata,
+            marenda: 'Marenda1',
+          }),
+        })
 
-        const response2 = await fetch(
-          'https://backend-hospital-n9to.onrender.com/menu/fresh',
-          {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              Datum_marende: menu.Datum_marende,
-              Juha: menu.Marenda2.Juha,
-              Glavno_jelo: menu.Marenda2.Glavno_jelo,
-              Salata: menu.Marenda2.Salata,
-              marenda: 'Marenda2',
-            }),
-          }
-        );
+        const response2 = await fetch('https://backend-hospital-n9to.onrender.com/menu/fresh', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            Datum_marende: menu.Datum_marende,
+            Juha: menu.Marenda2.Juha,
+            Glavno_jelo: menu.Marenda2.Glavno_jelo,
+            Salata: menu.Marenda2.Salata,
+            marenda: 'Marenda2',
+          }),
+        })
 
         if (response.ok && response2.ok) {
-          alert('Meni uspješno ažuriran!');
-          fetchMenus();
+          alert('Meni uspješno ažuriran!')
+          fetchMenus()
         } else {
-          throw new Error('Greška pri ažuriranju menija');
+          throw new Error('Greška pri ažuriranju menija')
         }
       } catch (error) {
-        console.error(error.message);
-        alert('Greška pri ažuriranju menija');
+        console.error(error.message)
+        alert('Greška pri ažuriranju menija')
       }
-    };
+    }
 
     // Brisanje menija
     const deleteMenu = async (menu) => {
       try {
-        const confirmDelete = confirm('Jeste li sigurni da želite obrisati meni?');
+        const confirmDelete = confirm('Jeste li sigurni da želite obrisati meni?')
         if (confirmDelete) {
           const response = await fetch(
             `https://backend-hospital-n9to.onrender.com/menu/delete?datum=${menu.Datum_marende}`,
             {
               method: 'DELETE',
-            }
-          );
+            },
+          )
 
           if (response.ok) {
-            alert('Meni uspješno obrisan!');
-            fetchMenus();
+            alert('Meni uspješno obrisan!')
+            fetchMenus()
           } else {
-            throw new Error('Greška pri brisanju menija');
+            throw new Error('Greška pri brisanju menija')
           }
         }
       } catch (error) {
-        console.error(error.message);
-        alert('Greška pri brisanju menija');
+        console.error(error.message)
+        alert('Greška pri brisanju menija')
       }
-    };
+    }
 
     // Učitavanje menija prilikom montiranja komponente
     onMounted(() => {
-      fetchMenus();
-    });
+      fetchMenus()
+    })
 
     return {
       form,
@@ -342,9 +303,9 @@ export default {
       updateMenu,
       deleteMenu,
       isFutureDate,
-    };
+    }
   },
-};
+}
 </script>
 
 <style scoped>

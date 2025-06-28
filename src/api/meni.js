@@ -44,29 +44,18 @@ router.post('/menu', validateDateFormat, async (req, res) => {
 
   const connection = await pool.getConnection()
   try {
-    // Provjera duplikata
-    const [existing1] = await connection.execute(`SELECT 1 FROM Marenda1 WHERE Datum_marende = ?`, [
-      Datum_marende,
-    ])
-    const [existing2] = await connection.execute(`SELECT 1 FROM Marenda2 WHERE Datum_marende = ?`, [
-      Datum_marende,
-    ])
-    if (existing1.length || existing2.length) {
-      return res.status(400).json({ message: 'Meni već postoji za taj datum.' })
-    }
-
     // Unos u obje tablice
     await connection.beginTransaction()
     await connection.execute(
       `
-            INSERT INTO Marenda1 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
-            VALUES (?, ?, ?, ?, ?, ?)`,
+      INSERT INTO Marenda1 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
+      VALUES (?, ?, ?, ?, ?, ?)`,
       [Datum_marende, Juha_m1, Glavno_jelo_m1, Salata_m1, ID_kuhara, username],
     )
     await connection.execute(
       `
-            INSERT INTO Marenda2 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
-            VALUES (?, ?, ?, ?, ?, ?)`,
+      INSERT INTO Marenda2 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
+      VALUES (?, ?, ?, ?, ?, ?)`,
       [Datum_marende, Juha_m2, Glavno_jelo_m2, Salata_m2, ID_kuhara, username],
     )
 
@@ -181,7 +170,7 @@ router.delete('/menu/delete', async (req, res) => {
 })
 
 router.get('/menu/history', async (req, res) => {
-  const today = dayjs().format('DD-MM-YYYY')
+  const today = dayjs().format('YYYY-MM-DD')
   const connection = await pool.getConnection()
   try {
     const [menus] = await connection.execute(
