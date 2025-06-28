@@ -181,7 +181,7 @@ router.delete('/menu/delete', async (req, res) => {
 })
 
 router.get('/menu/history', async (req, res) => {
-  const today = dayjs().format('YYYY-MM-DD')
+  const today = dayjs().format('DD-MM-YYYY')
   const connection = await pool.getConnection()
   try {
     const [menus] = await connection.execute(
