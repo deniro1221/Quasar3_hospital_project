@@ -338,7 +338,7 @@ export default {
         // Pripremi podatke za slanje
         const payload = {
           Datum_marende: updatedRow.Datum_marende,
-          [updatedRow.col]: updatedRow[updatedRow.field], // Šalji samo promijenjeno polje
+          [updatedRow.field]: updatedRow[updatedRow.field], // Šalji samo promijenjeno polje
         }
         console.log('payload prije slanja', payload)
         const url = `https://backend-hospital-n9to.onrender.com/menu/fresh`
