@@ -334,11 +334,11 @@ export default {
 
       for (const rowId in changesMap.value) {
         const updatedRow = { ...changesMap.value[rowId] }
-
+        const field = editingCell.value.col
         // Pripremi podatke za slanje
         const payload = {
           Datum_marende: updatedRow.Datum_marende,
-          [updatedRow.field]: updatedRow[updatedRow.field], // Šalji samo promijenjeno polje
+          [field]: updatedRow[field], // Šalji samo promijenjeno polje
         }
         console.log('payload prije slanja', payload)
         const url = `https://backend-hospital-n9to.onrender.com/menu/fresh`
@@ -426,9 +426,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-.q-card {
-  margin-bottom: 20px;
-}
-</style>
