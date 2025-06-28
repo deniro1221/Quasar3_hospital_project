@@ -15,6 +15,7 @@
               (val) => !!val || 'Datum je obavezan',
               (val) => isFutureDate(val) || 'Datum mora biti jednak ili veći od današnjeg',
             ]"
+            readonly
           />
           <q-input v-model="form.juha_m1" label="Juha (Marenda 1)" />
           <q-input v-model="form.glavno_jelo_m1" label="Glavno jelo (Marenda 1)" />
@@ -36,14 +37,25 @@
         <q-table :rows="menus" :columns="columns" row-key="Datum_marende" :pagination="pagination">
           <!-- Ažuriranje podataka -->
           <template v-slot:body-cell="props">
-            <q-td :props="props">
-              <div v-if="!props.row.editing">
+            <q-td
+              :props="props"
+              @dblclick="enableEditing(props.row, props.col.name)"
+              style="cursor: pointer"
+            >
+              <div
+                v-if="
+                  !props.row.editing ||
+                  props.col.name === 'Datum_marende' ||
+                  props.col.name === 'username' ||
+                  props.col.name === 'ID_kuhara'
+                "
+              >
                 {{ props.value }}
               </div>
               <q-input
                 v-else
                 v-model="props.row[props.col.field]"
-                @blur="updateMenu(props.row)"
+                @blur="updateMenu(props.row, props.col.field)"
                 dense
                 autofocus
               />
@@ -132,6 +144,20 @@ export default {
         align: 'left',
         sortable: true,
       },
+      {
+        name: 'username',
+        label: 'Korisnik',
+        field: 'username',
+        align: 'left',
+        sortable: true,
+      },
+      {
+        name: 'ID_kuhara',
+        label: 'ID kuhara',
+        field: 'ID_kuhara',
+        align: 'left',
+        sortable: true,
+      },
       { name: 'actions', label: 'Akcije', field: 'actions', align: 'center' },
     ]
 
@@ -167,6 +193,8 @@ export default {
               Juha_m2: '',
               Glavno_jelo_m2: '',
               Salata_m2: '',
+              username: menu.username,
+              ID_kuhara: menu.ID_kuhara,
             }
           }
 
@@ -174,10 +202,14 @@ export default {
             acc[date].Juha_m1 = menu.Juha_m1 || ''
             acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
             acc[date].Salata_m1 = menu.Salata_m1 || ''
+            acc[date].username = menu.username || ''
+            acc[date].ID_kuhara = menu.ID_kuhara || ''
           } else if (menu.marenda === 'Marenda2') {
             acc[date].Juha_m2 = menu.Juha_m1 || '' //Ispravljeno menu.Juha_m1 u menu.Juha_m2
             acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || '' //Ispravljeno menu.Glavno_jelo_m1 u menu.Glavno_jelo_m2
             acc[date].Salata_m2 = menu.Salata_m1 || '' //Ispravljeno menu.Salata_m1 u menu.Salata_m2
+            acc[date].username = menu.username || ''
+            acc[date].ID_kuhara = menu.ID_kuhara || ''
           }
 
           return acc
@@ -200,16 +232,6 @@ export default {
         if (existingMenu) {
           // Ako meni postoji, prikaži poruku o grešci
           alert('Meni za taj datum već postoji.')
-          // Resetiranje forme
-          form.value = {
-            date: new Date().toISOString().slice(0, 10),
-            juha_m1: '',
-            glavno_jelo_m1: '',
-            salata_m1: '',
-            juha_m2: '',
-            glavno_jelo_m2: '',
-            salata_m2: '',
-          }
           return // Prekini funkciju
         }
 
@@ -255,42 +277,41 @@ export default {
         alert('Greška pri dodavanju menija: ' + error.message)
       }
     }
+
     // Ažuriranje menija
-    const updateMenu = async (menu) => {
+    const updateMenu = async (menu, field) => {
       try {
+        const value = menu[field]
         const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/fresh', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             Datum_marende: menu.Datum_marende,
-            Juha: menu.Marenda1.Juha,
-            Glavno_jelo: menu.Marenda1.Glavno_jelo,
-            Salata: menu.Marenda1.Salata,
-            marenda: 'Marenda1',
+            [field]: value,
           }),
         })
 
-        const response2 = await fetch('https://backend-hospital-n9to.onrender.com/menu/fresh', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            Datum_marende: menu.Datum_marende,
-            Juha: menu.Marenda2.Juha,
-            Glavno_jelo: menu.Marenda2.Glavno_jelo,
-            Salata: menu.Marenda2.Salata,
-            marenda: 'Marenda2',
-          }),
-        })
-
-        if (response.ok && response2.ok) {
+        if (response.ok) {
           alert('Meni uspješno ažuriran!')
           fetchMenus()
+          menu.editing = false
         } else {
           throw new Error('Greška pri ažuriranju menija')
         }
       } catch (error) {
         console.error(error.message)
         alert('Greška pri ažuriranju menija')
+      }
+    }
+
+    const enableEditing = (row, columnName) => {
+      if (
+        columnName !== 'Datum_marende' &&
+        columnName !== 'actions' &&
+        columnName !== 'username' &&
+        columnName !== 'ID_kuhara'
+      ) {
+        row.editing = true
       }
     }
 
@@ -333,6 +354,7 @@ export default {
       updateMenu,
       deleteMenu,
       isFutureDate,
+      enableEditing,
     }
   },
 }

@@ -1,23 +1,22 @@
 import express from 'express'
 import { Router } from 'express'
 import dayjs from 'dayjs'
-import pool from './db.js' // Connection pool
+import pool from './db.js'
 import cors from 'cors'
 
-const app = express() // Kreiraj Express aplikaciju
+const app = express()
 const router = Router()
 
 const corsOptions = {
-  origin: 'https://thalassockmenu.netlify.app', // Točna domena tvog frontenda
+  origin: 'https://thalassockmenu.netlify.app',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true, // Ako koristiš kolačiće ili Authorization headere
-  optionsSuccessStatus: 204, // Neki stariji browseri zahtijevaju 204 umjesto 200
+  credentials: true,
+  optionsSuccessStatus: 204,
 }
 
 app.use(cors(corsOptions))
-app.use(express.json()) // Za obradu JSON podataka
+app.use(express.json())
 
-// Middleware za validaciju formata datuma
 const validateDateFormat = (req, res, next) => {
   const { Datum_marende } = req.body
   if (Datum_marende && !dayjs(Datum_marende, 'YYYY-MM-DD', true).isValid()) {
@@ -26,7 +25,6 @@ const validateDateFormat = (req, res, next) => {
   next()
 }
 
-// POST - Dodavanje menija
 router.post('/menu', validateDateFormat, async (req, res) => {
   const {
     Datum_marende,
@@ -43,10 +41,10 @@ router.post('/menu', validateDateFormat, async (req, res) => {
   if (!Datum_marende) return res.status(400).json({ message: 'Datum je obavezan.' })
 
   const connection = await pool.getConnection()
-  let transactionStarted = false // Dodana varijabla za praćenje transakcije
+  let transactionStarted = false
   try {
     await connection.beginTransaction()
-    transactionStarted = true // Postavljeno na true nakon početka transakcije
+    transactionStarted = true
 
     const sql1 = `
             INSERT INTO Marenda1 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
@@ -76,7 +74,6 @@ router.post('/menu', validateDateFormat, async (req, res) => {
     res.status(200).json({ message: 'Meniji uspješno spremljeni.' })
   } catch (err) {
     if (transactionStarted) {
-      // Provjeri je li transakcija započeta prije rollbacka
       await connection.rollback()
     }
     console.error(err)
@@ -86,7 +83,6 @@ router.post('/menu', validateDateFormat, async (req, res) => {
   }
 })
 
-// GET - Dohvati današnji meni
 router.get('/menu/today', async (req, res) => {
   const today = dayjs().format('YYYY-MM-DD')
   const connection = await pool.getConnection()
@@ -113,15 +109,11 @@ router.get('/menu/today', async (req, res) => {
   }
 })
 
-// PUT - Ažuriraj pojedinačno polje
 router.put('/menu/fresh', validateDateFormat, async (req, res) => {
   const { Datum_marende } = req.body
-  if (!Datum_marende) return res.status(400).json({ message: 'Datum je obavezan.' })
-  if (dayjs(Datum_marende).isBefore(dayjs(), 'day')) {
-    return res.status(400).json({ message: 'Ne možete uređivati menije za prošle datume.' })
-  }
 
-  // Validate that only one field (other than Datum_marende) is being updated
+  if (!Datum_marende) return res.status(400).json({ message: 'Datum je obavezan.' })
+
   const allowedFields = [
     'Juha_m1',
     'Glavno_jelo_m1',
@@ -137,11 +129,13 @@ router.put('/menu/fresh', validateDateFormat, async (req, res) => {
       .status(400)
       .json({ message: 'Možete ažurirati samo jedno polje (Juha, Glavno_jelo, Salata) odjednom.' })
   }
+  const field = updateFields[0]
+  const value = req.body[field]
 
-  const [field, value] = [updateFields[0], req.body[updateFields[0]]]
   const isM1 = field.endsWith('_m1')
   const table = isM1 ? 'Marenda1' : 'Marenda2'
   const column = field.replace('_m1', '').replace('_m2', '')
+
   const sql = `UPDATE ${table} SET ${column} = ? WHERE Datum_marende = ?`
 
   const connection = await pool.getConnection()
@@ -159,13 +153,9 @@ router.put('/menu/fresh', validateDateFormat, async (req, res) => {
   }
 })
 
-// DELETE - Briši meni
 router.delete('/menu/delete', async (req, res) => {
   const datum = req.query.datum
   if (!datum) return res.status(400).json({ message: 'Datum je obavezan.' })
-  if (dayjs(datum).isBefore(dayjs(), 'day')) {
-    return res.status(400).json({ message: 'Ne možete brisati menije za prošle datume.' })
-  }
 
   const connection = await pool.getConnection()
   try {
@@ -191,31 +181,36 @@ router.get('/menu/history', async (req, res) => {
   try {
     const [menus] = await connection.execute(
       `
-      SELECT
-          Datum_marende AS Datum,
-          Juha AS Juha_m1,
-          Glavno_jelo AS Glavno_jelo_m1,
-          Salata AS Salata_m1,
-          ID_kuhara,
-          username,
-          'Marenda1' AS marenda
-      FROM Marenda1
-      WHERE Datum_marende >= ?
-      UNION ALL
-      SELECT
-          Datum_marende AS Datum,
-          Juha AS Juha_m2,
-          Glavno_jelo AS Glavno_jelo_m2,
-          Salata AS Salata_m2,
-          ID_kuhara,
-          username,
-          'Marenda2' AS marenda
-      FROM Marenda2
-      WHERE Datum_marende >= ?
-      ORDER BY Datum DESC  -- Koristimo "Datum" umjesto "Datum_marende"
-    `,
+            SELECT
+                Datum_marende AS Datum,
+                Juha AS Juha_m1,
+                Glavno_jelo AS Glavno_jelo_m1,
+                Salata AS Salata_m1,
+                ID_kuhara,
+                username,
+                'Marenda1' AS marenda
+            FROM Marenda1
+            WHERE Datum_marende >= ?
+            UNION ALL
+            SELECT
+                Datum_marende AS Datum,
+                Juha AS Juha_m2,
+                Glavno_jelo AS Glavno_jelo_m2,
+                Salata AS Salata_m2,
+                ID_kuhara,
+                username,
+                'Marenda2' AS marenda
+            FROM Marenda2
+            WHERE Datum_marende >= ?
+            ORDER BY Datum DESC
+        `,
       [today, today],
     )
+
+    // Manually set CORS headers for the OPTIONS request
+    res.header('Access-Control-Allow-Origin', 'https://thalassockmenu.netlify.app')
+    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE')
+    res.header('Access-Control-Allow-Headers', 'Content-Type')
 
     res.json(menus)
   } catch (err) {
