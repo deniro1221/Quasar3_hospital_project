@@ -43,26 +43,42 @@ router.post('/menu', validateDateFormat, async (req, res) => {
   if (!Datum_marende) return res.status(400).json({ message: 'Datum je obavezan.' })
 
   const connection = await pool.getConnection()
+  let transactionStarted = false // Dodana varijabla za praćenje transakcije
   try {
-    // Unos u obje tablice
     await connection.beginTransaction()
-    await connection.execute(
-      `
-      INSERT INTO Marenda1 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
-      VALUES (?, ?, ?, ?, ?, ?)`,
-      [Datum_marende, Juha_m1, Glavno_jelo_m1, Salata_m1, ID_kuhara, username],
-    )
-    await connection.execute(
-      `
-      INSERT INTO Marenda2 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
-      VALUES (?, ?, ?, ?, ?, ?)`,
-      [Datum_marende, Juha_m2, Glavno_jelo_m2, Salata_m2, ID_kuhara, username],
-    )
+    transactionStarted = true // Postavljeno na true nakon početka transakcije
+
+    const sql1 = `
+            INSERT INTO Marenda1 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
+            VALUES (?, ?, ?, ?, ?, ?)`
+    await connection.execute(sql1, [
+      Datum_marende,
+      Juha_m1,
+      Glavno_jelo_m1,
+      Salata_m1,
+      ID_kuhara,
+      username,
+    ])
+
+    const sql2 = `
+            INSERT INTO Marenda2 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
+            VALUES (?, ?, ?, ?, ?, ?)`
+    await connection.execute(sql2, [
+      Datum_marende,
+      Juha_m2,
+      Glavno_jelo_m2,
+      Salata_m2,
+      ID_kuhara,
+      username,
+    ])
 
     await connection.commit()
     res.status(200).json({ message: 'Meniji uspješno spremljeni.' })
   } catch (err) {
-    await connection.rollback()
+    if (transactionStarted) {
+      // Provjeri je li transakcija započeta prije rollbacka
+      await connection.rollback()
+    }
     console.error(err)
     res.status(500).json({ message: 'Greška na serveru.' })
   } finally {
