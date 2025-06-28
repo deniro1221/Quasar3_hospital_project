@@ -238,6 +238,16 @@ export default {
         if (existingMenu) {
           // Ako meni postoji, prikaži poruku o grešci
           alert('Meni za taj datum već postoji.')
+          // Resetiranje forme
+          form.value = {
+            date: new Date().toISOString().slice(0, 10),
+            juha_m1: '',
+            glavno_jelo_m1: '',
+            salata_m1: '',
+            juha_m2: '',
+            glavno_jelo_m2: '',
+            salata_m2: '',
+          }
           return // Prekini funkciju
         }
 
