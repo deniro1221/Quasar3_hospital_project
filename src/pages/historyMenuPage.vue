@@ -15,7 +15,6 @@
               (val) => !!val || 'Datum je obavezan',
               (val) => isFutureDate(val) || 'Datum mora biti jednak ili veći od današnjeg',
             ]"
-            readonly
           />
           <q-input v-model="form.juha_m1" label="Juha (Marenda 1)" />
           <q-input v-model="form.glavno_jelo_m1" label="Glavno jelo (Marenda 1)" />
