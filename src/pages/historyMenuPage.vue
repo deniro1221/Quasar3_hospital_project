@@ -1,3 +1,4 @@
+Copy
 <template>
   <q-page class="q-pa-md">
     <!-- Unos menija -->
@@ -7,7 +8,6 @@
       </q-card-section>
       <q-card-section>
         <q-form @submit="addMenu" ref="menuForm">
-          <!-- Dodan ref na formu -->
           <q-input
             v-model="form.date"
             type="date"
@@ -40,31 +40,27 @@
           <template v-slot:body-cell="props">
             <q-td
               :props="props"
-              @dblclick="enableEditing(props.row, props.col.name)"
+              @dblclick="onCellDblClick(props.row, props.col)"
               style="cursor: pointer"
             >
               <!-- Dodan style za bolji UX -->
               <div
                 v-if="
-                  !props.row.editing ||
-                  props.col.name === 'Datum_marende' ||
-                  props.col.name === 'username' ||
-                  props.col.name === 'ID_kuhara'
+                  editingCell.rowId === props.row.Datum_marende &&
+                  editingCell.col === props.col.name
                 "
               >
+                <q-input
+                  v-model="props.row[props.col.field]"
+                  @input="onCellInput(props.row, props.col, $event)"
+                  @blur="cancelEdit()"
+                  dense
+                  autofocus
+                />
+              </div>
+              <div v-else>
                 {{ props.value }}
               </div>
-              <q-input
-                v-else
-                v-model="props.row[props.col.field]"
-                @blur="
-                  () => {
-                    updateMenu(props.row, props.col.field)
-                  }
-                "
-                dense
-                autofocus
-              />
             </q-td>
           </template>
 
@@ -76,10 +72,12 @@
           </template>
         </q-table>
       </q-card-section>
+      <q-card-section>
+        <q-btn color="primary" @click="confirmUpdate">Ažuriraj meni</q-btn>
+      </q-card-section>
     </q-card>
   </q-page>
 </template>
-
 <script>
 import { ref, onMounted } from 'vue'
 
