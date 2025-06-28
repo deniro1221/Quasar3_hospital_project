@@ -279,7 +279,6 @@ export default {
       }
     }
 
-    // Ref za trenutno uređenu ćeliju
     const editingCell = ref({ rowId: null, col: null })
 
     // Mapa za praćenje promjena
@@ -287,12 +286,18 @@ export default {
 
     // Funkcija za dvoklik na ćeliju
     function onCellDblClick(row, column) {
-      if (['Datum_marende', 'username', 'ID_kuhara', 'actions'].includes(column.name)) return
+      console.log('onCellDblClick pozvan', row, column)
+      if (['Datum_marende', 'username', 'ID_kuhara', 'actions'].includes(column.name)) {
+        console.log('Polje nije dozvoljeno za uređivanje')
+        return
+      }
       editingCell.value = { rowId: row.Datum_marende, col: column.name }
+      console.log('editingCell.value nakon dvoklika', editingCell.value)
     }
 
     // Funkcija za unos u ćeliju
     function onCellInput(row, column, event) {
+      console.log('onCellInput pozvan', row, column, event)
       let newVal = event.target.value || event.target.innerText
 
       if (!changesMap.value[row.Datum_marende]) {
@@ -300,15 +305,19 @@ export default {
       }
 
       changesMap.value[row.Datum_marende][column.field] = newVal
+      console.log('changesMap.value nakon unosa', changesMap.value)
     }
 
     // Funkcija za prekid uređivanja
     function cancelEdit() {
+      console.log('cancelEdit pozvan')
       editingCell.value = {}
+      console.log('editingCell.value nakon cancelEdit', editingCell.value)
     }
 
     // Funkcija za potvrdu ažuriranja
     async function confirmUpdate() {
+      console.log('confirmUpdate pozvan')
       if (!Object.keys(changesMap.value).length) {
         alert('Nema promjena za ažurirati.')
         return
@@ -319,6 +328,8 @@ export default {
       let successCount = 0
       let failCount = 0
 
+      console.log('changesMap.value prije slanja', changesMap.value)
+
       for (const rowId in changesMap.value) {
         const updatedRow = { ...changesMap.value[rowId] }
 
@@ -327,7 +338,7 @@ export default {
           Datum_marende: updatedRow.Datum_marende,
           [updatedRow.col]: updatedRow[updatedRow.field], // Šalji samo promijenjeno polje
         }
-
+        console.log('payload prije slanja', payload)
         const url = `https://backend-hospital-n9to.onrender.com/menu/fresh`
 
         try {
@@ -363,6 +374,8 @@ export default {
       alert(`Uspješno ažurirano: ${successCount}, Neuspješno: ${failCount}.`)
       changesMap.value = {}
       editingCell.value = {}
+      console.log('changesMap.value nakon ažuriranja', changesMap.value)
+      console.log('editingCell.value nakon ažuriranja', editingCell.value)
     }
 
     const deleteMenu = async (menu) => {
