@@ -1,486 +1,411 @@
 <template>
-  <q-page padding>
-    <h4>Pregled dijeta pacijenata</h4>
+  <q-page class="q-pa-md">
+    <!-- Unos menija -->
+    <q-card class="q-mb-md">
+      <q-card-section>
+        <div class="text-h6">Dodaj meni</div>
+      </q-card-section>
+      <q-card-section>
+        <q-form @submit="addMenu" ref="menuForm">
+          <q-input
+            v-model="form.date"
+            type="date"
+            label="Datum"
+            :rules="[
+              (val) => !!val || 'Datum je obavezan',
+              (val) => isFutureDate(val) || 'Datum mora biti jednak ili veći od današnjeg',
+            ]"
+            readonly
+          />
+          <q-input v-model="form.juha_m1" label="Juha (Marenda 1)" />
+          <q-input v-model="form.glavno_jelo_m1" label="Glavno jelo (Marenda 1)" />
+          <q-input v-model="form.salata_m1" label="Salata (Marenda 1)" />
+          <q-input v-model="form.juha_m2" label="Juha (Marenda 2)" />
+          <q-input v-model="form.glavno_jelo_m2" label="Glavno jelo (Marenda 2)" />
+          <q-input v-model="form.salata_m2" label="Salata (Marenda 2)" />
+          <q-btn type="submit" color="primary" label="Spremi meni" />
+        </q-form>
+      </q-card-section>
+    </q-card>
 
-    <!-- User Info Display -->
-    <div class="q-mb-md">
-      <p v-if="loggedInUser">Sestra: {{ loggedInUser }}</p>
-      <p v-if="idSestre">ID Sestre: {{ idSestre }}</p>
-    </div>
-
-    <!-- Message Display -->
-    <div
-      v-if="message"
-      :class="isSuccess ? 'bg-green-2 text-green-10' : 'bg-red-2 text-red-10'"
-      class="q-pa-md q-mb-md rounded-borders"
-    >
-      {{ message }}
-    </div>
-
-    <!-- Add Patient Diet Button -->
-    <q-btn label="Dodaj dijetu pacijenta" color="primary" @click="openDialog" class="q-mb-md" />
-
-    <q-table :rows="activePatients" :columns="columns" row-key="ID_dijeta_pac" class="styled-table">
-      <template v-slot:body="props">
-        <q-tr :props="props">
-          <q-td v-for="col in columns" :key="col.name" :props="props">
-            <!-- Editing on Double Click -->
-            <div
-              v-if="editingCell.rowId === props.row.ID_dijeta_pac && editingCell.col === col.name"
+    <!-- Tablica za pregled menija -->
+    <q-card>
+      <q-card-section>
+        <div class="text-h6">Pregled menija</div>
+      </q-card-section>
+      <q-card-section>
+        <q-table :rows="menus" :columns="columns" row-key="Datum_marende" :pagination="pagination">
+          <!-- Ažuriranje podataka -->
+          <template v-slot:body-cell="props">
+            <q-td
+              :props="props"
+              @dblclick="onCellDblClick(props.row, props.col)"
+              style="cursor: pointer"
             >
-              <input
-                v-model="props.row[col.field]"
-                @blur="onCellInput(props.row, col, $event)"
-                @keydown.enter="onCellInput(props.row, col, $event)"
-                @keydown.esc="cancelEdit()"
+              <div
+                v-if="
+                  editingCell.rowId !== props.row.Datum_marende ||
+                  editingCell.col !== props.col.name
+                "
+              >
+                {{ props.value }}
+              </div>
+              <q-input
+                v-else
+                v-model="props.row[props.col.field]"
+                @input="onCellInput(props.row, props.col, $event)"
+                @blur="cancelEdit()"
+                dense
                 autofocus
-                style="width: 100%"
               />
-            </div>
-            <div
-              v-else
-              @dblclick="onCellDblClick(props.row, col)"
-              style="min-width: 80px; cursor: pointer; user-select: none"
-              title="Dvoklik za uređivanje"
-            >
-              {{ props.row[col.field] }}
-            </div>
-          </q-td>
-        </q-tr>
-      </template>
-    </q-table>
+            </q-td>
+          </template>
 
-    <!-- Combined Button Group -->
-    <div class="q-gutter-sm button-group">
-      <q-btn label="Ažuriraj" color="primary" @click="confirmUpdate" />
-      <q-btn label="Odjavi se" color="negative" @click="logout" />
-      <q-btn label="Ispis" color="secondary" @click="izveziAktivnePDF" />
-    </div>
-
-    <!-- Add Patient Diet Dialog -->
-    <q-dialog v-model="dialogOpen">
-      <q-card style="width: 700px; max-width: 80vw;">
-        <q-card-section>
-          <div class="text-h6">Dodaj novu dijetu pacijenta</div>
-        </q-card-section>
-
-        <q-card-section>
-          <q-form @submit.prevent="postPatient" class="q-gutter-md">
-            <q-input v-model="brojSobe" label="Broj sobe" type="number" required />
-            <q-input v-model="imePrezime" label="Ime i prezime" required />
-            <q-input v-model="dorucak" label="Doručak" required />
-            <q-input v-model="rucak" label="Ručak" required />
-            <q-input v-model="vecera" label="Večera" required />
-            <q-input v-model="vrsta_dijete" label="Vrsta dijete" required />
-            <q-input v-model="napomene" label="Napomene" />
-            <q-input v-model="dolazak" label="Dolazak" type="date" required />
-            <q-input v-model="odlazak" label="Odlazak" type="date" required />
-            <q-select v-model="uSobu" label="U sobu" :options="['da', 'ne']" required />
-          </q-form>
-        </q-card-section>
-
-        <q-card-actions align="right" class="q-pa-sm">
-          <q-btn label="Odustani" color="secondary" @click="closeDialog" />
-          <q-btn label="Spremi" color="primary" @click="postPatient" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+          <!-- Brisanje menija -->
+          <template v-slot:body-cell-actions="props">
+            <q-td :props="props">
+              <q-btn @click="deleteMenu(props.row)" color="negative" label="Obriši" size="sm" />
+            </q-td>
+          </template>
+        </q-table>
+      </q-card-section>
+      <q-card-section>
+        <q-btn color="primary" @click="confirmUpdate">Ažuriraj meni</q-btn>
+      </q-card-section>
+    </q-card>
   </q-page>
 </template>
 
-<script setup>
-import { ref, onMounted, computed } from 'vue'
-import html2pdf from 'html2pdf.js'
-import { useRouter } from 'vue-router'
+<script>
+import { ref, onMounted } from 'vue'
 
-// Data
-const dijeta_pac = ref([])
-const editingCell = ref({})
-const changesMap = ref({})
-const message = ref('')
-const isSuccess = ref(false)
-
-// User Info
-const loggedInUser = ref('')
-const idSestre = ref('')
-const username = ref('')
-
-// Columns definition
-const columns = [
-  { name: 'ID_dijeta_pac', label: 'ID Dijete pacijenta', align: 'left', field: 'ID_dijeta_pac' },
-  { name: 'Broj_sobe', label: 'Broj sobe', align: 'left', field: 'Broj_sobe' },
-  { name: 'Ime_prezime', label: 'Ime i prezime', align: 'left', field: 'Ime_prezime' },
-  { name: 'Dorucak', label: 'Doručak', align: 'left', field: 'Dorucak' },
-  { name: 'Rucak', label: 'Ručak', align: 'left', field: 'Rucak' },
-  { name: 'Vecera', label: 'Večera', align: 'left', field: 'Vecera' },
-  { name: 'Vrsta_dijete', label: 'Vrsta dijete', align: 'left', field: 'Vrsta_dijete' },
-  { name: 'Napomene', label: 'Napomene', align: 'left', field: 'Napomene' },
-  { name: 'U_sobu', label: 'U sobu', align: 'left', field: 'U_sobu' },
-  { name: 'Dolazak', label: 'Dolazak', align: 'left', field: 'Dolazak' },
-  { name: 'Odlazak', label: 'Odlazak', align: 'left', field: 'Odlazak' },
-  { name: 'Datum_unosa', label: 'Datum unosa', align: 'left', field: 'Datum_unosa' },
-  { name: 'username', label: 'Sestra', align: 'left', field: 'username' },
-]
-
-// Dialog Control
-const dialogOpen = ref(false)
-
-// Form fields
-const brojSobe = ref('')
-const imePrezime = ref('')
-const dorucak = ref('')
-const rucak = ref('')
-const vecera = ref('')
-const vrsta_dijete = ref('')
-const napomene = ref('')
-const uSobu = ref('da')
-const dolazak = ref('')
-const odlazak = ref('')
-
-// Router
-const router = useRouter()
-
-// Computed property for active patients
-const activePatients = computed(() => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0) // Set time to midnight for accurate comparison
-
-  return dijeta_pac.value.filter((patient) => {
-    if (!patient.Datum_odlaska) return true // If departure date is null, consider them active
-
-    const departureDate = new Date(patient.Datum_odlaska)
-    departureDate.setHours(0, 0, 0, 0)
-
-    return departureDate >= today // Departure date is today or in the future
-  })
-})
-
-// Functions
-
-// Refresh ID
-function refreshID() {
-  idSestre.value = localStorage.getItem('idSestre') ? Number(localStorage.getItem('idSestre')) : ''
-  username.value = localStorage.getItem('loggedInUser') || ''
-}
-
-// Show Message
-function showMessage(txt, success = true) {
-  isSuccess.value = success
-  message.value = txt
-  setTimeout(() => {
-    message.value = ''
-  }, 3000)
-}
-
-// Reset Form
-function resetForm() {
-  brojSobe.value = ''
-  imePrezime.value = ''
-  dorucak.value = ''
-  rucak.value = ''
-  vecera.value = ''
-  vrsta_dijete.value = ''
-  napomene.value = ''
-  uSobu.value = 'da'
-  dolazak.value = ''
-  odlazak.value = ''
-}
-
-// Open Dialog
-function openDialog() {
-  dialogOpen.value = true
-}
-
-// Close Dialog
-function closeDialog() {
-  dialogOpen.value = false
-  resetForm() // Clear the form when closing
-}
-
-// Fetch Patient Data
-async function showPatient() {
-  try {
-    const response = await fetch('https://backend-hospital-n9to.onrender.com/dijeta-pacijent/active')
-    const data = await response.json()
-    dijeta_pac.value = Array.isArray(data) ? data : data ? [data] : []
-  } catch (error) {
-    console.error('Greška pri učitavanju podataka.', error)
-  }
-  console.log('Prikaz podataka: ', dijeta_pac.value)
-}
-
-// Format Date to MySQL
-function formatDateToMySQL(dateStr) {
-  if (!dateStr || typeof dateStr !== 'string') return dateStr
-  if (!dateStr.includes('-')) return dateStr
-  const parts = dateStr.split('-')
-  if (parts.length === 3 && parts[0].length === 4) return dateStr
-  if (parts.length === 3 && parts[0].length === 2) {
-    const [day, month, year] = parts
-    return `${year}-${month}-${day}`
-  }
-  return dateStr
-}
-
-// Cell Double Click
-function onCellDblClick(row, column) {
-  if (['ID_dijeta_pac', 'username', 'Datum_unosa'].includes(column.name)) return
-  editingCell.value = { rowId: row.ID_dijeta_pac, col: column.name }
-}
-
-// Cell Input
-function onCellInput(row, column, event) {
-  let newVal = event.target.value || event.target.innerText
-  if (['Odlazak', 'Datum_unosa', 'Dolazak'].includes(column.name)) {
-    newVal = formatDateToMySQL(newVal)
-  }
-
-  if (!changesMap.value[row.ID_dijeta_pac]) {
-    changesMap.value[row.ID_dijeta_pac] = { ...row }
-  }
-
-  changesMap.value[row.ID_dijeta_pac][column.field] = newVal
-  editingCell.value = {}
-}
-
-// Cancel Edit
-function cancelEdit() {
-  editingCell.value = {}
-}
-
-// Confirm Update
-async function confirmUpdate() {
-  if (!Object.keys(changesMap.value).length) {
-    message.value = 'Nema promjena za ažurirati.'
-    return
-  }
-
-  if (!confirm('Jeste li sigurni za ažuriranje?')) return
-
-  let successCount = 0
-  let failCount = 0
-
-  for (const rowId in changesMap.value) {
-    const updatedRow = { ...changesMap.value[rowId] }
-
-    updatedRow.Odlazak = formatDateToMySQL(updatedRow.Odlazak)
-    updatedRow.Dolazak = formatDateToMySQL(updatedRow.Dolazak)
-    updatedRow.ID_sestre = idSestre.value // Use ref value
-    updatedRow.username = username.value
-
-    // 🔒 Remove protected fields before sending
-    delete updatedRow.ID_dijeta_pac
-    delete updatedRow.Datum_unosa
-
-    const url = `https://backend-hospital-n9to.onrender.com/dijeta-pacijent/${rowId}`
-
-    try {
-      const response = await fetch(url, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedRow),
-      })
-
-      if (response.ok) {
-        successCount++
-        const index = dijeta_pac.value.findIndex((r) => r.ID_dijeta_pac === parseInt(rowId))
-        if (index !== -1) {
-          dijeta_pac.value[index] = {
-            ...dijeta_pac.value[index],
-            ...updatedRow,
-          }
-        }
-      } else {
-        failCount++
-        const errMsg = await response.json()
-        alert(`Greška kod ID ${rowId}: ${errMsg.message}`)
-      }
-    } catch (err) {
-      failCount++
-      alert(`Neuspješno slanje ID ${rowId}: ${err.message}`)
-    }
-  }
-
-  // Refresh data after all update attempts, regardless of success or failure
-  await showPatient()
-
-  message.value = `Uspješno ažurirano: ${successCount}, Neuspješno: ${failCount}.`
-  changesMap.value = {}
-  editingCell.value = {}
-}
-
-// Post Patient Data
-async function postPatient() {
-  refreshID()
-  console.log('ID_sestre za slanje: ', idSestre.value)
-  try {
-    const response = await fetch('https://backend-hospital-n9to.onrender.com/dijeta-pacijent', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        Broj_sobe: brojSobe.value,
-        Ime_prezime: imePrezime.value,
-        Dorucak: dorucak.value,
-        Rucak: rucak.value,
-        Vecera: vecera.value,
-        vrsta_dijete: vrsta_dijete.value,
-        Napomene: napomene.value,
-        U_sobu: uSobu.value,
-        Dolazak: dolazak.value,
-        Odlazak: odlazak.value,
-        ID_sestre: idSestre.value,
-        username: username.value
-      }),
+export default {
+  setup() {
+    // Stanje forme za unos menija
+    const form = ref({
+      date: new Date().toISOString().slice(0, 10),
+      juha_m1: '',
+      glavno_jelo_m1: '',
+      salata_m1: '',
+      juha_m2: '',
+      glavno_jelo_m2: '',
+      salata_m2: '',
     })
 
-    if (response.ok) {
-      showMessage('Podaci uspješno spremljeni.', true)
-      await showPatient() // Refresh table data
-      closeDialog() // Close the dialog
-    } else {
-      showMessage('Greška pri unosu podataka.', false)
+    // Stanje tablice s menijima
+    const menus = ref([])
+
+    // Kolone za tablicu
+    const columns = [
+      {
+        name: 'Datum_marende',
+        label: 'Datum',
+        field: 'Datum_marende',
+        align: 'left',
+        sortable: true,
+      },
+      {
+        name: 'Juha_m1',
+        label: 'Juha (Marenda 1)',
+        field: 'Juha_m1',
+        align: 'left',
+        sortable: true,
+      },
+      {
+        name: 'Glavno_jelo_m1',
+        label: 'Glavno jelo (Marenda 1)',
+        field: 'Glavno_jelo_m1',
+        align: 'left',
+        sortable: true,
+      },
+      {
+        name: 'Salata_m1',
+        label: 'Salata (Marenda 1)',
+        field: 'Salata_m1',
+        align: 'left',
+        sortable: true,
+      },
+      {
+        name: 'Juha_m2',
+        label: 'Juha (Marenda 2)',
+        field: 'Juha_m2',
+        align: 'left',
+        sortable: true,
+      },
+      {
+        name: 'Glavno_jelo_m2',
+        label: 'Glavno jelo (Marenda 2)',
+        field: 'Glavno_jelo_m2',
+        align: 'left',
+        sortable: true,
+      },
+      {
+        name: 'Salata_m2',
+        label: 'Salata (Marenda 2)',
+        field: 'Salata_m2',
+        align: 'left',
+        sortable: true,
+      },
+      {
+        name: 'username',
+        label: 'Korisnik',
+        field: 'username',
+        align: 'left',
+        sortable: true,
+      },
+      {
+        name: 'ID_kuhara',
+        label: 'ID kuhara',
+        field: 'ID_kuhara',
+        align: 'left',
+        sortable: true,
+      },
+      { name: 'actions', label: 'Akcije', field: 'actions', align: 'center' },
+    ]
+
+    // Paginacija za tablicu
+    const pagination = ref({
+      rowsPerPage: 10,
+    })
+
+    const isFutureDate = (date) => {
+      const today = new Date().toISOString().slice(0, 10)
+      return date >= today
     }
-  } catch (error) {
-    console.error('Greška:', error)
-    showMessage('Greška na serveru.', false)
-  }
-}
 
-// Logout Function
-const logout = () => {
-  localStorage.removeItem('loggedInUser')
-  localStorage.removeItem('idSestre')
-  idSestre.value = ''
-  loggedInUser.value = ''
-  router.push('/login_nurse')
-  console.log('ID_sestre u Vue nakon odjave:', idSestre.value)
-}
+    const fetchMenus = async () => {
+      try {
+        const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/history')
+        if (!response.ok) {
+          throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
+        }
+        const data = await response.json()
 
-// Function to generate and save PDF from data
-function printPdfFromData(data, title) {
-  if (!data.length) {
-    alert('Nema podataka za ispis.')
-    return
-  }
+        const groupedMenus = data.reduce((acc, menu) => {
+          const date = menu.Datum.split('T')[0]
+          if (!acc[date]) {
+            acc[date] = {
+              Datum_marende: date,
+              Juha_m1: '',
+              Glavno_jelo_m1: '',
+              Salata_m1: '',
+              Juha_m2: '',
+              Glavno_jelo_m2: '',
+              Salata_m2: '',
+              username: menu.username,
+              ID_kuhara: menu.ID_kuhara,
+            }
+          }
 
-  const style = `
-    <style>
-      table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: Arial, sans-serif; }
-      th, td { border: 1px solid #333; padding: 6px; text-align: left; }
-      th { background: #f0f0f0; }
-      h3 { margin-bottom: 10px; font-family: Arial, sans-serif; }
-    </style>
-  `
+          if (menu.marenda === 'Marenda1') {
+            acc[date].Juha_m1 = menu.Juha_m1 || ''
+            acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
+            acc[date].Salata_m1 = menu.Salata_m1 || ''
+            acc[date].username = menu.username || ''
+            acc[date].ID_kuhara = menu.ID_kuhara || ''
+          } else if (menu.marenda === 'Marenda2') {
+            acc[date].Juha_m2 = menu.Juha_m1 || '' // Ispravljeno menu.Juha_m1 u menu.Juha_m2
+            acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || '' // Ispravljeno menu.Glavno_jelo_m1 u menu.Glavno_jelo_m2
+            acc[date].Salata_m2 = menu.Salata_m1 || '' // Ispravljeno menu.Salata_m1 u menu.Salata_m2
+            acc[date].username = menu.username || ''
+            acc[date].ID_kuhara = menu.ID_kuhara || ''
+          }
 
-  const html = `
-    ${style}
-    <h3>${title}</h3>
-    <table>
-      <thead>
-        <tr>
-          ${columns.map((c) => `<th>${c.label}</th>`).join('')}
-        </tr>
-      </thead>
-      <tbody>
-        ${data
-          .map(
-            (row) => `
-            <tr>
-              ${columns.map((c) => `<td>${row[c.field] ?? ''}</td>`).join('')}
-            </tr>
-          `,
+          return acc
+        }, {})
+
+        menus.value = Object.values(groupedMenus)
+      } catch (error) {
+        console.error(error.message)
+        alert('Greška pri dohvaćanju menija: ' + error.message)
+      }
+    }
+
+    const addMenu = async () => {
+      try {
+        const existingMenu = menus.value.find((menu) => menu.Datum_marende === form.value.date)
+
+        if (existingMenu) {
+          alert('Meni za taj datum već postoji.')
+          return
+        }
+
+        const response = await fetch('https://backend-hospital-n9to.onrender.com/menu', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            Datum_marende: form.value.date,
+            ID_kuhara: 2, // Ili dohvati ID_kuhara dinamički
+            username: 'marin', // Ili dohvati username dinamički
+            Juha_m1: form.value.juha_m1,
+            Glavno_jelo_m1: form.value.glavno_jelo_m1,
+            Salata_m1: form.value.salata_m1,
+            Juha_m2: form.value.juha_m2,
+            Glavno_jelo_m2: form.value.glavno_jelo_m2,
+            Salata_m2: form.value.salata_m2,
+          }),
+        })
+
+        if (response.ok) {
+          alert('Meni uspješno dodan!')
+          fetchMenus()
+
+          form.value = {
+            date: new Date().toISOString().slice(0, 10),
+            juha_m1: '',
+            glavno_jelo_m1: '',
+            salata_m1: '',
+            juha_m2: '',
+            glavno_jelo_m2: '',
+            salata_m2: '',
+          }
+        } else {
+          const errorData = await response.json()
+          throw new Error(
+            `Greška pri dodavanju menija: ${response.status} ${JSON.stringify(errorData)}`,
           )
-          .join('')}
-      </tbody>
-    </table>
-  `
-
-  const container = document.createElement('div')
-  container.innerHTML = html
-  html2pdf().from(container).save()
-}
-
-
-function parseDateString(dateStr) {
-  const parts = dateStr.match(/^(\d{2})-(\d{2})-(\d{4})$/)
-  if (parts) {
-    const [, day, month, year] = parts
-    return new Date(`${year}-${month}-${day}`)
-  }
-  return new Date(dateStr)
-}
-
-// Function to export active patient diets to PDF
-function izveziAktivnePDF() {
-  const today = new Date()
-  const todayStart = new Date(today)
-  todayStart.setHours(0, 0, 0, 0)
-
-  const aktivne = dijeta_pac.value.filter((row) => {
-    if (!row.Odlazak) {
-      console.log('Nema datum za red:', row)
-      return false
+        }
+      } catch (error) {
+        console.error(error.message)
+        alert('Greška pri dodavanju menija: ' + error.message)
+      }
     }
 
-    const odlazakDate = parseDateString(row.Odlazak)
-    odlazakDate.setHours(0, 0, 0, 0)
+    // Ref za trenutno uređenu ćeliju
+    const editingCell = ref({ rowId: null, col: null })
 
-    console.log('Red:', row, 'Odlazak (raw):', row.Odlazak, 'Parsed:', odlazakDate)
+    // Mapa za praćenje promjena
+    const changesMap = ref({})
 
-    return odlazakDate >= todayStart
-  })
+    // Funkcija za dvoklik na ćeliju
+    function onCellDblClick(row, column) {
+      if (['Datum_marende', 'username', 'ID_kuhara', 'actions'].includes(column.name)) return
+      editingCell.value = { rowId: row.Datum_marende, col: column.name }
+    }
 
-  console.log('Aktivne dijete:', aktivne)
+    // Funkcija za unos u ćeliju
+    function onCellInput(row, column, event) {
+      let newVal = event.target.value || event.target.innerText
 
-  if (!aktivne.length) {
-    alert('Nema aktivnih dijeta za ispis.')
-    return
-  }
+      if (!changesMap.value[row.Datum_marende]) {
+        changesMap.value[row.Datum_marende] = { ...row }
+      }
 
-  printPdfFromData(aktivne, 'Aktivne dijete pacijenata')
+      changesMap.value[row.Datum_marende][column.field] = newVal
+    }
+
+    // Funkcija za prekid uređivanja
+    function cancelEdit() {
+      editingCell.value = {}
+    }
+
+    // Funkcija za potvrdu ažuriranja
+    async function confirmUpdate() {
+      if (!Object.keys(changesMap.value).length) {
+        alert('Nema promjena za ažurirati.')
+        return
+      }
+
+      if (!confirm('Jeste li sigurni za ažuriranje?')) return
+
+      let successCount = 0
+      let failCount = 0
+
+      for (const rowId in changesMap.value) {
+        const updatedRow = { ...changesMap.value[rowId] }
+
+        // Pripremi podatke za slanje
+        const payload = {
+          Datum_marende: updatedRow.Datum_marende,
+          [updatedRow.col]: updatedRow[updatedRow.field], // Šalji samo promijenjeno polje
+        }
+
+        const url = `https://backend-hospital-n9to.onrender.com/menu/fresh`
+
+        try {
+          const response = await fetch(url, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          })
+
+          if (response.ok) {
+            successCount++
+            const index = menus.value.findIndex((r) => r.Datum_marende === rowId)
+            if (index !== -1) {
+              menus.value[index] = {
+                ...menus.value[index],
+                ...updatedRow,
+              }
+            }
+          } else {
+            failCount++
+            const errMsg = await response.json()
+            alert(`Greška kod datuma ${rowId}: ${errMsg.message}`)
+          }
+        } catch (err) {
+          failCount++
+          alert(`Neuspješno slanje za datum ${rowId}: ${err.message}`)
+        }
+      }
+
+      // Osvježi podatke nakon svih pokušaja ažuriranja
+      await fetchMenus()
+
+      alert(`Uspješno ažurirano: ${successCount}, Neuspješno: ${failCount}.`)
+      changesMap.value = {}
+      editingCell.value = {}
+    }
+
+    const deleteMenu = async (menu) => {
+      try {
+        const confirmDelete = confirm('Jeste li sigurni da želite obrisati meni?')
+        if (confirmDelete) {
+          const response = await fetch(
+            `https://backend-hospital-n9to.onrender.com/menu/delete?datum=${menu.Datum_marende}`,
+            {
+              method: 'DELETE',
+            },
+          )
+
+          if (response.ok) {
+            alert('Meni uspješno obrisan!')
+            fetchMenus()
+          } else {
+            throw new Error('Greška pri brisanju menija')
+          }
+        }
+      } catch (error) {
+        console.error(error.message)
+        alert('Greška pri brisanju menija')
+      }
+    }
+
+    onMounted(() => {
+      fetchMenus()
+    })
+
+    return {
+      form,
+      menus,
+      columns,
+      pagination,
+      addMenu,
+      deleteMenu,
+      isFutureDate,
+      editingCell,
+      changesMap,
+      onCellDblClick,
+      onCellInput,
+      cancelEdit,
+      confirmUpdate,
+    }
+  },
 }
-
-// Lifecycle Hook
-onMounted(() => {
-  loggedInUser.value = localStorage.getItem('loggedInUser')
-  refreshID()
-  console.log('ID_sestre u Vue nakon učitavanja:', idSestre.value)
-
-  if (!loggedInUser.value) {
-    router.push('/login_nurse')
-  }
-  showPatient()
-})
 </script>
 
 <style scoped>
-.rounded-borders {
-  border-radius: 8px;
-}
-
-/* Styled Table */
-.styled-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.styled-table th,
-.styled-table td {
-  border: 1px solid #ddd; /* Light gray border */
-  padding: 8px;
-  text-align: left;
-}
-
-.styled-table th {
-  background-color: #f2f2f2; /* Light gray background for header */
-  font-weight: bold;
-}
-
-/* Button Group Styling */
-.button-group {
-  display: flex;
-  justify-content: start; /* Align buttons to the left */
-  gap: 10px; /* Space between buttons */
-  margin-bottom: 10px; /* Space below the button group */
+.q-card {
+  margin-bottom: 20px;
 }
 </style>
