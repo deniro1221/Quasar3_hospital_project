@@ -310,7 +310,9 @@ export default {
       }
     }
     const openDialog = () => {
+      console.log('openDialog pozvan')
       addMenuDialog.value = true
+      console.log('addMenuDialog.value', addMenuDialog.value)
     }
     const editingCell = ref({ rowId: null, col: null })
 
