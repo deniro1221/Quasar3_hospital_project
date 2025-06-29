@@ -30,7 +30,8 @@
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="Odustani" color="primary" v-close-popup />
+          <q-btn flat label="Odustani" color="primary" @click="closeDialog" />
+          <!-- Promijenjeno v-close-popup u @click="closeDialog" -->
           <q-btn flat label="Spremi" color="primary" @click="addMenu" />
         </q-card-actions>
       </q-card>
@@ -170,7 +171,19 @@ export default {
       },
       { name: 'actions', label: 'Akcije', field: 'actions', align: 'center' },
     ]
-
+    const closeDialog = () => {
+      console.log('closeDialog pozvan')
+      addMenuDialog.value = false
+      form.value = {
+        date: new Date().toISOString().slice(0, 10),
+        juha_m1: '',
+        glavno_jelo_m1: '',
+        salata_m1: '',
+        juha_m2: '',
+        glavno_jelo_m2: '',
+        salata_m2: '',
+      }
+    }
     // Paginacija za tablicu
     const pagination = ref({
       rowsPerPage: 10,
@@ -460,6 +473,7 @@ export default {
       addMenuDialog,
       openDialog,
       onDialogCancel,
+      closeDialog,
     }
   },
 }
