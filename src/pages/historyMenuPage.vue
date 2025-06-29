@@ -1,87 +1,103 @@
 <template>
-  <q-page class="q-pa-md">
-    <!-- Gumb za otvaranje dijaloga -->
-    <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
+  <q-layout view="hHh LpP lFf">
+    <q-header elevated>
+      <q-toolbar>
+        <q-toolbar-title> Meni </q-toolbar-title>
+      </q-toolbar>
+    </q-header>
 
-    <!-- Dijalog za unos menija -->
-    <q-dialog v-model="addMenuDialog" ref="addMenuDialog">
-      <q-card style="width: 700px">
-        <q-card-section>
-          <div class="text-h6">Dodaj meni</div>
-        </q-card-section>
-        <q-card-section>
-          <q-form @submit="addMenu" ref="menuForm" @reset="onReset">
-            <q-input
-              v-model="form.date"
-              type="date"
-              label="Datum"
-              :rules="[
-                (val) => !!val || 'Datum je obavezan',
-                (val) => isFutureDate(val) || 'Datum mora biti jednak ili veći od današnjeg',
-              ]"
-            />
-            <q-input v-model="form.juha_m1" label="Juha (Marenda 1)" />
-            <q-input v-model="form.glavno_jelo_m1" label="Glavno jelo (Marenda 1)" />
-            <q-input v-model="form.salata_m1" label="Salata (Marenda 1)" />
-            <q-input v-model="form.juha_m2" label="Juha (Marenda 2)" />
-            <q-input v-model="form.glavno_jelo_m2" label="Glavno jelo (Marenda 2)" />
-            <q-input v-model="form.salata_m2" label="Salata (Marenda 2)" />
-          </q-form>
-        </q-card-section>
+    <q-page-container>
+      <q-page class="q-pa-md">
+        <!-- Sav tvoj postojeći kod ovdje -->
+        <!-- Gumb za otvaranje dijaloga -->
+        <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
 
-        <q-card-actions align="right">
-          <q-btn flat label="Odustani" color="primary" @click="closeTheGreatDialog" />
-          <q-btn flat label="Spremi" color="primary" @click="addMenu" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+        <!-- Dijalog za unos menija -->
+        <q-dialog v-model="addMenuDialog">
+          <q-card style="width: 700px">
+            <q-card-section>
+              <div class="text-h6">Dodaj meni</div>
+            </q-card-section>
+            <q-card-section>
+              <q-form @submit="addMenu" ref="menuForm">
+                <q-input
+                  v-model="form.date"
+                  type="date"
+                  label="Datum"
+                  :rules="[
+                    (val) => !!val || 'Datum je obavezan',
+                    (val) => isFutureDate(val) || 'Datum mora biti jednak ili veći od današnjeg',
+                  ]"
+                />
+                <q-input v-model="form.juha_m1" label="Juha (Marenda 1)" />
+                <q-input v-model="form.glavno_jelo_m1" label="Glavno jelo (Marenda 1)" />
+                <q-input v-model="form.salata_m1" label="Salata (Marenda 1)" />
+                <q-input v-model="form.juha_m2" label="Juha (Marenda 2)" />
+                <q-input v-model="form.glavno_jelo_m2" label="Glavno jelo (Marenda 2)" />
+                <q-input v-model="form.salata_m2" label="Salata (Marenda 2)" />
+              </q-form>
+            </q-card-section>
 
-    <!-- Tablica za pregled menija -->
-    <q-card>
-      <q-card-section>
-        <div class="text-h6">Pregled menija</div>
-      </q-card-section>
-      <q-card-section>
-        <q-table :rows="menus" :columns="columns" row-key="Datum_marende" :pagination="pagination">
-          <!-- Ažuriranje podataka -->
-          <template v-slot:body-cell="props">
-            <q-td
-              :props="props"
-              @dblclick="onCellDblClick(props.row, props.col)"
-              style="cursor: pointer"
+            <q-card-actions align="right">
+              <q-btn flat label="Odustani" color="primary" @click="closeTheGreatDialog" />
+              <q-btn flat label="Spremi" color="primary" @click="addMenu" />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
+
+        <!-- Tablica za pregled menija -->
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">Pregled menija</div>
+          </q-card-section>
+          <q-card-section>
+            <q-table
+              :rows="menus"
+              :columns="columns"
+              row-key="Datum_marende"
+              :pagination="pagination"
             >
-              <!-- Dodan style za bolji UX -->
-              <div
-                v-if="
-                  editingCell.rowId !== props.row.Datum_marende ||
-                  editingCell.col !== props.col.name
-                "
-              >
-                {{ props.value }}
-              </div>
-              <q-input
-                v-else
-                v-model="props.row[props.col.field]"
-                @update:model-value="onCellInput(props.row, props.col, $event)"
-                dense
-                autofocus
-              />
-            </q-td>
-          </template>
+              <!-- Ažuriranje podataka -->
+              <template v-slot:body-cell="props">
+                <q-td
+                  :props="props"
+                  @dblclick="onCellDblClick(props.row, props.col)"
+                  style="cursor: pointer"
+                >
+                  <!-- Dodan style za bolji UX -->
+                  <div
+                    v-if="
+                      editingCell.rowId !== props.row.Datum_marende ||
+                      editingCell.col !== props.col.name
+                    "
+                  >
+                    {{ props.value }}
+                  </div>
+                  <q-input
+                    v-else
+                    v-model="props.row[props.col.field]"
+                    @update:model-value="onCellInput(props.row, props.col, $event)"
+                    dense
+                    autofocus
+                  />
+                </q-td>
+              </template>
 
-          <!-- Brisanje menija -->
-          <template v-slot:body-cell-actions="props">
-            <q-td :props="props">
-              <q-btn @click="deleteMenu(props.row)" color="negative" label="Obriši" size="sm" />
-            </q-td>
-          </template>
-        </q-table>
-      </q-card-section>
-      <q-card-section>
-        <q-btn color="primary" @click="confirmUpdate">Ažuriraj meni</q-btn>
-      </q-card-section>
-    </q-card>
-  </q-page>
+              <!-- Brisanje menija -->
+              <template v-slot:body-cell-actions="props">
+                <q-td :props="props">
+                  <q-btn @click="deleteMenu(props.row)" color="negative" label="Obriši" size="sm" />
+                </q-td>
+              </template>
+            </q-table>
+          </q-card-section>
+          <q-card-section>
+            <q-btn color="primary" @click="confirmUpdate">Ažuriraj meni</q-btn>
+          </q-card-section>
+        </q-card>
+      </q-page>
+    </q-page-container>
+  </q-layout>
 </template>
 
 <script>
