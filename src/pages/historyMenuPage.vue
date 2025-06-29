@@ -8,12 +8,11 @@
 
     <q-page-container>
       <q-page class="q-pa-md">
-        <!-- Sav tvoj postojeći kod ovdje -->
         <!-- Gumb za otvaranje dijaloga -->
         <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
 
         <!-- Dijalog za unos menija -->
-        <q-dialog v-model="addMenuDialog">
+        <q-dialog v-model="addMenuDialog" persistent>
           <q-card style="width: 700px">
             <q-card-section>
               <div class="text-h6">Dodaj meni</div>
