@@ -4,7 +4,7 @@
     <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
 
     <!-- Dijalog za unos menija -->
-    <q-dialog ref="addMenuDialog" @hide="onDialogCancel">
+    <q-dialog v-model="addMenuDialog" ref="addMenuDialog" @hide="onDialogCancel">
       <q-card style="width: 700px">
         <q-card-section>
           <div class="text-h6">Dodaj meni</div>
