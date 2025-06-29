@@ -1,31 +1,40 @@
 <template>
   <q-page class="q-pa-md">
-    <!-- Unos menija -->
-    <q-card class="q-mb-md">
-      <q-card-section>
-        <div class="text-h6">Dodaj meni</div>
-      </q-card-section>
-      <q-card-section>
-        <q-form @submit="addMenu" ref="menuForm">
-          <q-input
-            v-model="form.date"
-            type="date"
-            label="Datum"
-            :rules="[
-              (val) => !!val || 'Datum je obavezan',
-              (val) => isFutureDate(val) || 'Datum mora biti jednak ili veći od današnjeg',
-            ]"
-          />
-          <q-input v-model="form.juha_m1" label="Juha (Marenda 1)" />
-          <q-input v-model="form.glavno_jelo_m1" label="Glavno jelo (Marenda 1)" />
-          <q-input v-model="form.salata_m1" label="Salata (Marenda 1)" />
-          <q-input v-model="form.juha_m2" label="Juha (Marenda 2)" />
-          <q-input v-model="form.glavno_jelo_m2" label="Glavno jelo (Marenda 2)" />
-          <q-input v-model="form.salata_m2" label="Salata (Marenda 2)" />
-          <q-btn type="submit" color="primary" label="Spremi meni" />
-        </q-form>
-      </q-card-section>
-    </q-card>
+    <!-- Gumb za otvaranje dijaloga -->
+    <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
+
+    <!-- Dijalog za unos menija -->
+    <q-dialog ref="addMenuDialog" @hide="onDialogCancel">
+      <q-card style="width: 700px">
+        <q-card-section>
+          <div class="text-h6">Dodaj meni</div>
+        </q-card-section>
+        <q-card-section>
+          <q-form @submit="addMenu" ref="menuForm" @reset="onReset">
+            <q-input
+              v-model="form.date"
+              type="date"
+              label="Datum"
+              :rules="[
+                (val) => !!val || 'Datum je obavezan',
+                (val) => isFutureDate(val) || 'Datum mora biti jednak ili veći od današnjeg',
+              ]"
+            />
+            <q-input v-model="form.juha_m1" label="Juha (Marenda 1)" />
+            <q-input v-model="form.glavno_jelo_m1" label="Glavno jelo (Marenda 1)" />
+            <q-input v-model="form.salata_m1" label="Salata (Marenda 1)" />
+            <q-input v-model="form.juha_m2" label="Juha (Marenda 2)" />
+            <q-input v-model="form.glavno_jelo_m2" label="Glavno jelo (Marenda 2)" />
+            <q-input v-model="form.salata_m2" label="Salata (Marenda 2)" />
+          </q-form>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Odustani" color="primary" v-close-popup />
+          <q-btn flat label="Spremi" color="primary" @click="addMenu" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 
     <!-- Tablica za pregled menija -->
     <q-card>
@@ -220,6 +229,7 @@ export default {
       }
     }
 
+    const addMenuDialog = ref(false)
     const addMenu = async () => {
       try {
         const existingMenu = menus.value.find((menu) => menu.Datum_marende === form.value.date)
@@ -267,6 +277,7 @@ export default {
             glavno_jelo_m2: '',
             salata_m2: '',
           }
+          addMenuDialog.value = false
         } else {
           const errorData = await response.json()
           throw new Error(
@@ -278,7 +289,29 @@ export default {
         alert('Greška pri dodavanju menija: ' + error.message)
       }
     }
+    const onDialogCancel = () => {
+      // optional, do something useful
+      //   if (preventReset.value === true) {
+      //     return
+      //   }
 
+      // this is only for demo purposes so
+      // user does not get annoyed when playing
+      // with the "Prevent closing" example
+      console.log('+++ Hiding dialog; form was NOT reset')
+      form.value = {
+        date: new Date().toISOString().slice(0, 10),
+        juha_m1: '',
+        glavno_jelo_m1: '',
+        salata_m1: '',
+        juha_m2: '',
+        glavno_jelo_m2: '',
+        salata_m2: '',
+      }
+    }
+    const openDialog = () => {
+      addMenuDialog.value = true
+    }
     const editingCell = ref({ rowId: null, col: null })
 
     // Mapa za praćenje promjena
@@ -422,7 +455,16 @@ export default {
       onCellInput,
       cancelEdit,
       confirmUpdate,
+      addMenuDialog,
+      openDialog,
+      onDialogCancel,
     }
   },
 }
 </script>
+
+<style scoped>
+.q-card {
+  margin-bottom: 20px;
+}
+</style>
