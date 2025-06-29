@@ -289,6 +289,10 @@ export default {
         alert('Greška pri dodavanju menija: ' + error.message)
       }
     }
+    const closeTheGreatDialog = () => {
+      console.log('closeTheGreatDialog pozvan')
+      addMenuDialog.value = false
+    }
     const onDialogCancel = () => {
       // optional, do something useful
       //   if (preventReset.value === true) {
@@ -313,10 +317,6 @@ export default {
       console.log('openDialog pozvan')
       addMenuDialog.value = true
       console.log('addMenuDialog.value', addMenuDialog.value)
-    }
-    const closeTheGreatDialog = () => {
-      console.log('closeTheGreatDialog pozvan')
-      addMenuDialog.value = false
     }
     const editingCell = ref({ rowId: null, col: null })
 
