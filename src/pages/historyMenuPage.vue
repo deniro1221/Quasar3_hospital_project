@@ -402,6 +402,8 @@ export default {
         const payload = {
           Datum_marende: updatedRow.Datum_marende,
           [field]: updatedRow[field], // Šalji samo promijenjeno polje
+          username: loggedInUser.value,
+          ID_kuhara: userID.value,
         }
         console.log('payload prije slanja', payload)
         const url = `https://backend-hospital-n9to.onrender.com/menu/fresh`
