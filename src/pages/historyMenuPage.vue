@@ -97,6 +97,7 @@
           <q-card-section>
             <q-btn color="primary" @click="confirmUpdate">Ažuriraj meni</q-btn>
             <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
+            <q-btn label="Odjavi se" color="negative" class="button-item" @click="logout" />
           </q-card-section>
         </q-card>
       </q-page>
@@ -469,7 +470,14 @@ export default {
       }
     }
     const router = useRouter()
-
+    //logout:
+    const logout = () => {
+      // Briši podatke iz localStorage
+      localStorage.removeItem('loggedInUser')
+      localStorage.removeItem('userID')
+      // Preusmeri na početnu ili login stranicu
+      router.push('/login_chef')
+    }
     const loadUserData = () => {
       loggedInUser.value = localStorage.getItem('loggedInUser')
       userID.value = localStorage.getItem('userID')
@@ -511,6 +519,7 @@ export default {
       loggedInUser,
       userID,
       router,
+      logout,
     }
   },
 }
