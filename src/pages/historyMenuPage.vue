@@ -14,7 +14,6 @@
     <q-page-container>
       <q-page class="q-pa-md">
         <!-- Gumb za otvaranje dijaloga -->
-        <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
 
         <!-- Dijalog za unos menija -->
         <q-dialog v-model="addMenuDialog" persistent>
@@ -97,6 +96,9 @@
           </q-card-section>
           <q-card-section>
             <q-btn color="primary" @click="confirmUpdate">Ažuriraj meni</q-btn>
+            <q-separator>
+              <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
+            </q-separator>
           </q-card-section>
         </q-card>
       </q-page>
