@@ -3,6 +3,11 @@
     <q-header elevated>
       <q-toolbar>
         <q-toolbar-title> Meni </q-toolbar-title>
+        <!-- Prikaz korisničkog imena -->
+        <p v-if="loggedInUser">Korisnik: {{ loggedInUser }}</p>
+
+        <!-- Prikaz ID kuhaara -->
+        <p v-if="userID">ID Kuhara: {{ userID }}</p>
       </q-toolbar>
     </q-header>
 
@@ -101,6 +106,7 @@
 
 <script>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router' // Import useRouter
 
 export default {
   setup() {
@@ -114,6 +120,9 @@ export default {
       glavno_jelo_m2: '',
       salata_m2: '',
     })
+
+    const loggedInUser = ref('')
+    const userID = ref('')
 
     // Stanje tablice s menijima
     const menus = ref([])
@@ -224,14 +233,10 @@ export default {
             acc[date].Juha_m1 = menu.Juha_m1 || ''
             acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
             acc[date].Salata_m1 = menu.Salata_m1 || ''
-            acc[date].username = menu.username || ''
-            acc[date].ID_kuhara = menu.ID_kuhara || ''
           } else if (menu.marenda === 'Marenda2') {
-            acc[date].Juha_m2 = menu.Juha_m1 || '' // Ispravljeno menu.Juha_m1 u menu.Juha_m2
-            acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || '' // Ispravljeno menu.Glavno_jelo_m1 u menu.Glavno_jelo_m2
-            acc[date].Salata_m2 = menu.Salata_m1 || '' // Ispravljeno menu.Salata_m1 u menu.Salata_m2
-            acc[date].username = menu.username || ''
-            acc[date].ID_kuhara = menu.ID_kuhara || ''
+            acc[date].Juha_m2 = menu.Juha_m2 || '' // Corrected typo
+            acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m2 || '' // Corrected typo
+            acc[date].Salata_m2 = menu.Salata_m2 || '' // Corrected typo
           }
 
           return acc
@@ -457,9 +462,16 @@ export default {
         alert('Greška pri brisanju menija')
       }
     }
-
+    const router = useRouter()
     onMounted(() => {
       fetchMenus()
+      loggedInUser.value = localStorage.getItem('loggedInUser')
+      userID.value = localStorage.getItem('userID')
+
+      // Ako korisnik nije prijavljen, preusmjeri na login
+      if (!loggedInUser.value) {
+        router.push('/')
+      }
     })
 
     return {
@@ -480,6 +492,9 @@ export default {
       openDialog,
       onDialogCancel,
       closeTheGreatDialog,
+      loggedInUser,
+      userID,
+      router,
     }
   },
 }
