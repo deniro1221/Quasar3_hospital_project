@@ -234,9 +234,9 @@ export default {
             acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
             acc[date].Salata_m1 = menu.Salata_m1 || ''
           } else if (menu.marenda === 'Marenda2') {
-            acc[date].Juha_m2 = menu.Juha_m2 || '' // Corrected typo
-            acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m2 || '' // Corrected typo
-            acc[date].Salata_m2 = menu.Salata_m2 || '' // Corrected typo
+            acc[date].Juha_m2 = menu.Juha_m2 || ''
+            acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m2 || ''
+            acc[date].Salata_m2 = menu.Salata_m2 || ''
           }
 
           return acc
