@@ -14,12 +14,24 @@
     <q-page-container>
       <q-page class="q-pa-md">
         <!-- Gumb za otvaranje dijaloga -->
+        <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
 
         <!-- Dijalog za unos menija -->
         <q-dialog v-model="addMenuDialog" persistent>
           <q-card style="width: 700px">
             <q-card-section>
               <div class="text-h6">Dodaj meni</div>
+            </q-card-section>
+            <q-card-section>
+              <div id="printable-menu" style="padding: 10px">
+                <h2 style="text-align: center; margin-bottom: 20px">Plan menija</h2>
+                <q-table
+                  :rows="menus"
+                  :columns="columns"
+                  row-key="Datum_marende"
+                  :pagination="pagination"
+                />
+              </div>
             </q-card-section>
             <q-card-section>
               <q-form @submit="addMenu" ref="menuForm">
@@ -96,7 +108,6 @@
           </q-card-section>
           <q-card-section>
             <q-btn color="primary" @click="confirmUpdate">Ažuriraj meni</q-btn>
-            <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
             <q-btn label="Odjavi se" color="negative" class="button-item" @click="logout" />
           </q-card-section>
         </q-card>
@@ -108,7 +119,7 @@
 <script>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router' // Import useRouter
-
+import html2pdf from 'html2pdf.js'
 export default {
   setup() {
     // Stanje forme za unos menija
@@ -124,6 +135,24 @@ export default {
 
     const loggedInUser = ref('')
     const userID = ref('')
+    const printPDF = () => {
+      const element = document.getElementById('printable-menu')
+      if (!element) {
+        alert('Ne mogu pronaći meni za ispis.')
+        return
+      }
+
+      const opt = {
+        margin: 10,
+        filename: 'plan_menija.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+      }
+
+      html2pdf().set(opt).from(element).save()
+    }
 
     // Stanje tablice s menijima
     const menus = ref([])
@@ -520,6 +549,7 @@ export default {
       userID,
       router,
       logout,
+      printPDF,
     }
   },
 }
