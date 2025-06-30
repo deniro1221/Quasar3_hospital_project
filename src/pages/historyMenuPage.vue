@@ -4,7 +4,7 @@
       <q-toolbar>
         <q-toolbar-title> Meni </q-toolbar-title>
         <!-- Prikaz korisničkog imena -->
-        <p v-if="loggedInUser">Korisnik: {{ loggedInUser }}</p>
+        <p v-if="loggedInUser" style="margin-right: 10px">Korisnik: {{ loggedInUser }}</p>
 
         <!-- Prikaz ID kuhaara -->
         <p v-if="userID">ID Kuhara: {{ userID }}</p>
