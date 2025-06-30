@@ -110,9 +110,11 @@ router.get('/menu/today', async (req, res) => {
 })
 
 router.put('/menu/fresh', validateDateFormat, async (req, res) => {
-  const { Datum_marende } = req.body
+  const { Datum_marende, username, ID_kuhara } = req.body
 
-  if (!Datum_marende) return res.status(400).json({ message: 'Datum je obavezan.' })
+  if (!Datum_marende) {
+    return res.status(400).json({ message: 'Datum je obavezan.' })
+  }
 
   const allowedFields = [
     'Juha_m1',
@@ -122,28 +124,41 @@ router.put('/menu/fresh', validateDateFormat, async (req, res) => {
     'Glavno_jelo_m2',
     'Salata_m2',
   ]
-  const updateFields = Object.keys(req.body).filter((key) => key !== 'Datum_marende')
 
-  if (updateFields.length !== 1 || !allowedFields.includes(updateFields[0])) {
-    return res
-      .status(400)
-      .json({ message: 'Možete ažurirati samo jedno polje (Juha, Glavno_jelo, Salata) odjednom.' })
+  const dishFields = Object.keys(req.body).filter((key) => allowedFields.includes(key))
+
+  if (dishFields.length !== 1) {
+    return res.status(400).json({
+      message: 'Možete ažurirati samo jedno polje (Juha, Glavno_jelo, Salata) odjednom.',
+    })
   }
-  const field = updateFields[0]
+
+  const field = dishFields[0]
   const value = req.body[field]
 
   const isM1 = field.endsWith('_m1')
   const table = isM1 ? 'Marenda1' : 'Marenda2'
   const column = field.replace('_m1', '').replace('_m2', '')
 
-  const sql = `UPDATE ${table} SET ${column} = ? WHERE Datum_marende = ?`
-
   const connection = await pool.getConnection()
   try {
-    const [result] = await connection.execute(sql, [value, Datum_marende])
+    const [result] = await connection.execute(
+      `UPDATE ${table} SET ${column} = ? WHERE Datum_marende = ?`,
+      [value, Datum_marende],
+    )
+
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Meni nije pronađen za taj datum.' })
     }
+
+    if (username && ID_kuhara) {
+      // Spremi korisničke podatke u istu tablicu (ako postoje kolone)
+      await connection.execute(
+        `UPDATE ${table} SET username = ?, ID_kuhara = ? WHERE Datum_marende = ?`,
+        [username, ID_kuhara, Datum_marende],
+      )
+    }
+
     res.json({ message: 'Meni je uspješno ažuriran.' })
   } catch (err) {
     console.error(err)
