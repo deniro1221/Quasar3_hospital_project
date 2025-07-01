@@ -81,7 +81,7 @@ async function osvjeziMenije() {
       meni.value = [] // ako je null ili ništa
     }
   } catch (error) {
-    showMessage('Greška pri učitavanju menija.', false)
+    showMessage('Greška pri učitavanju menija.', false, error)
   }
 }
 
