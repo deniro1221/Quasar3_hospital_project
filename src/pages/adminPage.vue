@@ -1,7 +1,7 @@
 <template>
   <q-page class="flex flex-center" style="background-color: #e0f7fa">
     <div class="admin-container">
-      <h2>Dobrodošli u Admin Panel!</h2>
+      <h2>Admin Panel!</h2>
       <p>Uspješno ste se prijavili.</p>
       <p v-if="loggedInUser">Korisnik: {{ loggedInUser }}</p>
       <!-- Prikaz korisničkog imena -->

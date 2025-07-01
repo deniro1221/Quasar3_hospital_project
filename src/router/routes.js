@@ -22,6 +22,7 @@ const routes = [
       },
       { path: 'showPatient', component: () => import('pages/showPatientPage.vue') },
       { path: 'showPatientAdmin', component: () => import('pages/AdminShowPatientPage.vue') },
+      { path: 'noActiveAdmin', component: () => import('pages/noActiveAdminPage.vue') },
     ],
   },
 
