@@ -39,7 +39,7 @@ const submit = async () => {
     localStorage.setItem('userID', response.data.ID_kuhara)
 
     // Preusmeravanje na chef panel
-    router.push('/chef_panel')
+    router.push('/history_menu')
   } catch (error) {
     if (error.response) {
       errorMessage.value = error.response.data.message || 'Došlo je do greške. Pokušajte ponovo.'
