@@ -242,13 +242,7 @@ export default {
         align: 'left',
         sortable: true,
       },
-      {
-        name: 'ID_kuhara',
-        label: 'ID kuhara',
-        field: 'ID_kuhara',
-        align: 'left',
-        sortable: true,
-      },
+
       { name: 'actions', label: 'Akcije', field: 'actions', align: 'center' },
     ]
 

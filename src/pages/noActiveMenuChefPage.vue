@@ -120,8 +120,6 @@ export default {
         sortable: true,
       },
       { name: 'username', label: 'Korisnik', field: 'username', align: 'left', sortable: true },
-      { name: 'ID_kuhara', label: 'ID kuhara', field: 'ID_kuhara', align: 'left', sortable: true },
-      { name: 'actions', label: 'Akcije', field: 'actions', align: 'center' },
     ]
 
     const pagination = ref({ rowsPerPage: 10 })
@@ -208,7 +206,6 @@ export default {
               Glavno_jelo_m2: '',
               Salata_m2: '',
               username: menu.username,
-              ID_kuhara: menu.ID_kuhara,
             }
           }
 
@@ -223,7 +220,6 @@ export default {
             acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || '' // Ispravljeno menu.Glavno_jelo_m1 u menu.Glavno_jelo_m2
             acc[date].Salata_m2 = menu.Salata_m1 || '' // Ispravljeno menu.Salata_m1 u menu.Salata_m2
             acc[date].username = menu.username || ''
-            acc[date].ID_kuhara = menu.ID_kuhara || ''
           }
 
           return acc
