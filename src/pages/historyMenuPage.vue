@@ -580,3 +580,26 @@ export default {
   },
 }
 </script>
+<style>
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+
+.styled-table th,
+.styled-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.styled-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.button-group .q-btn {
+  margin-right: 10px; /* Adjust the spacing as needed */
+}
+</style>
