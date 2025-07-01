@@ -57,6 +57,13 @@
             <q-card-actions align="right">
               <q-btn flat label="Odustani" color="primary" @click="closeTheGreatDialog" />
               <q-btn flat label="Spremi" color="primary" @click="addMenu" />
+              <q-card-section>
+                <q-btn color="primary" @click="confirmUpdate">Ažuriraj meni</q-btn>
+                <q-btn label="Odjavi se" color="negative" class="button-item" @click="logout" />
+                <!-- Gumb za otvaranje dijaloga -->
+                <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
+                <q-btn color="primary" label="Ispiši PDF" @click="printPDF" />
+              </q-card-section>
             </q-card-actions>
           </q-card>
         </q-dialog>
@@ -139,11 +146,46 @@ export default {
     const loggedInUser = ref('')
     const userID = ref('')
     const printPDF = () => {
-      const element = document.getElementById('printable-menu')
-      if (!element) {
-        alert('Ne mogu pronaći meni za ispis.')
-        return
-      }
+      // Prepare the table HTML
+      let tableHTML = `
+        <h2 style="text-align: center; margin-bottom: 20px">Plan menija</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              ${columns
+                .filter((col) => col.name !== 'actions')
+                .map(
+                  (col) =>
+                    `<th style="border: 1px solid black; padding: 8px; text-align: left;">${col.label}</th>`,
+                )
+                .join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${menus.value
+              .map(
+                (menu) => `
+              <tr>
+                ${columns
+                  .filter((col) => col.name !== 'actions')
+                  .map(
+                    (col) =>
+                      `<td style="border: 1px solid black; padding: 8px;">${menu[col.field] || ''}</td>`,
+                  )
+                  .join('')}
+              </tr>
+            `,
+              )
+              .join('')}
+          </tbody>
+        </table>
+      `
+
+      // Create a temporary div element to hold the table HTML
+      const element = document.createElement('div')
+      element.id = 'printable-menu' // Ensure the ID is set
+      element.innerHTML = tableHTML
+      document.body.appendChild(element) // Append to the body so html2pdf can find it
 
       const opt = {
         margin: 10,
@@ -155,6 +197,9 @@ export default {
       }
 
       html2pdf().set(opt).from(element).save()
+
+      // Clean up: remove the temporary element after printing
+      document.body.removeChild(element)
     }
 
     // Stanje tablice s menijima
