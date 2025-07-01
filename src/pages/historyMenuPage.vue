@@ -19,21 +19,6 @@
             <q-card-section>
               <div class="text-h6">Dodaj meni</div>
             </q-card-section>
-            <!-- REMOVE THIS SECTION -->
-            <!-- <q-card-section>
-      <div id="printable-menu" style="padding: 10px">
-        <h2 style="text-align: center; margin-bottom: 20px">Plan menija</h2>
-        <q-table
-          :rows="menus"
-          :columns="columns"
-          row-key="Datum_marende"
-          :pagination="pagination"
-        />
-      </div>
-    </q-card-section> -->
-            <q-card-section>
-              <q-form @submit="addMenu" ref="menuForm"> </q-form>
-            </q-card-section>
             <q-card-section>
               <q-form @submit="addMenu" ref="menuForm">
                 <q-input
@@ -57,13 +42,6 @@
             <q-card-actions align="right">
               <q-btn flat label="Odustani" color="primary" @click="closeTheGreatDialog" />
               <q-btn flat label="Spremi" color="primary" @click="addMenu" />
-              <q-card-section>
-                <q-btn color="primary" @click="confirmUpdate">Ažuriraj meni</q-btn>
-                <q-btn label="Odjavi se" color="negative" class="button-item" @click="logout" />
-                <!-- Gumb za otvaranje dijaloga -->
-                <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
-                <q-btn color="primary" label="Ispiši PDF" @click="printPDF" />
-              </q-card-section>
             </q-card-actions>
           </q-card>
         </q-dialog>
@@ -119,13 +97,13 @@
             <q-btn label="Odjavi se" color="negative" class="button-item" @click="logout" />
             <!-- Gumb za otvaranje dijaloga -->
             <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
+            <q-btn color="primary" label="Ispiši PDF" @click="printPDF" />
           </q-card-section>
         </q-card>
       </q-page>
     </q-page-container>
   </q-layout>
 </template>
-
 <script>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router' // Import useRouter
