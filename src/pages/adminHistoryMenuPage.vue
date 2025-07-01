@@ -119,8 +119,6 @@ export default {
         sortable: true,
       },
       { name: 'username', label: 'Korisnik', field: 'username', align: 'left', sortable: true },
-      { name: 'ID_kuhara', label: 'ID kuhara', field: 'ID_kuhara', align: 'left', sortable: true },
-      { name: 'actions', label: 'Akcije', field: 'actions', align: 'center' },
     ]
 
     const pagination = ref({ rowsPerPage: 10 })
