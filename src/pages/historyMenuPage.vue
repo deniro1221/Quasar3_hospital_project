@@ -94,7 +94,14 @@
           </q-card-section>
           <q-card-section>
             <q-btn color="primary" @click="confirmUpdate">Ažuriraj meni</q-btn>
-            <q-btn label="Odjavi se" color="negative" class="button-item" @click="logout" />
+            <q-btn
+              label="Odjavi se"
+              color="negative"
+              class="button-item"
+              @click="logout"
+              style:margin-left:
+              auto;
+            />
             <!-- Gumb za otvaranje dijaloga -->
             <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
             <q-btn color="primary" label="Ispiši PDF" @click="printPDF" />

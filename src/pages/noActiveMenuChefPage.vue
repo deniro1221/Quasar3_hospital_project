@@ -52,6 +52,9 @@
         <q-card-actions align="right">
           <q-btn color="primary" label="Ispiši PDF" @click="printPDF" />
         </q-card-actions>
+        <q-card-actions align="left">
+          <q-btn color="primary" label="Natrag" to="history_menu" />
+        </q-card-actions>
       </q-card>
     </q-page>
   </q-layout>
