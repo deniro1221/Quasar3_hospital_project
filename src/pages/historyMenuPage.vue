@@ -19,16 +19,20 @@
             <q-card-section>
               <div class="text-h6">Dodaj meni</div>
             </q-card-section>
+            <!-- REMOVE THIS SECTION -->
+            <!-- <q-card-section>
+      <div id="printable-menu" style="padding: 10px">
+        <h2 style="text-align: center; margin-bottom: 20px">Plan menija</h2>
+        <q-table
+          :rows="menus"
+          :columns="columns"
+          row-key="Datum_marende"
+          :pagination="pagination"
+        />
+      </div>
+    </q-card-section> -->
             <q-card-section>
-              <div id="printable-menu" style="padding: 10px">
-                <h2 style="text-align: center; margin-bottom: 20px">Plan menija</h2>
-                <q-table
-                  :rows="menus"
-                  :columns="columns"
-                  row-key="Datum_marende"
-                  :pagination="pagination"
-                />
-              </div>
+              <q-form @submit="addMenu" ref="menuForm"> </q-form>
             </q-card-section>
             <q-card-section>
               <q-form @submit="addMenu" ref="menuForm">
