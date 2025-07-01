@@ -13,9 +13,6 @@
 
     <q-page-container>
       <q-page class="q-pa-md">
-        <!-- Gumb za otvaranje dijaloga -->
-        <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
-
         <!-- Dijalog za unos menija -->
         <q-dialog v-model="addMenuDialog" persistent>
           <q-card style="width: 700px">
@@ -109,6 +106,8 @@
           <q-card-section>
             <q-btn color="primary" @click="confirmUpdate">Ažuriraj meni</q-btn>
             <q-btn label="Odjavi se" color="negative" class="button-item" @click="logout" />
+            <!-- Gumb za otvaranje dijaloga -->
+            <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
           </q-card-section>
         </q-card>
       </q-page>
