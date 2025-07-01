@@ -1,209 +1,251 @@
 <template>
-  <q-page padding>
-    <!-- Prikaz poruke -->
-    <div v-if="message" :class="{ positive: isSuccess, negative: !isSuccess }">
-      {{ message }}
-    </div>
+  <q-layout view="hHh LpP lFf">
+    <q-header elevated>
+      <q-toolbar>
+        <q-toolbar-title>Meni</q-toolbar-title>
 
-    <!-- Tablica za pregled menija -->
-    <q-table
-      title="Pregled Menija"
-      :rows="meni"
-      :columns="columns"
-      row-key="Datum_menija"
-      selection="multiple"
-      v-model:selected.sync="selectedRows"
-    >
-      <template v-slot:top>
-        <q-btn label="Osvježi" color="primary" @click="osvjeziMenije" />
-        <q-btn label="PDF" color="secondary" @click="izveziSvePDF" style="margin-left: 10px" />
-        <q-btn
-          label="PDF Označeno"
-          color="secondary"
-          @click="izveziOznacenoPDF"
-          style="margin-left: 10px"
-        />
-      </template>
-      <template v-slot:body-cell="props">
-        <q-td :props="props">
-          {{ props.value }}
-        </q-td>
-      </template>
-      <template v-slot:bottom>
-        <q-btn label="Nazad" color="primary" @click="goAdmin" />
-      </template>
-    </q-table>
-  </q-page>
+        <div class="q-ml-md" v-if="loggedInUser">Korisnik: {{ loggedInUser }}</div>
+
+        <div class="q-ml-md" v-if="userID">ID Kuhara: {{ userID }}</div>
+      </q-toolbar>
+    </q-header>
+
+    <q-page padding>
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Pregled menija</div>
+        </q-card-section>
+
+        <q-card-section>
+          <q-table
+            :rows="menus"
+            :columns="columns"
+            row-key="Datum_marende"
+            :pagination="pagination"
+          >
+            <template v-slot:body-cell="props">
+              <q-td
+                :props="props"
+                @dblclick="onCellDblClick(props.row, props.col)"
+                style="cursor: pointer"
+              >
+                <div
+                  v-if="
+                    editingCell.rowId !== props.row.Datum_marende ||
+                    editingCell.col !== props.col.name
+                  "
+                >
+                  {{ props.value }}
+                </div>
+                <q-input
+                  v-else
+                  v-model="props.row[props.col.field]"
+                  @update:model-value="onCellInput(props.row, props.col, $event)"
+                  dense
+                  autofocus
+                />
+              </q-td>
+            </template>
+          </q-table>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn color="primary" label="Ispiši PDF" @click="printPDF" />
+        </q-card-actions>
+      </q-card>
+    </q-page>
+  </q-layout>
 </template>
 
-<script setup>
+<script>
 import { ref, onMounted } from 'vue'
 import html2pdf from 'html2pdf.js'
-import { useRouter } from 'vue-router'
 
-const router = useRouter()
+export default {
+  setup() {
+    const loggedInUser = ref('demo_korisnik') // ili dohvaćeno iz auth
+    const userID = ref('123') // ili dohvaćeno iz auth
+    const menus = ref([])
+    const editingCell = ref({ rowId: null, col: null })
 
-const message = ref('')
-const isSuccess = ref(false)
-const meni = ref([]) // Svi meniji
-const selectedRows = ref([]) // Označeni redovi
+    const columns = [
+      {
+        name: 'Datum_marende',
+        label: 'Datum',
+        field: 'Datum_marende',
+        align: 'left',
+        sortable: true,
+      },
+      {
+        name: 'Juha_m1',
+        label: 'Juha (Marenda 1)',
+        field: 'Juha_m1',
+        align: 'left',
+        sortable: true,
+      },
+      {
+        name: 'Glavno_jelo_m1',
+        label: 'Glavno jelo (Marenda 1)',
+        field: 'Glavno_jelo_m1',
+        align: 'left',
+        sortable: true,
+      },
+      {
+        name: 'Salata_m1',
+        label: 'Salata (Marenda 1)',
+        field: 'Salata_m1',
+        align: 'left',
+        sortable: true,
+      },
+      {
+        name: 'Juha_m2',
+        label: 'Juha (Marenda 2)',
+        field: 'Juha_m2',
+        align: 'left',
+        sortable: true,
+      },
+      {
+        name: 'Glavno_jelo_m2',
+        label: 'Glavno jelo (Marenda 2)',
+        field: 'Glavno_jelo_m2',
+        align: 'left',
+        sortable: true,
+      },
+      {
+        name: 'Salata_m2',
+        label: 'Salata (Marenda 2)',
+        field: 'Salata_m2',
+        align: 'left',
+        sortable: true,
+      },
+      { name: 'username', label: 'Korisnik', field: 'username', align: 'left', sortable: true },
+      { name: 'ID_kuhara', label: 'ID kuhara', field: 'ID_kuhara', align: 'left', sortable: true },
+      { name: 'actions', label: 'Akcije', field: 'actions', align: 'center' },
+    ]
 
-const goAdmin = () => {
-  router.push('/admin')
-}
+    const pagination = ref({ rowsPerPage: 10 })
 
-function showMessage(txt, success = true) {
-  message.value = txt
-  isSuccess.value = success
-  setTimeout(() => {
-    message.value = ''
-  }, 3000)
-}
+    const printPDF = () => {
+      let tableHTML = `
+        <h2 style="text-align: center; margin-bottom: 20px">Plan menija</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              ${columns
+                .filter((col) => col.name !== 'actions')
+                .map(
+                  (col) => `<th style="border: 1px solid black; padding: 8px;">${col.label}</th>`,
+                )
+                .join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${menus.value
+              .map(
+                (menu) => `
+              <tr>
+                ${columns
+                  .filter((col) => col.name !== 'actions')
+                  .map(
+                    (col) =>
+                      `<td style="border: 1px solid black; padding: 8px;">${menu[col.field] || ''}</td>`,
+                  )
+                  .join('')}
+              </tr>
+            `,
+              )
+              .join('')}
+          </tbody>
+        </table>
+      `
+      const element = document.createElement('div')
+      element.id = 'printable-menu'
+      element.innerHTML = tableHTML
+      document.body.appendChild(element)
 
-// Kolone tablice
-const columns = [
-  { name: 'Datum_menija', label: 'Datum', align: 'left', field: 'Datum_menija' },
-  { name: 'Marenda1', label: 'Marenda 1', align: 'left', field: 'Marenda1' },
-  { name: 'Marenda2', label: 'Marenda 2', align: 'left', field: 'Marenda2' },
-  { name: 'ID_kuhara', label: 'ID Kuhara', align: 'left', field: 'ID_kuhara' },
-]
-
-// Dohvati meni sa servera
-async function osvjeziMenije() {
-  try {
-    const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/history') // API endpoint za sve menije
-    const data = await response.json()
-    if (Array.isArray(data)) {
-      meni.value = data // ako je već niz
-    } else if (data) {
-      meni.value = [data] // ako je objekat, smesti u niz
-    } else {
-      meni.value = [] // ako je null ili ništa
+      html2pdf()
+        .set({
+          margin: 10,
+          filename: 'plan_menija.pdf',
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+        })
+        .from(element)
+        .save()
+        .then(() => {
+          document.body.removeChild(element)
+        })
     }
-  } catch (error) {
-    showMessage('Greška pri učitavanju menija.', false, error)
-  }
-}
 
-function izveziSvePDF() {
-  if (meni.value.length === 0) {
-    showMessage('Nema podataka za ispis.', false)
-    return
-  }
-
-  const tableHTML = `
-  <style>
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-    th, td {
-      border: 1px solid #333;
-      padding: 10px;
-      text-align: left;
-    }
-    th {
-      background-color: #f0f0f0;
-    }
-    h3 {
-      margin-bottom: 15px;
-    }
-  </style>
-
-  <h3>Svi meniji</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Datum</th>
-        <th>Marenda 1</th>
-        <th>Marenda 2</th>
-        <th>ID Kuhara</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${meni.value
-        .map(
-          (row) => `
-        <tr>
-          <td>${row.Datum_menija}</td>
-          <td>${row.Marenda1}</td>
-          <td>${row.Marenda2}</td>
-          <td>${row.ID_kuhara}</td>
-        </tr>
-      `,
+    const fetchMenus = async () => {
+      try {
+        const response = await fetch(
+          'https://backend-hospital-n9to.onrender.com/menu/history/noActive',
         )
-        .join('')}
-    </tbody>
-  </table>
-`
+        if (!response.ok) throw new Error(`Greška: ${response.statusText}`)
 
-  const container = document.createElement('div')
-  container.innerHTML = tableHTML
-  html2pdf().from(container).save()
+        const data = await response.json()
+
+        const grouped = data.reduce((acc, menu) => {
+          const date = menu.Datum.split('T')[0]
+          if (!acc[date]) {
+            acc[date] = {
+              Datum_marende: date,
+              Juha_m1: '',
+              Glavno_jelo_m1: '',
+              Salata_m1: '',
+              Juha_m2: '',
+              Glavno_jelo_m2: '',
+              Salata_m2: '',
+              username: menu.username,
+              ID_kuhara: menu.ID_kuhara,
+            }
+          }
+
+          if (menu.marenda === 'Marenda1') {
+            acc[date].Juha_m1 = menu.Juha_m1 || ''
+            acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
+            acc[date].Salata_m1 = menu.Salata_m1 || ''
+          } else if (menu.marenda === 'Marenda2') {
+            acc[date].Juha_m2 = menu.Juha_m2 || ''
+            acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m2 || ''
+            acc[date].Salata_m2 = menu.Salata_m2 || ''
+          }
+
+          return acc
+        }, {})
+
+        menus.value = Object.values(grouped)
+      } catch (error) {
+        console.error(error.message)
+        alert('Greška pri dohvaćanju menija: ' + error.message)
+      }
+    }
+
+    const onCellDblClick = (row, col) => {
+      editingCell.value = { rowId: row.Datum_marende, col: col.name }
+    }
+
+    const onCellInput = (row, col, newValue) => {
+      row[col.field] = newValue
+      editingCell.value = { rowId: null, col: null }
+    }
+
+    onMounted(fetchMenus)
+
+    return {
+      loggedInUser,
+      userID,
+      menus,
+      columns,
+      pagination,
+      editingCell,
+      printPDF,
+      onCellDblClick,
+      onCellInput,
+    }
+  },
 }
-
-function izveziOznacenoPDF() {
-  if (selectedRows.value.length === 0) {
-    showMessage('Niste označili nijedan red.', false)
-    return
-  }
-
-  // Filtriraj samo označene redove
-  const oznaceni = selectedRows.value
-
-  const tableHTML = `
-  <style>
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-    th, td {
-      border: 1px solid #333;
-      padding: 10px;
-      text-align: left;
-    }
-    th {
-      background-color: #f0f0f0;
-    }
-    h3 {
-      margin-bottom: 15px;
-    }
-  </style>
-
-  <h3>Označeni meniji</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Datum</th>
-        <th>Marenda 1</th>
-        <th>Marenda 2</th>
-        <th>ID Kuhara</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${oznaceni
-        .map(
-          (row) => `
-        <tr>
-          <td>${row.Datum_menija}</td>
-          <td>${row.Marenda1}</td>
-          <td>${row.Marenda2}</td>
-          <td>${row.ID_kuhara}</td>
-        </tr>
-      `,
-        )
-        .join('')}
-    </tbody>
-  </table>
-  `
-  const container = document.createElement('div')
-  container.innerHTML = tableHTML
-  html2pdf().from(container).save()
-}
-
-onMounted(() => {
-  osvjeziMenije()
-})
 </script>
