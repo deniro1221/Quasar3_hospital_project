@@ -98,6 +98,7 @@
             <!-- Gumb za otvaranje dijaloga -->
             <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
             <q-btn color="primary" label="Ispiši PDF" @click="printPDF" />
+            <q-btn color="primary" label="Arhiv marenda" to="noActiveMenu" />
           </q-card-section>
         </q-card>
       </q-page>
