@@ -24,6 +24,11 @@
           style="margin-left: 10px"
         />
       </template>
+      <template v-slot:body-cell="props">
+        <q-td :props="props">
+          {{ props.value }}
+        </q-td>
+      </template>
       <template v-slot:bottom>
         <q-btn label="Nazad" color="primary" @click="goAdmin" />
       </template>
@@ -42,9 +47,11 @@ const message = ref('')
 const isSuccess = ref(false)
 const meni = ref([]) // Svi meniji
 const selectedRows = ref([]) // Označeni redovi
+
 const goAdmin = () => {
   router.push('/admin')
 }
+
 function showMessage(txt, success = true) {
   message.value = txt
   isSuccess.value = success
@@ -74,7 +81,7 @@ async function osvjeziMenije() {
       meni.value = [] // ako je null ili ništa
     }
   } catch (error) {
-    showMessage('Greška pri učitavanju menija.', false, error)
+    showMessage('Greška pri učitavanju menija.', false)
   }
 }
 
