@@ -11,7 +11,12 @@
       {{ message }}
     </div>
 
-    <q-table :rows="inactivePatients" :columns="columns" row-key="ID_dijeta_pac" class="styled-table">
+    <q-table
+      :rows="inactivePatients"
+      :columns="columns"
+      row-key="ID_dijeta_pac"
+      class="styled-table"
+    >
       <template v-slot:body="props">
         <q-tr :props="props">
           <q-td v-for="col in columns" :key="col.name" :props="props">
@@ -29,11 +34,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import html2pdf from 'html2pdf.js'
+import { ref, onMounted } from 'vue'
 
-const router = useRouter()
+import html2pdf from 'html2pdf.js'
 
 // Data
 const inactivePatients = ref([])
@@ -60,7 +63,9 @@ const columns = [
 // Fetch Inactive Patients
 async function fetchInactivePatients() {
   try {
-    const response = await fetch('https://backend-hospital-n9to.onrender.com/dijeta-pacijent/inactive')
+    const response = await fetch(
+      'https://backend-hospital-n9to.onrender.com/dijeta-pacijent/inactive',
+    )
     const data = await response.json()
     inactivePatients.value = Array.isArray(data) ? data : data ? [data] : []
   } catch (error) {
@@ -117,7 +122,6 @@ function printPdfFromData(data, title) {
 function izveziSvePDF() {
   printPdfFromData(inactivePatients.value, 'Arhiva pacijenata') // Make the changes here instead of dijeta_pac.value to inactivePatients.value
 }
-
 
 // Lifecycle Hook
 onMounted(() => {
