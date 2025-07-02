@@ -13,7 +13,7 @@
     <q-page padding>
       <q-card>
         <q-card-section>
-          <div class="text-h6">Pregled menija</div>
+          <div class="text-h6">Arhiva menija</div>
         </q-card-section>
 
         <q-card-section>
