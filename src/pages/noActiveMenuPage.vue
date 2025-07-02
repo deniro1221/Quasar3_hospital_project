@@ -50,8 +50,8 @@
         </q-card-section>
 
         <q-card-actions class="q-pa-md row items-center justify-between">
-          <q-btn color="primary" label="Natrag" to="admin" />
           <q-btn color="primary" label="Ispiši PDF" @click="printPDF" />
+          <q-btn color="primary" label="Natrag" to="admin" />
         </q-card-actions>
       </q-card>
     </q-page>
@@ -181,15 +181,7 @@ export default {
 
     const fetchMenus = async () => {
       try {
-        const response = await fetch(
-          'https://backend-hospital-n9to.onrender.com/menu/history/noActive',
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          },
-        )
+        const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/history')
         if (!response.ok) {
           throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
         }
@@ -207,6 +199,7 @@ export default {
               Glavno_jelo_m2: '',
               Salata_m2: '',
               username: menu.username,
+              ID_kuhara: menu.ID_kuhara,
             }
           }
 
@@ -221,6 +214,7 @@ export default {
             acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || '' // Ispravljeno menu.Glavno_jelo_m1 u menu.Glavno_jelo_m2
             acc[date].Salata_m2 = menu.Salata_m1 || '' // Ispravljeno menu.Salata_m1 u menu.Salata_m2
             acc[date].username = menu.username || ''
+            acc[date].ID_kuhara = menu.ID_kuhara || ''
           }
 
           return acc
