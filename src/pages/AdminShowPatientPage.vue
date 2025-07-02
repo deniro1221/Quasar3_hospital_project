@@ -61,7 +61,9 @@ const columns = [
 // Učitavanje podataka
 async function showPatient() {
   try {
-    const response = await fetch('https://backend-hospital-n9to.onrender.com/dijeta-pacijent/active')
+    const response = await fetch(
+      'https://backend-hospital-n9to.onrender.com/dijeta-pacijent/active',
+    )
     const data = await response.json()
     dijeta_pac.value = Array.isArray(data) ? data : data ? [data] : []
     console.log('Učitani podaci:', dijeta_pac.value)
@@ -144,14 +146,14 @@ function izveziSvePDF() {
   */
 
 // Pomoćna funkcija za parsiranje datuma
-function parseDateString(dateStr) {
+/*function parseDateString(dateStr) {
   const parts = dateStr.match(/^(\d{2})-(\d{2})-(\d{4})$/)
   if (parts) {
     const [, day, month, year] = parts
     return new Date(`${year}-${month}-${day}`)
   }
   return new Date(dateStr)
-}
+}*/
 </script>
 
 <style scoped>
