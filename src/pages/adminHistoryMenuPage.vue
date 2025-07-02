@@ -51,8 +51,9 @@
 
         <q-card-actions align="right" class="q-pa-md row items-center justify-between">
           <q-btn color="primary" label="Ispiši PDF" @click="printPDF" />
-          <q-btn color="primary" label="Natrag" to="admin" />
+
           <q-btn color="primary" label="Arhiv menija" to="admin_history_menu" />
+          <q-btn color="primary" label="Natrag" to="admin" />
         </q-card-actions>
       </q-card>
     </q-page>
@@ -181,14 +182,13 @@ export default {
 
     const fetchMenus = async () => {
       try {
-        const response = await fetch(
-          'https://backend-hospital-n9to.onrender.com/menu/history/noActive',
-        )
-        if (!response.ok) throw new Error(`Greška: ${response.statusText}`)
-
+        const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/history')
+        if (!response.ok) {
+          throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
+        }
         const data = await response.json()
 
-        const grouped = data.reduce((acc, menu) => {
+        const groupedMenus = data.reduce((acc, menu) => {
           const date = menu.Datum.split('T')[0]
           if (!acc[date]) {
             acc[date] = {
@@ -208,16 +208,20 @@ export default {
             acc[date].Juha_m1 = menu.Juha_m1 || ''
             acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
             acc[date].Salata_m1 = menu.Salata_m1 || ''
+            acc[date].username = menu.username || ''
+            acc[date].ID_kuhara = menu.ID_kuhara || ''
           } else if (menu.marenda === 'Marenda2') {
-            acc[date].Juha_m2 = menu.Juha_m2 || ''
-            acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m2 || ''
-            acc[date].Salata_m2 = menu.Salata_m2 || ''
+            acc[date].Juha_m2 = menu.Juha_m1 || '' // Ispravljeno menu.Juha_m1 u menu.Juha_m2
+            acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || '' // Ispravljeno menu.Glavno_jelo_m1 u menu.Glavno_jelo_m2
+            acc[date].Salata_m2 = menu.Salata_m1 || '' // Ispravljeno menu.Salata_m1 u menu.Salata_m2
+            acc[date].username = menu.username || ''
+            acc[date].ID_kuhara = menu.ID_kuhara || ''
           }
 
           return acc
         }, {})
 
-        menus.value = Object.values(grouped)
+        menus.value = Object.values(groupedMenus)
       } catch (error) {
         console.error(error.message)
         alert('Greška pri dohvaćanju menija: ' + error.message)
