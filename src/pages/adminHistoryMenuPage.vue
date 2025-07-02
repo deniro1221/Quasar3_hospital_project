@@ -52,7 +52,7 @@
         <q-card-actions align="right" class="q-pa-md row items-center justify-between">
           <q-btn color="primary" label="Ispiši PDF" @click="printPDF" />
 
-          <q-btn color="primary" label="Arhiv menija" to="admin_history_menu" />
+          <q-btn color="primary" label="Arhiv menija" to="noActiveAdmin" />
           <q-btn color="primary" label="Natrag" to="admin" />
         </q-card-actions>
       </q-card>
