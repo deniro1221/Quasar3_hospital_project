@@ -24,6 +24,8 @@ const corsOptions = {
 }
 
 app.use(cors(corsOptions)) // Koristi corsOptions
+// Eksplicitno dozvoli OPTIONS preflight zahtjeve za sve rute
+app.options('*', cors(corsOptions))
 
 app.use(bodyParser.json())
 
