@@ -1,7 +1,7 @@
 import express from 'express'
 import { Router } from 'express'
 import dayjs from 'dayjs'
-import utc from 'dayjs/plugin/utc'
+import utc from 'dayjs/plugin/utc.js'
 dayjs.extend(utc)
 import pool from './db.js'
 import cors from 'cors'
