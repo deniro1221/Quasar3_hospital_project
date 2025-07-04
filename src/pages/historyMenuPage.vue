@@ -516,9 +516,10 @@ export default {
       try {
         const confirmDelete = confirm('Jeste li sigurni da želite obrisati meni?')
         if (confirmDelete) {
-          console.log('Datum za brisanje:', menu.Datum_marende) // Dodaj ovu liniju
-          const url = `http://192.168.1.10:3000/menu/delete?datum=${menu.Datum_marende}`
-          console.log('URL za brisanje:', url) // Dodaj ovu liniju
+          const praviDatum = dayjs(menu.Datum_marende).add(1, 'day').format('YYYY-MM-DD') // Dodaj 1 dan
+          console.log('Datum za brisanje:', praviDatum)
+          const url = `http://192.168.1.10:3000/menu/delete?datum=${praviDatum}`
+          console.log('URL za brisanje:', url)
           const response = await fetch(url, {
             method: 'DELETE',
           })
@@ -535,6 +536,7 @@ export default {
         alert('Greška pri brisanju menija')
       }
     }
+
     const router = useRouter()
     //logout:
     const logout = () => {
