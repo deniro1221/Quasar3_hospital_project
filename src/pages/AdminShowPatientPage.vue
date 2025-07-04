@@ -61,9 +61,7 @@ const columns = [
 // Učitavanje podataka
 async function showPatient() {
   try {
-    const response = await fetch(
-      'https://backend-hospital-n9to.onrender.com/dijeta-pacijent/active',
-    )
+    const response = await fetch('http://192.168.1.10:3000/dijeta-pacijent/active')
     const data = await response.json()
     dijeta_pac.value = Array.isArray(data) ? data : data ? [data] : []
     console.log('Učitani podaci:', dijeta_pac.value)

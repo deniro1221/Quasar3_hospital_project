@@ -259,7 +259,7 @@ export default {
 
     const fetchMenus = async () => {
       try {
-        const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/history')
+        const response = await fetch('http://192.168.1.10:3000/menu/history')
         if (!response.ok) {
           throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
         }
@@ -324,7 +324,7 @@ export default {
           return
         }
 
-        const response = await fetch('https://backend-hospital-n9to.onrender.com/menu', {
+        const response = await fetch('http://192.168.1.10:3000/menu', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -458,7 +458,7 @@ export default {
           ID_kuhara: userID.value,
         }
         console.log('payload prije slanja', payload)
-        const url = `https://backend-hospital-n9to.onrender.com/menu/fresh`
+        const url = `http://192.168.1.10:3000/menu/fresh`
 
         try {
           const response = await fetch(url, {
@@ -502,7 +502,7 @@ export default {
         const confirmDelete = confirm('Jeste li sigurni da želite obrisati meni?')
         if (confirmDelete) {
           const response = await fetch(
-            `https://backend-hospital-n9to.onrender.com/menu/delete?datum=${menu.Datum_marende}`,
+            `http://192.168.1.10:3000/menu/delete?datum=${menu.Datum_marende}`,
             {
               method: 'DELETE',
             },

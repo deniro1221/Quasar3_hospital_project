@@ -200,9 +200,7 @@ function closeDialog() {
 // Fetch Patient Data
 async function showPatient() {
   try {
-    const response = await fetch(
-      'https://backend-hospital-n9to.onrender.com/dijeta-pacijent/active',
-    )
+    const response = await fetch('http://192.168.1.10:3000/active')
     const data = await response.json()
     dijeta_pac.value = Array.isArray(data) ? data : data ? [data] : []
   } catch (error) {
@@ -274,7 +272,7 @@ async function confirmUpdate() {
     delete updatedRow.ID_dijeta_pac
     delete updatedRow.Datum_unosa
 
-    const url = `https://backend-hospital-n9to.onrender.com/dijeta-pacijent/${rowId}`
+    const url = `http://192.168.1.10:3000/dijeta-pacijent/${rowId}`
 
     try {
       const response = await fetch(url, {
@@ -316,7 +314,7 @@ async function postPatient() {
   refreshID()
   console.log('ID_sestre za slanje: ', idSestre.value)
   try {
-    const response = await fetch('https://backend-hospital-n9to.onrender.com/dijeta-pacijent', {
+    const response = await fetch('http://192.168.1.10:3000/dijeta-pacijent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

@@ -7,14 +7,7 @@ import cors from 'cors'
 const app = express()
 const router = Router()
 
-const corsOptions = {
-  origin: 'https://thalassockmenu.netlify.app',
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true,
-  optionsSuccessStatus: 204,
-}
-
-app.use(cors(corsOptions))
+app.use(cors())
 app.use(express.json())
 
 const validateDateFormat = (req, res, next) => {
@@ -222,11 +215,6 @@ router.get('/menu/history', async (req, res) => {
       [today, today],
     )
 
-    // Manually set CORS headers for the OPTIONS request
-    res.header('Access-Control-Allow-Origin', 'https://thalassockmenu.netlify.app')
-    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE')
-    res.header('Access-Control-Allow-Headers', 'Content-Type')
-
     res.json(menus)
   } catch (err) {
     console.error('Greška pri dohvaćanju povijesti menija:', err)
@@ -268,10 +256,6 @@ router.get('/menu/history/noActive', async (req, res) => {
         `,
       [today, today],
     )
-
-    res.header('Access-Control-Allow-Origin', 'https://thalassockmenu.netlify.app')
-    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE')
-    res.header('Access-Control-Allow-Headers', 'Content-Type')
 
     res.json(menus)
   } catch (err) {

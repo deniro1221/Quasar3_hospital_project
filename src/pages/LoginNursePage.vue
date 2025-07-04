@@ -26,7 +26,7 @@ const errorMessage = ref('') // Varijabla za pohranu poruka o grešci
 
 const submit = async () => {
   try {
-    const response = await axios.post('https://backend-hospital-n9to.onrender.com/login_nurse', {
+    const response = await axios.post('http://192.168.1.10:3000/login_nurse', {
       username: username.value,
       password: password.value,
     })

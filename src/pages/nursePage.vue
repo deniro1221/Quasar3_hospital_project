@@ -77,7 +77,7 @@ const columns = [
 // Dohvaćanje svih sestara iz API-ja
 const fetchNurses = async () => {
   try {
-    const response = await axios.get('https://backend-hospital-n9to.onrender.com/nurse')
+    const response = await axios.get('http://192.168.1.10:3000/nurse')
     nurses.value = response.data
   } catch (error) {
     console.error('Greška prilikom dohvaćanja sestara:', error)
@@ -108,7 +108,7 @@ const editNurse = (nurse) => {
 // Dodavanje nove sestre
 const addNurse = async () => {
   try {
-    await axios.post('https://backend-hospital-n9to.onrender.com/nurse', form.value)
+    await axios.post('http://192.168.1.10:3000/nurse', form.value)
     await fetchNurses()
     closeDialog()
   } catch (error) {
@@ -119,10 +119,7 @@ const addNurse = async () => {
 // Ažuriranje sestre
 const updateNurse = async () => {
   try {
-    await axios.put(
-      `https://backend-hospital-n9to.onrender.com/nurse/${form.value.ID_sestre}`,
-      form.value,
-    )
+    await axios.put(`http://192.168.1.10:3000/nurse/${form.value.ID_sestre}`, form.value)
     await fetchNurses()
     closeDialog()
   } catch (error) {
@@ -134,7 +131,7 @@ const updateNurse = async () => {
 const deleteNurse = async (id) => {
   if (confirm('Jeste li sigurni da želite izbrisati ovu sestru?')) {
     try {
-      await axios.delete(`https://backend-hospital-n9to.onrender.com/nurse/${id}`)
+      await axios.delete(`http://192.168.1.10:3000/nurse/${id}`)
       await fetchNurses()
     } catch (error) {
       console.error('Greška prilikom brisanja sestre:', error)
