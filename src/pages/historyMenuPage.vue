@@ -516,12 +516,11 @@ export default {
       try {
         const confirmDelete = confirm('Jeste li sigurni da želite obrisati meni?')
         if (confirmDelete) {
-          const response = await fetch(
-            `http://192.168.1.10:3000/menu/delete?datum=${menu.Datum_marende}`,
-            {
-              method: 'DELETE',
-            },
-          )
+          const url = `http://192.168.1.10:3000/menu/delete?datum=${menu.Datum_marende}`
+          console.log('URL za brisanje:', url) // Dodaj ovu liniju
+          const response = await fetch(url, {
+            method: 'DELETE',
+          })
 
           if (response.ok) {
             alert('Meni uspješno obrisan!')
