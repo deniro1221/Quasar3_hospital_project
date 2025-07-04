@@ -72,7 +72,12 @@
                       editingCell.col !== props.col.name
                     "
                   >
-                    {{ props.value }}
+                    <div v-if="props.col.name === 'Datum_marende'">
+                      {{ dayjs.utc(props.value).format('YYYY-MM-DD') }}
+                    </div>
+                    <div v-else>
+                      {{ props.value }}
+                    </div>
                   </div>
                   <q-input
                     v-else
@@ -438,7 +443,6 @@ export default {
       console.log('editingCell.value nakon cancelEdit', editingCell.value)
     }
 
-    // Funkcija za potvrdu ažuriranja
     async function confirmUpdate() {
       console.log('confirmUpdate pozvan')
       if (!Object.keys(changesMap.value).length) {
@@ -455,11 +459,16 @@ export default {
 
       for (const rowId in changesMap.value) {
         const updatedRow = { ...changesMap.value[rowId] }
-        const field = editingCell.value.col
+
         // Pripremi podatke za slanje
         const payload = {
           Datum_marende: updatedRow.Datum_marende,
-          [field]: updatedRow[field], // Šalji samo promijenjeno polje
+          Juha_m1: updatedRow.Juha_m1,
+          Glavno_jelo_m1: updatedRow.Glavno_jelo_m1,
+          Salata_m1: updatedRow.Salata_m1,
+          Juha_m2: updatedRow.Juha_m2,
+          Glavno_jelo_m2: updatedRow.Glavno_jelo_m2,
+          Salata_m2: updatedRow.Salata_m2,
           username: loggedInUser.value,
           ID_kuhara: userID.value,
         }
@@ -578,6 +587,7 @@ export default {
       router,
       logout,
       printPDF,
+      dayjs,
     }
   },
 }
