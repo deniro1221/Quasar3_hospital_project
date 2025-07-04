@@ -122,7 +122,6 @@ export default {
       glavno_jelo_m2: '',
       salata_m2: '',
     })
-
     const loggedInUser = ref('')
     const userID = ref('')
     const printPDF = () => {
