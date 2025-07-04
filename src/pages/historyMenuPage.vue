@@ -110,11 +110,15 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router' // Import useRouter
 import html2pdf from 'html2pdf.js'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+dayjs.extend(utc)
+
 export default {
   setup() {
     // Stanje forme za unos menija
     const form = ref({
-      date: new Date().toISOString().slice(0, 10),
+      date: dayjs().format('YYYY-MM-DD'), // Inicijaliziraj s današnjim datumom
       juha_m1: '',
       glavno_jelo_m1: '',
       salata_m1: '',
@@ -252,7 +256,7 @@ export default {
     })
 
     const isFutureDate = (date) => {
-      const today = new Date().toISOString().slice(0, 10)
+      const today = dayjs().utc().format('YYYY-MM-DD')
       return date >= today
     }
 
@@ -312,7 +316,7 @@ export default {
         if (existingMenu) {
           alert('Meni za taj datum već postoji.')
           form.value = {
-            date: new Date().toISOString().slice(0, 10),
+            date: dayjs().format('YYYY-MM-DD'),
             juha_m1: '',
             glavno_jelo_m1: '',
             salata_m1: '',
@@ -323,11 +327,14 @@ export default {
           return
         }
 
+        // Konvertiraj datum u UTC prije slanja
+        const datumZaSlanje = dayjs(form.value.date).utc().format('YYYY-MM-DD')
+
         const response = await fetch('http://192.168.1.10:3000/menu', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            Datum_marende: form.value.date,
+            Datum_marende: datumZaSlanje,
             ID_kuhara: 2, // Ili dohvati ID_kuhara dinamički
             username: 'marin', // Ili dohvati username dinamički
             Juha_m1: form.value.juha_m1,
@@ -344,7 +351,7 @@ export default {
           fetchMenus()
 
           form.value = {
-            date: new Date().toISOString().slice(0, 10),
+            date: dayjs().format('YYYY-MM-DD'),
             juha_m1: '',
             glavno_jelo_m1: '',
             salata_m1: '',
@@ -379,7 +386,7 @@ export default {
       // with the "Prevent closing" example
       console.log('+++ Hiding dialog; form was NOT reset')
       form.value = {
-        date: new Date().toISOString().slice(0, 10),
+        date: dayjs().format('YYYY-MM-DD'),
         juha_m1: '',
         glavno_jelo_m1: '',
         salata_m1: '',
