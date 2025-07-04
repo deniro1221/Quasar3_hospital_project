@@ -516,6 +516,7 @@ export default {
       try {
         const confirmDelete = confirm('Jeste li sigurni da želite obrisati meni?')
         if (confirmDelete) {
+          console.log('Datum za brisanje:', menu.Datum_marende) // Dodaj ovu liniju
           const url = `http://192.168.1.10:3000/menu/delete?datum=${menu.Datum_marende}`
           console.log('URL za brisanje:', url) // Dodaj ovu liniju
           const response = await fetch(url, {
