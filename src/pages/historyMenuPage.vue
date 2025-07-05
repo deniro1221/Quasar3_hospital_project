@@ -113,17 +113,21 @@
 </template>
 <script>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router' // Import useRouter
+import { useRouter } from 'vue-router'
 import html2pdf from 'html2pdf.js'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+import localizedFormat from 'dayjs/plugin/localizedFormat'
 dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.extend(localizedFormat)
+dayjs.tz.setDefault('Europe/Zagreb')
 
 export default {
   setup() {
-    // Stanje forme za unos menija
     const form = ref({
-      date: dayjs().format('YYYY-MM-DD'), // Inicijaliziraj s današnjim datumom
+      date: dayjs().format('YYYY-MM-DD'),
       juha_m1: '',
       glavno_jelo_m1: '',
       salata_m1: '',
@@ -133,6 +137,8 @@ export default {
     })
     const loggedInUser = ref('')
     const userID = ref('')
+    const apiUrl = import.meta.env.VITE_API_URL
+
     const printPDF = () => {
       // Prepare the table HTML
       let tableHTML = `
@@ -201,6 +207,7 @@ export default {
         field: 'Datum_marende',
         align: 'left',
         sortable: true,
+        format: (val) => dayjs.utc(val).tz('Europe/Zagreb').format('LL'),
       },
       {
         name: 'Juha_m1',
@@ -251,7 +258,6 @@ export default {
         align: 'left',
         sortable: true,
       },
-
       { name: 'actions', label: 'Akcije', field: 'actions', align: 'center' },
     ]
 
@@ -261,13 +267,13 @@ export default {
     })
 
     const isFutureDate = (date) => {
-      const today = dayjs().utc().format('YYYY-MM-DD')
+      const today = dayjs().tz().format('YYYY-MM-DD')
       return date >= today
     }
 
     const fetchMenus = async () => {
       try {
-        const response = await fetch('http://192.168.1.10:3000/menu/history')
+        const response = await fetch(`${apiUrl}/menu/history`)
         if (!response.ok) {
           throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
         }
@@ -296,9 +302,9 @@ export default {
             acc[date].username = menu.username || ''
             acc[date].ID_kuhara = menu.ID_kuhara || ''
           } else if (menu.marenda === 'Marenda2') {
-            acc[date].Juha_m2 = menu.Juha_m1 || '' // Ispravljeno menu.Juha_m1 u menu.Juha_m2
-            acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || '' // Ispravljeno menu.Glavno_jelo_m1 u menu.Glavno_jelo_m2
-            acc[date].Salata_m2 = menu.Salata_m1 || '' // Ispravljeno menu.Salata_m1 u menu.Salata_m2
+            acc[date].Juha_m2 = menu.Juha_m2 || ''
+            acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m2 || ''
+            acc[date].Salata_m2 = menu.Salata_m2 || ''
             acc[date].username = menu.username || ''
             acc[date].ID_kuhara = menu.ID_kuhara || ''
           }
@@ -316,26 +322,9 @@ export default {
     const addMenuDialog = ref(false)
     const addMenu = async () => {
       try {
-        const existingMenu = menus.value.find((menu) => menu.Datum_marende === form.value.date)
-
-        if (existingMenu) {
-          alert('Meni za taj datum već postoji.')
-          form.value = {
-            date: dayjs().format('YYYY-MM-DD'),
-            juha_m1: '',
-            glavno_jelo_m1: '',
-            salata_m1: '',
-            juha_m2: '',
-            glavno_jelo_m2: '',
-            salata_m2: '',
-          }
-          return
-        }
-
-        // Konvertiraj datum u UTC prije slanja
-        const datumZaSlanje = dayjs(form.value.date).utc().format('YYYY-MM-DD')
-
-        const response = await fetch('http://192.168.1.10:3000/menu', {
+        const datumZaSlanje = dayjs(form.value.date).tz('Europe/Zagreb').utc().format('YYYY-MM-DD')
+        console.log(datumZaSlanje)
+        const response = await fetch(`${apiUrl}/menu`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -351,6 +340,13 @@ export default {
           }),
         })
 
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(
+            `Greška pri dodavanju menija: ${response.status} ${JSON.stringify(errorData)}`,
+          )
+        }
+
         if (response.ok) {
           alert('Meni uspješno dodan!')
           fetchMenus()
@@ -365,31 +361,19 @@ export default {
             salata_m2: '',
           }
           addMenuDialog.value = false
-        } else {
-          const errorData = await response.json()
-          throw new Error(
-            `Greška pri dodavanju menija: ${response.status} ${JSON.stringify(errorData)}`,
-          )
         }
       } catch (error) {
         console.error(error.message)
         alert('Greška pri dodavanju menija: ' + error.message)
       }
     }
+
     const closeTheGreatDialog = () => {
       console.log('closeTheGreatDialog pozvan')
       addMenuDialog.value = false
     }
-    const onDialogCancel = () => {
-      // optional, do something useful
-      //   if (preventReset.value === true) {
-      //     return
-      //   }
 
-      // this is only for demo purposes so
-      // user does not get annoyed when playing
-      // with the "Prevent closing" example
-      console.log('+++ Hiding dialog; form was NOT reset')
+    const onDialogCancel = () => {
       form.value = {
         date: dayjs().format('YYYY-MM-DD'),
         juha_m1: '',
@@ -400,11 +384,13 @@ export default {
         salata_m2: '',
       }
     }
+
     const openDialog = () => {
       console.log('openDialog pozvan')
       addMenuDialog.value = true
       console.log('addMenuDialog.value', addMenuDialog.value)
     }
+
     const editingCell = ref({ rowId: null, col: null })
 
     // Mapa za praćenje promjena
@@ -424,8 +410,7 @@ export default {
     // Funkcija za unos u ćeliju
     function onCellInput(row, column, event) {
       console.log('onCellInput pozvan', row, column, event)
-      // let newVal = event.target.value || event.target.innerText; // Uklonjeno
-      let newVal = row[column.field] // Dohvati vrijednost izravno iz reda
+      let newVal = row[column.field]
       console.log('newVal', newVal)
 
       if (!changesMap.value[row.Datum_marende]) {
@@ -473,7 +458,7 @@ export default {
           ID_kuhara: userID.value,
         }
         console.log('payload prije slanja', payload)
-        const url = `http://192.168.1.10:3000/menu/fresh`
+        const url = `${apiUrl}/menu/fresh`
 
         try {
           const response = await fetch(url, {
@@ -518,7 +503,7 @@ export default {
         if (confirmDelete) {
           const praviDatum = dayjs(menu.Datum_marende).add(1, 'day').format('YYYY-MM-DD') // Dodaj 1 dan
           console.log('Datum za brisanje:', praviDatum)
-          const url = `http://192.168.1.10:3000/menu/delete?datum=${praviDatum}`
+          const url = `${apiUrl}/menu/delete?datum=${praviDatum}`
           console.log('URL za brisanje:', url)
           const response = await fetch(url, {
             method: 'DELETE',
