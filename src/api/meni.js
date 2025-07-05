@@ -25,8 +25,9 @@ const validateDateFormat = (req, res, next) => {
 }
 
 router.post('/menu', validateDateFormat, async (req, res) => {
+  console.log('Backend Received Payload:', req.body)
   const {
-    Datum_marende,
+    Datum_marende, // Should match what's targeted by your middleware and being sent by frontend.
     ID_kuhara,
     username,
     Juha_m1,
@@ -46,8 +47,8 @@ router.post('/menu', validateDateFormat, async (req, res) => {
     transactionStarted = true
 
     const sql1 = `
-            INSERT INTO Marenda1 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
-            VALUES (?, ?, ?, ?, ?, ?)`
+        INSERT INTO Marenda1 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
+        VALUES (?, ?, ?, ?, ?, ?)`
     await connection.execute(sql1, [
       Datum_marende,
       Juha_m1,
@@ -58,8 +59,8 @@ router.post('/menu', validateDateFormat, async (req, res) => {
     ])
 
     const sql2 = `
-            INSERT INTO Marenda2 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
-            VALUES (?, ?, ?, ?, ?, ?)`
+        INSERT INTO Marenda2 (Datum_marende, Juha, Glavno_jelo, Salata, ID_kuhara, username)
+        VALUES (?, ?, ?, ?, ?, ?)`
     await connection.execute(sql2, [
       Datum_marende,
       Juha_m2,
@@ -75,7 +76,7 @@ router.post('/menu', validateDateFormat, async (req, res) => {
     if (transactionStarted) {
       await connection.rollback()
     }
-    console.error(err)
+    console.error('Backend Error:', err)
     res.status(500).json({ message: 'Greška na serveru.' })
   } finally {
     connection.release()

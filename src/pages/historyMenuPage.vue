@@ -323,48 +323,28 @@ export default {
     const addMenu = async () => {
       try {
         const datumZaSlanje = dayjs(form.value.date).tz('Europe/Zagreb').utc().format('YYYY-MM-DD')
-        console.log(datumZaSlanje)
+        console.log('Frontend Datum za slanje:', datumZaSlanje)
+        const payload = {
+          Datum_marende: datumZaSlanje,
+          ID_kuhara: 2, // Aleady set statically for simplicity
+          username: 'marin', // Also static for now, depending on dynamic logic needed
+          Juha_m1: form.value.juha_m1,
+          Glavno_jelo_m1: form.value.glavno_jelo_m1,
+          Salata_m1: form.value.salata_m1,
+          Juha_m2: form.value.juha_m2,
+          Glavno_jelo_m2: form.value.glavno_jelo_m2,
+          Salata_m2: form.value.salata_m2,
+        }
+        console.log('Frontend Payload:', JSON.stringify(payload))
+
         const response = await fetch(`${apiUrl}/menu`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            Datum_marende: datumZaSlanje,
-            ID_kuhara: 2, // Ili dohvati ID_kuhara dinamički
-            username: 'marin', // Ili dohvati username dinamički
-            Juha_m1: form.value.juha_m1,
-            Glavno_jelo_m1: form.value.glavno_jelo_m1,
-            Salata_m1: form.value.salata_m1,
-            Juha_m2: form.value.juha_m2,
-            Glavno_jelo_m2: form.value.glavno_jelo_m2,
-            Salata_m2: form.value.salata_m2,
-          }),
+          body: JSON.stringify(payload, response),
         })
-
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(
-            `Greška pri dodavanju menija: ${response.status} ${JSON.stringify(errorData)}`,
-          )
-        }
-
-        if (response.ok) {
-          alert('Meni uspješno dodan!')
-          fetchMenus()
-
-          form.value = {
-            date: dayjs().format('YYYY-MM-DD'),
-            juha_m1: '',
-            glavno_jelo_m1: '',
-            salata_m1: '',
-            juha_m2: '',
-            glavno_jelo_m2: '',
-            salata_m2: '',
-          }
-          addMenuDialog.value = false
-        }
+        // Handle the response here
       } catch (error) {
-        console.error(error.message)
-        alert('Greška pri dodavanju menija: ' + error.message)
+        console.error('Error in addMenu:', error)
       }
     }
 
