@@ -273,7 +273,7 @@ export default {
 
     const fetchMenus = async () => {
       try {
-        const response = await fetch(`${apiUrl}/menu/history`)
+        const response = await fetch(`http://192.168.1.10:3000/menu/history`)
         if (!response.ok) {
           throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
         }
@@ -326,8 +326,8 @@ export default {
         console.log('Frontend Datum za slanje:', datumZaSlanje)
         const payload = {
           Datum_marende: datumZaSlanje,
-          ID_kuhara: 2, // Aleady set statically for simplicity
-          username: 'marin', // Also static for now, depending on dynamic logic needed
+          ID_kuhara: 2,
+          username: 'marin',
           Juha_m1: form.value.juha_m1,
           Glavno_jelo_m1: form.value.glavno_jelo_m1,
           Salata_m1: form.value.salata_m1,
@@ -337,14 +337,44 @@ export default {
         }
         console.log('Frontend Payload:', JSON.stringify(payload))
 
-        const response = await fetch(`${apiUrl}/menu`, {
+        const response = await fetch(`http://192.168.1.10:3000/menu`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload, response),
+          body: JSON.stringify(payload),
         })
-        // Handle the response here
+
+        if (response.ok) {
+          const responseData = await response.json()
+          console.log('Meni uspješno dodan:', responseData)
+          alert('Meni uspješno dodan!')
+
+          // Resetiraj formu ili napravi nešto drugo nakon uspješnog dodavanja
+          form.value = {
+            date: dayjs().format('YYYY-MM-DD'),
+            juha_m1: '',
+            glavno_jelo_m1: '',
+            salata_m1: '',
+            juha_m2: '',
+            glavno_jelo_m2: '',
+            salata_m2: '',
+          }
+          addMenuDialog.value = false // Zatvori dijalog nakon uspješnog dodavanja
+        } else {
+          // Ako je došlo do greške na serveru
+          console.error('Greška pri dodavanju menija:', response.status, response.statusText)
+          try {
+            const errorData = await response.json()
+            alert(
+              `Greška pri dodavanju menija: ${response.status} - ${errorData.message || response.statusText}`,
+            )
+          } catch (jsonError) {
+            console.error('Greška pri parsiranju JSON odgovora:', jsonError) // Ispiši jsonError
+            alert(`Greška pri dodavanju menija: ${response.status} - ${response.statusText}`)
+          }
+        }
       } catch (error) {
         console.error('Error in addMenu:', error)
+        alert('Došlo je do pogreške pri dodavanju menija.')
       }
     }
 
@@ -438,7 +468,7 @@ export default {
           ID_kuhara: userID.value,
         }
         console.log('payload prije slanja', payload)
-        const url = `${apiUrl}/menu/fresh`
+        const url = `http://192.168.1.10:3000/menu/fresh`
 
         try {
           const response = await fetch(url, {
