@@ -207,7 +207,6 @@ export default {
         field: 'Datum_marende',
         align: 'left',
         sortable: true,
-        format: (val) => dayjs(val).format('YYYY-MM-DD'),
       },
       {
         name: 'Juha_m1',
