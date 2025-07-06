@@ -1,8 +1,8 @@
 import express from 'express'
 import { Router } from 'express'
 import dayjs from 'dayjs'
-import utc from 'dayjs/plugin/utc.js'
-dayjs.extend(utc)
+// import utc from 'dayjs/plugin/utc.js' // Uklonjeno
+// dayjs.extend(utc) // Uklonjeno
 import pool from './db.js'
 import cors from 'cors'
 
@@ -12,19 +12,17 @@ const router = Router()
 app.use(cors())
 app.use(express.json())
 
-/*const validateDateFormat = (req, res, next) => {
+const validateDateFormat = (req, res, next) => {
   const { Datum_marende } = req.body
   if (Datum_marende) {
     if (!dayjs(Datum_marende, 'YYYY-MM-DD', true).isValid()) {
       return res.status(400).json({ message: 'Neispravan format datuma. Koristite YYYY-MM-DD.' })
     }
-    // Konvertiraj u UTC
-    req.body.Datum_marende = dayjs.utc(Datum_marende).format('YYYY-MM-DD')
   }
   next()
-}*/
+}
 
-router.post('/menu', async (req, res) => {
+router.post('/menu', validateDateFormat, async (req, res) => {
   console.log('Backend Received Payload:', req.body)
   const {
     Datum_marende, // Should match what's targeted by your middleware and being sent by frontend.

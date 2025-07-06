@@ -267,7 +267,7 @@ export default {
     })
 
     const isFutureDate = (date) => {
-      const today = dayjs().tz().format('YYYY-MM-DD')
+      const today = dayjs().format('YYYY-MM-DD')
       return date >= today
     }
 
@@ -322,7 +322,7 @@ export default {
     const addMenuDialog = ref(false)
     const addMenu = async () => {
       try {
-        const datumZaSlanje = form.value.date // Koristi datum izravno iz forme
+        const datumZaSlanje = form.value.date // Šalji direktno bez konverzije
         console.log('Frontend Datum za slanje:', datumZaSlanje)
 
         const payload = {
@@ -587,6 +587,8 @@ export default {
   },
 }
 </script>
+Regenerate Copy
+
 <style>
 .styled-table {
   width: 100%;
