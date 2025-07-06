@@ -207,7 +207,7 @@ export default {
         field: 'Datum_marende',
         align: 'left',
         sortable: true,
-        format: (val) => dayjs.utc(val).tz('Europe/Zagreb').format('LL'),
+        format: (val) => dayjs(val).format('YYYY-MM-DD'),
       },
       {
         name: 'Juha_m1',
@@ -322,8 +322,9 @@ export default {
     const addMenuDialog = ref(false)
     const addMenu = async () => {
       try {
-        const datumZaSlanje = dayjs(form.value.date).tz('Europe/Zagreb').utc().format('YYYY-MM-DD')
+        const datumZaSlanje = form.value.date // Koristi datum izravno iz forme
         console.log('Frontend Datum za slanje:', datumZaSlanje)
+
         const payload = {
           Datum_marende: datumZaSlanje,
           ID_kuhara: 2,
@@ -348,7 +349,7 @@ export default {
           console.log('Meni uspješno dodan:', responseData)
           alert('Meni uspješno dodan!')
 
-          // Resetiraj formu ili napravi nešto drugo nakon uspješnog dodavanja
+          // Resetiraj formu
           form.value = {
             date: dayjs().format('YYYY-MM-DD'),
             juha_m1: '',
@@ -358,9 +359,8 @@ export default {
             glavno_jelo_m2: '',
             salata_m2: '',
           }
-          addMenuDialog.value = false // Zatvori dijalog nakon uspješnog dodavanja
+          addMenuDialog.value = false
         } else {
-          // Ako je došlo do greške na serveru
           console.error('Greška pri dodavanju menija:', response.status, response.statusText)
           try {
             const errorData = await response.json()
@@ -368,7 +368,7 @@ export default {
               `Greška pri dodavanju menija: ${response.status} - ${errorData.message || response.statusText}`,
             )
           } catch (jsonError) {
-            console.error('Greška pri parsiranju JSON odgovora:', jsonError) // Ispiši jsonError
+            console.error('Greška pri parsiranju JSON odgovora:', jsonError)
             alert(`Greška pri dodavanju menija: ${response.status} - ${response.statusText}`)
           }
         }
@@ -511,9 +511,7 @@ export default {
       try {
         const confirmDelete = confirm('Jeste li sigurni da želite obrisati meni?')
         if (confirmDelete) {
-          const praviDatum = dayjs(menu.Datum_marende).add(1, 'day').format('YYYY-MM-DD') // Dodaj 1 dan
-          console.log('Datum za brisanje:', praviDatum)
-          const url = `${apiUrl}/menu/delete?datum=${praviDatum}`
+          const url = `${apiUrl}/menu/delete?datum=${menu.Datum_marende}`
           console.log('URL za brisanje:', url)
           const response = await fetch(url, {
             method: 'DELETE',

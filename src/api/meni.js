@@ -12,7 +12,7 @@ const router = Router()
 app.use(cors())
 app.use(express.json())
 
-const validateDateFormat = (req, res, next) => {
+/*const validateDateFormat = (req, res, next) => {
   const { Datum_marende } = req.body
   if (Datum_marende) {
     if (!dayjs(Datum_marende, 'YYYY-MM-DD', true).isValid()) {
@@ -22,9 +22,9 @@ const validateDateFormat = (req, res, next) => {
     req.body.Datum_marende = dayjs.utc(Datum_marende).format('YYYY-MM-DD')
   }
   next()
-}
+}*/
 
-router.post('/menu', validateDateFormat, async (req, res) => {
+router.post('/menu', async (req, res) => {
   console.log('Backend Received Payload:', req.body)
   const {
     Datum_marende, // Should match what's targeted by your middleware and being sent by frontend.
@@ -109,7 +109,7 @@ router.get('/menu/today', async (req, res) => {
   }
 })
 
-router.put('/menu/fresh', validateDateFormat, async (req, res) => {
+router.put('/menu/fresh', async (req, res) => {
   const {
     Datum_marende,
     Juha_m1,
