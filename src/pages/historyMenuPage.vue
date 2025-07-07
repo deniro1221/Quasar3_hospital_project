@@ -279,7 +279,7 @@ export default {
         const data = await response.json()
 
         const groupedMenus = data.reduce((acc, menu) => {
-          const date = menu.Datum.split('T')[0]
+          const date = menu.Datum
           if (!acc[date]) {
             acc[date] = {
               Datum_marende: date,
