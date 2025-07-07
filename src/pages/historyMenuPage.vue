@@ -72,12 +72,8 @@
                       editingCell.col !== props.col.name
                     "
                   >
-                    <div v-if="props.col.name === 'Datum_marende'">
-                      {{ dayjs.utc(props.value).format('YYYY-MM-DD') }}
-                    </div>
-                    <div v-else>
-                      {{ props.value }}
-                    </div>
+                    <div v-if="props.col.name === 'Datum_marende'">{{ props.value }}</div>
+                    <div v-else>{{ props.value }}</div>
                   </div>
                   <q-input
                     v-else
