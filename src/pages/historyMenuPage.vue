@@ -275,7 +275,8 @@ export default {
         const data = await response.json()
 
         const groupedMenus = data.reduce((acc, menu) => {
-          const date = dayjs.utc(menu.Datum).tz('Europe/Zagreb').format('YYYY-MM-DD') // Konvertirajte u lokalno vrijeme
+          // Treat the date as a plain string (no timezone conversion)
+          const date = dayjs(menu.Datum).format('YYYY-MM-DD')
           if (!acc[date]) {
             acc[date] = {
               Datum_marende: date,
@@ -308,12 +309,13 @@ export default {
         }, {})
 
         menus.value = Object.values(groupedMenus)
+
+        console.log('Dohvaćeni meniji:', menus.value)
       } catch (error) {
         console.error(error.message)
         alert('Greška pri dohvaćanju menija: ' + error.message)
       }
     }
-
     const addMenuDialog = ref(false)
     const addMenu = async () => {
       try {
@@ -582,7 +584,6 @@ export default {
   },
 }
 </script>
-Regenerate Copy
 
 <style>
 .styled-table {
