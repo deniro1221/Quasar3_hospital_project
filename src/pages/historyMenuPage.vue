@@ -275,7 +275,7 @@ export default {
         const data = await response.json()
 
         const groupedMenus = data.reduce((acc, menu) => {
-          const date = menu.Datum
+          const date = dayjs.utc(menu.Datum).tz('Europe/Zagreb').format('YYYY-MM-DD') // Konvertirajte u lokalno vrijeme
           if (!acc[date]) {
             acc[date] = {
               Datum_marende: date,
