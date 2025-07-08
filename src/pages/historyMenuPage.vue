@@ -107,7 +107,7 @@
     </q-page-container>
   </q-layout>
 </template>
-<script>
+<script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import html2pdf from 'html2pdf.js'
@@ -120,24 +120,22 @@ dayjs.extend(timezone)
 dayjs.extend(localizedFormat)
 dayjs.tz.setDefault('Europe/Zagreb')
 
-export default {
-  setup() {
-    const form = ref({
-      date: dayjs().format('YYYY-MM-DD'),
-      juha_m1: '',
-      glavno_jelo_m1: '',
-      salata_m1: '',
-      juha_m2: '',
-      glavno_jelo_m2: '',
-      salata_m2: '',
-    })
-    const loggedInUser = ref('')
-    const userID = ref('')
-    const apiUrl = import.meta.env.VITE_API_URL
+const form = ref({
+  date: dayjs().format('YYYY-MM-DD'),
+  juha_m1: '',
+  glavno_jelo_m1: '',
+  salata_m1: '',
+  juha_m2: '',
+  glavno_jelo_m2: '',
+  salata_m2: '',
+})
+const loggedInUser = ref('')
+const userID = ref('')
+// const apiUrl = import.meta.env.VITE_API_URL
 
-    const printPDF = () => {
-      // Prepare the table HTML
-      let tableHTML = `
+const printPDF = () => {
+  // Prepare the table HTML
+  let tableHTML = `
         <h2 style="text-align: center; margin-bottom: 20px">Plan menija</h2>
         <table style="width: 100%; border-collapse: collapse;">
           <thead>
@@ -171,216 +169,183 @@ export default {
         </table>
       `
 
-      // Create a temporary div element to hold the table HTML
-      const element = document.createElement('div')
-      element.id = 'printable-menu' // Ensure the ID is set
-      element.innerHTML = tableHTML
-      document.body.appendChild(element) // Append to the body so html2pdf can find it
+  // Create a temporary div element to hold the table HTML
+  const element = document.createElement('div')
+  element.id = 'printable-menu' // Ensure the ID is set
+  element.innerHTML = tableHTML
+  document.body.appendChild(element) // Append to the body so html2pdf can find it
 
-      const opt = {
-        margin: 10,
-        filename: 'plan_menija.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+  const opt = {
+    margin: 10,
+    filename: 'plan_menija.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+  }
+
+  html2pdf().set(opt).from(element).save()
+
+  // Clean up: remove the temporary element after printing
+  document.body.removeChild(element)
+}
+
+// Stanje tablice s menijima
+const menus = ref([])
+
+// Kolone za tablicu
+const columns = [
+  {
+    name: 'Datum_marende',
+    label: 'Datum',
+    field: 'Datum_marende',
+    align: 'left',
+    sortable: true,
+  },
+  {
+    name: 'Juha_m1',
+    label: 'Juha (Marenda 1)',
+    field: 'Juha_m1',
+    align: 'left',
+    sortable: true,
+  },
+  {
+    name: 'Glavno_jelo_m1',
+    label: 'Glavno jelo (Marenda 1)',
+    field: 'Glavno_jelo_m1',
+    align: 'left',
+    sortable: true,
+  },
+  {
+    name: 'Salata_m1',
+    label: 'Salata (Marenda 1)',
+    field: 'Salata_m1',
+    align: 'left',
+    sortable: true,
+  },
+  {
+    name: 'Juha_m2',
+    label: 'Juha (Marenda 2)',
+    field: 'Juha_m2',
+    align: 'left',
+    sortable: true,
+  },
+  {
+    name: 'Glavno_jelo_m2',
+    label: 'Glavno jelo (Marenda 2)',
+    field: 'Glavno_jelo_m2',
+    align: 'left',
+    sortable: true,
+  },
+  {
+    name: 'Salata_m2',
+    label: 'Salata (Marenda 2)',
+    field: 'Salata_m2',
+    align: 'left',
+    sortable: true,
+  },
+  {
+    name: 'username',
+    label: 'Korisnik',
+    field: 'username',
+    align: 'left',
+    sortable: true,
+  },
+  { name: 'actions', label: 'Akcije', field: 'actions', align: 'center' },
+]
+
+// Paginacija za tablicu
+const pagination = ref({
+  rowsPerPage: 10,
+})
+
+const isFutureDate = (date) => {
+  const today = dayjs().format('YYYY-MM-DD')
+  return date >= today
+}
+
+const fetchMenus = async () => {
+  try {
+    const response = await fetch(`http://192.168.1.10:3000/menu/history`)
+    if (!response.ok) {
+      throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
+    }
+    const data = await response.json()
+
+    const groupedMenus = data.reduce((acc, menu) => {
+      // Treat the date as a plain string (no timezone conversion)
+      const date = dayjs(menu.Datum).format('YYYY-MM-DD')
+      if (!acc[date]) {
+        acc[date] = {
+          Datum_marende: date,
+          Juha_m1: '',
+          Glavno_jelo_m1: '',
+          Salata_m1: '',
+          Juha_m2: '',
+          Glavno_jelo_m2: '',
+          Salata_m2: '',
+          username: '',
+          ID_kuhara: '',
+        }
       }
 
-      html2pdf().set(opt).from(element).save()
+      // Always set username and ID_kuhara if present
+      if (menu.username) acc[date].username = menu.username
+      if (menu.ID_kuhara) acc[date].ID_kuhara = menu.ID_kuhara
 
-      // Clean up: remove the temporary element after printing
-      document.body.removeChild(element)
+      // Correctly map both Marenda1 and Marenda2 fields
+      if (menu.marenda === 'Marenda1') {
+        acc[date].Juha_m1 = menu.Juha_m1 || ''
+        acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
+        acc[date].Salata_m1 = menu.Salata_m1 || ''
+      } else if (menu.marenda === 'Marenda2') {
+        acc[date].Juha_m2 = menu.Juha_m2 || ''
+        acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m2 || ''
+        acc[date].Salata_m2 = menu.Salata_m2 || ''
+      }
+
+      return acc
+    }, {})
+
+    menus.value = Object.values(groupedMenus)
+
+    console.log('Dohvaćeni meniji:', menus.value)
+  } catch (error) {
+    console.error(error.message)
+    alert('Greška pri dohvaćanju menija: ' + error.message)
+  }
+}
+const addMenuDialog = ref(false)
+const addMenu = async () => {
+  try {
+    const datumZaSlanje = form.value.date // Šalji direktno bez konverzije
+    console.log('Frontend Datum za slanje:', datumZaSlanje)
+
+    const payload = {
+      Datum_marende: datumZaSlanje,
+      ID_kuhara: 2,
+      username: 'marin',
+      Juha_m1: form.value.juha_m1,
+      Glavno_jelo_m1: form.value.glavno_jelo_m1,
+      Salata_m1: form.value.salata_m1,
+      Juha_m2: form.value.juha_m2,
+      Glavno_jelo_m2: form.value.glavno_jelo_m2,
+      Salata_m2: form.value.salata_m2,
     }
+    console.log('Frontend Payload:', JSON.stringify(payload))
 
-    // Stanje tablice s menijima
-    const menus = ref([])
-
-    // Kolone za tablicu
-    const columns = [
-      {
-        name: 'Datum_marende',
-        label: 'Datum',
-        field: 'Datum_marende',
-        align: 'left',
-        sortable: true,
-      },
-      {
-        name: 'Juha_m1',
-        label: 'Juha (Marenda 1)',
-        field: 'Juha_m1',
-        align: 'left',
-        sortable: true,
-      },
-      {
-        name: 'Glavno_jelo_m1',
-        label: 'Glavno jelo (Marenda 1)',
-        field: 'Glavno_jelo_m1',
-        align: 'left',
-        sortable: true,
-      },
-      {
-        name: 'Salata_m1',
-        label: 'Salata (Marenda 1)',
-        field: 'Salata_m1',
-        align: 'left',
-        sortable: true,
-      },
-      {
-        name: 'Juha_m2',
-        label: 'Juha (Marenda 2)',
-        field: 'Juha_m2',
-        align: 'left',
-        sortable: true,
-      },
-      {
-        name: 'Glavno_jelo_m2',
-        label: 'Glavno jelo (Marenda 2)',
-        field: 'Glavno_jelo_m2',
-        align: 'left',
-        sortable: true,
-      },
-      {
-        name: 'Salata_m2',
-        label: 'Salata (Marenda 2)',
-        field: 'Salata_m2',
-        align: 'left',
-        sortable: true,
-      },
-      {
-        name: 'username',
-        label: 'Korisnik',
-        field: 'username',
-        align: 'left',
-        sortable: true,
-      },
-      { name: 'actions', label: 'Akcije', field: 'actions', align: 'center' },
-    ]
-
-    // Paginacija za tablicu
-    const pagination = ref({
-      rowsPerPage: 10,
+    const response = await fetch(`http://192.168.1.10:3000/menu`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     })
 
-    const isFutureDate = (date) => {
-      const today = dayjs().format('YYYY-MM-DD')
-      return date >= today
-    }
+    if (response.ok) {
+      const responseData = await response.json()
+      console.log('Meni uspješno dodan:', responseData)
+      alert('Meni uspješno dodan!')
 
-    const fetchMenus = async () => {
-      try {
-        const response = await fetch(`http://192.168.1.10:3000/menu/history`)
-        if (!response.ok) {
-          throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
-        }
-        const data = await response.json()
-
-        const groupedMenus = data.reduce((acc, menu) => {
-          // Treat the date as a plain string (no timezone conversion)
-          const date = dayjs(menu.Datum).format('YYYY-MM-DD')
-          if (!acc[date]) {
-            acc[date] = {
-              Datum_marende: date,
-              Juha_m1: '',
-              Glavno_jelo_m1: '',
-              Salata_m1: '',
-              Juha_m2: '',
-              Glavno_jelo_m2: '',
-              Salata_m2: '',
-              username: menu.username,
-              ID_kuhara: menu.ID_kuhara,
-            }
-          }
-
-          if (menu.marenda === 'Marenda1') {
-            acc[date].Juha_m1 = menu.Juha_m1 || ''
-            acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
-            acc[date].Salata_m1 = menu.Salata_m1 || ''
-            acc[date].username = menu.username || ''
-            acc[date].ID_kuhara = menu.ID_kuhara || ''
-          } else if (menu.marenda === 'Marenda2') {
-            acc[date].Juha_m2 = menu.Juha_m2 || ''
-            acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m2 || ''
-            acc[date].Salata_m2 = menu.Salata_m2 || ''
-            acc[date].username = menu.username || ''
-            acc[date].ID_kuhara = menu.ID_kuhara || ''
-          }
-
-          return acc
-        }, {})
-
-        menus.value = Object.values(groupedMenus)
-
-        console.log('Dohvaćeni meniji:', menus.value)
-      } catch (error) {
-        console.error(error.message)
-        alert('Greška pri dohvaćanju menija: ' + error.message)
-      }
-    }
-    const addMenuDialog = ref(false)
-    const addMenu = async () => {
-      try {
-        const datumZaSlanje = form.value.date // Šalji direktno bez konverzije
-        console.log('Frontend Datum za slanje:', datumZaSlanje)
-
-        const payload = {
-          Datum_marende: datumZaSlanje,
-          ID_kuhara: 2,
-          username: 'marin',
-          Juha_m1: form.value.juha_m1,
-          Glavno_jelo_m1: form.value.glavno_jelo_m1,
-          Salata_m1: form.value.salata_m1,
-          Juha_m2: form.value.juha_m2,
-          Glavno_jelo_m2: form.value.glavno_jelo_m2,
-          Salata_m2: form.value.salata_m2,
-        }
-        console.log('Frontend Payload:', JSON.stringify(payload))
-
-        const response = await fetch(`http://192.168.1.10:3000/menu`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
-
-        if (response.ok) {
-          const responseData = await response.json()
-          console.log('Meni uspješno dodan:', responseData)
-          alert('Meni uspješno dodan!')
-
-          // Resetiraj formu
-          form.value = {
-            date: dayjs().format('YYYY-MM-DD'),
-            juha_m1: '',
-            glavno_jelo_m1: '',
-            salata_m1: '',
-            juha_m2: '',
-            glavno_jelo_m2: '',
-            salata_m2: '',
-          }
-          addMenuDialog.value = false
-        } else {
-          console.error('Greška pri dodavanju menija:', response.status, response.statusText)
-          try {
-            const errorData = await response.json()
-            alert(
-              `Greška pri dodavanju menija: ${response.status} - ${errorData.message || response.statusText}`,
-            )
-          } catch (jsonError) {
-            console.error('Greška pri parsiranju JSON odgovora:', jsonError)
-            alert(`Greška pri dodavanju menija: ${response.status} - ${response.statusText}`)
-          }
-        }
-      } catch (error) {
-        console.error('Error in addMenu:', error)
-        alert('Došlo je do pogreške pri dodavanju menija.')
-      }
-    }
-
-    const closeTheGreatDialog = () => {
-      console.log('closeTheGreatDialog pozvan')
-      addMenuDialog.value = false
-    }
-
-    const onDialogCancel = () => {
+      // Resetiraj formu
       form.value = {
         date: dayjs().format('YYYY-MM-DD'),
         juha_m1: '',
@@ -390,199 +355,234 @@ export default {
         glavno_jelo_m2: '',
         salata_m2: '',
       }
-    }
-
-    const openDialog = () => {
-      console.log('openDialog pozvan')
-      addMenuDialog.value = true
-      console.log('addMenuDialog.value', addMenuDialog.value)
-    }
-
-    const editingCell = ref({ rowId: null, col: null })
-
-    // Mapa za praćenje promjena
-    const changesMap = ref({})
-
-    // Funkcija za dvoklik na ćeliju
-    function onCellDblClick(row, column) {
-      console.log('onCellDblClick pozvan', row, column)
-      if (['Datum_marende', 'username', 'ID_kuhara', 'actions'].includes(column.name)) {
-        console.log('Polje nije dozvoljeno za uređivanje')
-        return
-      }
-      editingCell.value = { rowId: row.Datum_marende, col: column.name }
-      console.log('editingCell.value nakon dvoklika', editingCell.value)
-    }
-
-    // Funkcija za unos u ćeliju
-    function onCellInput(row, column, event) {
-      console.log('onCellInput pozvan', row, column, event)
-      let newVal = row[column.field]
-      console.log('newVal', newVal)
-
-      if (!changesMap.value[row.Datum_marende]) {
-        changesMap.value[row.Datum_marende] = { ...row }
-      }
-
-      changesMap.value[row.Datum_marende][column.field] = newVal
-      console.log('changesMap.value nakon unosa', changesMap.value)
-    }
-
-    // Funkcija za prekid uređivanja
-    function cancelEdit() {
-      console.log('cancelEdit pozvan')
-      editingCell.value = {}
-      console.log('editingCell.value nakon cancelEdit', editingCell.value)
-    }
-
-    async function confirmUpdate() {
-      console.log('confirmUpdate pozvan')
-      if (!Object.keys(changesMap.value).length) {
-        alert('Nema promjena za ažurirati.')
-        return
-      }
-
-      if (!confirm('Jeste li sigurni za ažuriranje?')) return
-
-      let successCount = 0
-      let failCount = 0
-
-      console.log('changesMap.value prije slanja', changesMap.value)
-
-      for (const rowId in changesMap.value) {
-        const updatedRow = { ...changesMap.value[rowId] }
-
-        // Pripremi podatke za slanje
-        const payload = {
-          Datum_marende: updatedRow.Datum_marende,
-          Juha_m1: updatedRow.Juha_m1,
-          Glavno_jelo_m1: updatedRow.Glavno_jelo_m1,
-          Salata_m1: updatedRow.Salata_m1,
-          Juha_m2: updatedRow.Juha_m2,
-          Glavno_jelo_m2: updatedRow.Glavno_jelo_m2,
-          Salata_m2: updatedRow.Salata_m2,
-          username: loggedInUser.value,
-          ID_kuhara: userID.value,
-        }
-        console.log('payload prije slanja', payload)
-        const url = `http://192.168.1.10:3000/menu/fresh`
-
-        try {
-          const response = await fetch(url, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-          })
-
-          if (response.ok) {
-            successCount++
-            const index = menus.value.findIndex((r) => r.Datum_marende === rowId)
-            if (index !== -1) {
-              menus.value[index] = {
-                ...menus.value[index],
-                ...updatedRow,
-              }
-            }
-          } else {
-            failCount++
-            const errMsg = await response.json()
-            alert(`Greška kod datuma ${rowId}: ${errMsg.message}`)
-          }
-        } catch (err) {
-          failCount++
-          alert(`Neuspješno slanje za datum ${rowId}: ${err.message}`)
-        }
-      }
-
-      // Osvježi podatke nakon svih pokušaja ažuriranja
-      await fetchMenus()
-
-      alert(`Uspješno ažurirano: ${successCount}, Neuspješno: ${failCount}.`)
-      changesMap.value = {}
-      editingCell.value = {}
-      console.log('changesMap.value nakon ažuriranja', changesMap.value)
-      console.log('editingCell.value nakon ažuriranja', editingCell.value)
-    }
-
-    const deleteMenu = async (menu) => {
+      addMenuDialog.value = false
+      await fetchMenus() // Refresh table after adding menu
+    } else {
+      console.error('Greška pri dodavanju menija:', response.status, response.statusText)
       try {
-        const confirmDelete = confirm('Jeste li sigurni da želite obrisati meni?')
-        if (confirmDelete) {
-          const url = `${apiUrl}/menu/delete?datum=${menu.Datum_marende}`
-          console.log('URL za brisanje:', url)
-          const response = await fetch(url, {
-            method: 'DELETE',
-          })
+        const errorData = await response.json()
+        alert(
+          `Greška pri dodavanju menija: ${response.status} - ${errorData.message || response.statusText}`,
+        )
+      } catch (jsonError) {
+        console.error('Greška pri parsiranju JSON odgovora:', jsonError)
+        alert(`Greška pri dodavanju menija: ${response.status} - ${response.statusText}`)
+      }
+    }
+  } catch (error) {
+    console.error('Error in addMenu:', error)
+    alert('Došlo je do pogreške pri dodavanju menija.')
+  }
+}
+// Dialog close
+const closeTheGreatDialog = () => {
+  console.log('closeTheGreatDialog pozvan')
+  addMenuDialog.value = false
+}
 
-          if (response.ok) {
-            alert('Meni uspješno obrisan!')
-            fetchMenus()
-          } else {
-            throw new Error('Greška pri brisanju menija')
+// Dialog cancel
+const onDialogCancel = () => {
+  form.value = {
+    date: dayjs().format('YYYY-MM-DD'),
+    juha_m1: '',
+    glavno_jelo_m1: '',
+    salata_m1: '',
+    juha_m2: '',
+    glavno_jelo_m2: '',
+    salata_m2: '',
+  }
+}
+
+// Open dialog
+const openDialog = () => {
+  console.log('openDialog pozvan')
+  addMenuDialog.value = true
+  console.log('addMenuDialog.value', addMenuDialog.value)
+}
+
+const editingCell = ref({ rowId: null, col: null })
+
+// Mapa za praćenje promjena
+const changesMap = ref({})
+
+// Funkcija za dvoklik na ćeliju
+function onCellDblClick(row, column) {
+  console.log('onCellDblClick pozvan', row, column)
+  if (['Datum_marende', 'username', 'ID_kuhara', 'actions'].includes(column.name)) {
+    console.log('Polje nije dozvoljeno za uređivanje')
+    return
+  }
+  editingCell.value = { rowId: row.Datum_marende, col: column.name }
+  console.log('editingCell.value nakon dvoklika', editingCell.value)
+}
+
+// Funkcija za unos u ćeliju
+function onCellInput(row, column, event) {
+  console.log('onCellInput pozvan', row, column, event)
+  let newVal = row[column.field]
+  console.log('newVal', newVal)
+
+  if (!changesMap.value[row.Datum_marende]) {
+    changesMap.value[row.Datum_marende] = { ...row }
+  }
+
+  changesMap.value[row.Datum_marende][column.field] = newVal
+  console.log('changesMap.value nakon unosa', changesMap.value)
+}
+
+// Funkcija za prekid uređivanja
+function cancelEdit() {
+  console.log('cancelEdit pozvan')
+  editingCell.value = {}
+  console.log('editingCell.value nakon cancelEdit', editingCell.value)
+}
+
+async function confirmUpdate() {
+  console.log('confirmUpdate pozvan')
+  if (!Object.keys(changesMap.value).length) {
+    alert('Nema promjena za ažurirati.')
+    return
+  }
+
+  if (!confirm('Jeste li sigurni za ažuriranje?')) return
+
+  let successCount = 0
+  let failCount = 0
+
+  console.log('changesMap.value prije slanja', changesMap.value)
+
+  for (const rowId in changesMap.value) {
+    const updatedRow = { ...changesMap.value[rowId] }
+
+    // Pripremi podatke za slanje
+    const payload = {
+      Datum_marende: updatedRow.Datum_marende,
+      Juha_m1: updatedRow.Juha_m1,
+      Glavno_jelo_m1: updatedRow.Glavno_jelo_m1,
+      Salata_m1: updatedRow.Salata_m1,
+      Juha_m2: updatedRow.Juha_m2,
+      Glavno_jelo_m2: updatedRow.Glavno_jelo_m2,
+      Salata_m2: updatedRow.Salata_m2,
+      username: loggedInUser.value,
+      ID_kuhara: userID.value,
+    }
+    console.log('payload prije slanja', payload)
+    const url = `http://192.168.1.10:3000/menu/fresh`
+
+    try {
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      if (response.ok) {
+        successCount++
+        const index = menus.value.findIndex((r) => r.Datum_marende === rowId)
+        if (index !== -1) {
+          menus.value[index] = {
+            ...menus.value[index],
+            ...updatedRow,
           }
         }
-      } catch (error) {
-        console.error(error.message)
-        alert('Greška pri brisanju menija')
+      } else {
+        failCount++
+        const errMsg = await response.json()
+        alert(`Greška kod datuma ${rowId}: ${errMsg.message}`)
       }
+    } catch (err) {
+      failCount++
+      alert(`Neuspješno slanje za datum ${rowId}: ${err.message}`)
     }
+  }
 
-    const router = useRouter()
-    //logout:
-    const logout = () => {
-      // Briši podatke iz localStorage
-      localStorage.removeItem('loggedInUser')
-      localStorage.removeItem('userID')
-      // Preusmeri na početnu ili login stranicu
-      router.push('/login_chef')
-    }
-    const loadUserData = () => {
-      loggedInUser.value = localStorage.getItem('loggedInUser')
-      userID.value = localStorage.getItem('userID')
-    }
+  // Osvježi podatke nakon svih pokušaja ažuriranja
+  await fetchMenus()
 
-    onMounted(() => {
-      fetchMenus()
-      loadUserData()
-
-      // Ako korisnik nije prijavljen, preusmjeri na login
-      if (!loggedInUser.value) {
-        router.push('/')
-      }
-    })
-
-    // Učitaj podatke i kada se komponenta vrati u fokus (npr. povratak iz drugog taba)
-    onMounted(() => {
-      window.addEventListener('focus', loadUserData)
-    })
-
-    return {
-      form,
-      menus,
-      columns,
-      pagination,
-      addMenu,
-      deleteMenu,
-      isFutureDate,
-      editingCell,
-      changesMap,
-      onCellDblClick,
-      onCellInput,
-      cancelEdit,
-      confirmUpdate,
-      addMenuDialog,
-      openDialog,
-      onDialogCancel,
-      closeTheGreatDialog,
-      loggedInUser,
-      userID,
-      router,
-      logout,
-      printPDF,
-      dayjs,
-    }
-  },
+  alert(`Uspješno ažurirano: ${successCount}, Neuspješno: ${failCount}.`)
+  changesMap.value = {}
+  editingCell.value = {}
+  console.log('changesMap.value nakon ažuriranja', changesMap.value)
+  console.log('editingCell.value nakon ažuriranja', editingCell.value)
 }
+
+const deleteMenu = async (menu) => {
+  try {
+    const confirmDelete = confirm('Jeste li sigurni da želite obrisati meni?')
+    if (confirmDelete) {
+      const url = `http://192.168.1.10:3000/menu/delete?datum=${menu.Datum_marende}`
+      console.log('URL za brisanje:', url)
+      const response = await fetch(url, {
+        method: 'DELETE',
+      })
+      if (response.ok) {
+        alert('Meni uspješno obrisan!')
+        await fetchMenus() // Ensure table refresh after delete
+      } else {
+        throw new Error('Greška pri brisanju menija')
+      }
+    }
+  } catch (error) {
+    console.error(error.message)
+    alert('Greška pri brisanju menija')
+  }
+}
+
+const router = useRouter()
+//logout:
+const logout = () => {
+  // Briši podatke iz localStorage
+  localStorage.removeItem('loggedInUser')
+  localStorage.removeItem('userID')
+  // Preusmeri na početnu ili login stranicu
+  router.push('/login_chef')
+}
+const loadUserData = () => {
+  loggedInUser.value = localStorage.getItem('loggedInUser')
+  userID.value = localStorage.getItem('userID')
+}
+
+onMounted(() => {
+  fetchMenus()
+  loadUserData()
+
+  // Ako korisnik nije prijavljen, preusmjeri na login
+  if (!loggedInUser.value) {
+    router.push('/')
+  }
+})
+
+// Učitaj podatke i kada se komponenta vrati u fokus (npr. povratak iz drugog taba)
+onMounted(() => {
+  window.addEventListener('focus', loadUserData)
+})
+
+//make it accessible to the template
+defineExpose({
+  form,
+  menus,
+  columns,
+  pagination,
+  addMenu,
+  deleteMenu,
+  isFutureDate,
+  editingCell,
+  changesMap,
+  onCellDblClick,
+  onCellInput,
+  cancelEdit,
+  confirmUpdate,
+  addMenuDialog,
+  openDialog,
+  onDialogCancel,
+  closeTheGreatDialog,
+  loggedInUser,
+  userID,
+  router,
+  logout,
+  printPDF,
+  dayjs,
+})
 </script>
 
 <style>
