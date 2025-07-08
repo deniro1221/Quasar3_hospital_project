@@ -266,7 +266,7 @@ const isFutureDate = (date) => {
 
 const fetchMenus = async () => {
   try {
-    const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/history')
+    const response = await fetch('http://192.168.1.10:3000/menu/history')
     if (!response.ok) {
       throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
     }
