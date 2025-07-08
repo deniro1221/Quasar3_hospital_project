@@ -266,7 +266,7 @@ const isFutureDate = (date) => {
 
 const fetchMenus = async () => {
   try {
-    const response = await fetch('http://192.168.1.10:3000/menu/history/noActive', {
+    const response = await fetch('http://192.168.1.10:3000/menu/history', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
