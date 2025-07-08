@@ -266,7 +266,12 @@ const isFutureDate = (date) => {
 
 const fetchMenus = async () => {
   try {
-    const response = await fetch('http://192.168.1.10:3000/menu/history')
+    const response = await fetch('http://192.168.1.10:3000/menu/history/noActive', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
     if (!response.ok) {
       throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
     }
@@ -284,7 +289,6 @@ const fetchMenus = async () => {
           Glavno_jelo_m2: '',
           Salata_m2: '',
           username: menu.username,
-          ID_kuhara: menu.ID_kuhara,
         }
       }
 
@@ -299,7 +303,6 @@ const fetchMenus = async () => {
         acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || '' // Ispravljeno menu.Glavno_jelo_m1 u menu.Glavno_jelo_m2
         acc[date].Salata_m2 = menu.Salata_m1 || '' // Ispravljeno menu.Salata_m1 u menu.Salata_m2
         acc[date].username = menu.username || ''
-        acc[date].ID_kuhara = menu.ID_kuhara || ''
       }
 
       return acc
