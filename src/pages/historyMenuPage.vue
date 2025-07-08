@@ -266,15 +266,14 @@ const isFutureDate = (date) => {
 
 const fetchMenus = async () => {
   try {
-    const response = await fetch(`http://192.168.1.10:3000/menu/history`)
+    const response = await fetch('https://backend-hospital-n9to.onrender.com/menu/history')
     if (!response.ok) {
       throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
     }
     const data = await response.json()
 
     const groupedMenus = data.reduce((acc, menu) => {
-      // Treat the date as a plain string (no timezone conversion)
-      const date = dayjs(menu.Datum).format('YYYY-MM-DD')
+      const date = menu.Datum.split('T')[0]
       if (!acc[date]) {
         acc[date] = {
           Datum_marende: date,
@@ -284,37 +283,35 @@ const fetchMenus = async () => {
           Juha_m2: '',
           Glavno_jelo_m2: '',
           Salata_m2: '',
-          username: '',
-          ID_kuhara: '',
+          username: menu.username,
+          ID_kuhara: menu.ID_kuhara,
         }
       }
 
-      // Always set username and ID_kuhara if present
-      if (menu.username) acc[date].username = menu.username
-      if (menu.ID_kuhara) acc[date].ID_kuhara = menu.ID_kuhara
-
-      // Correctly map both Marenda1 and Marenda2 fields
       if (menu.marenda === 'Marenda1') {
         acc[date].Juha_m1 = menu.Juha_m1 || ''
         acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
         acc[date].Salata_m1 = menu.Salata_m1 || ''
+        acc[date].username = menu.username || ''
+        acc[date].ID_kuhara = menu.ID_kuhara || ''
       } else if (menu.marenda === 'Marenda2') {
-        acc[date].Juha_m2 = menu.Juha_m2 || ''
-        acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m2 || ''
-        acc[date].Salata_m2 = menu.Salata_m2 || ''
+        acc[date].Juha_m2 = menu.Juha_m1 || '' // Ispravljeno menu.Juha_m1 u menu.Juha_m2
+        acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || '' // Ispravljeno menu.Glavno_jelo_m1 u menu.Glavno_jelo_m2
+        acc[date].Salata_m2 = menu.Salata_m1 || '' // Ispravljeno menu.Salata_m1 u menu.Salata_m2
+        acc[date].username = menu.username || ''
+        acc[date].ID_kuhara = menu.ID_kuhara || ''
       }
 
       return acc
     }, {})
 
     menus.value = Object.values(groupedMenus)
-
-    console.log('Dohvaćeni meniji:', menus.value)
   } catch (error) {
     console.error(error.message)
     alert('Greška pri dohvaćanju menija: ' + error.message)
   }
 }
+
 const addMenuDialog = ref(false)
 const addMenu = async () => {
   try {
