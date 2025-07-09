@@ -195,7 +195,7 @@ router.get('/menu/history', async (req, res) => {
                 Salata AS Salata_m1,
                 ID_kuhara,
                 username,
-                'Marenda1' AS marenda
+                'Marenda1' AS marendaa
             FROM Marenda1
             WHERE Datum_marende >= ?
             UNION ALL
