@@ -266,16 +266,6 @@ const isFutureDate = (date) => {
   const today = dayjs().format('YYYY-MM-DD')
   return date >= today
 }
-/*Datum_marende: '2025-07-09',
-  ID_kuhara: 2,
-  username: 'marin',
-  Juha_m1: 'test',
-  Glavno_jelo_m1: 'test',
-  Salata_m1: 'test',
-  Juha_m2: 'test2',
-  Glavno_jelo_m2: 'test2',
-  Salata_m2: 'test2'
-  */
 const fetchMenus = async () => {
   try {
     const response = await fetch('http://192.168.1.10:3000/menu/history', {
@@ -287,13 +277,9 @@ const fetchMenus = async () => {
     }
     const data = await response.json()
 
-    // U slučaju da API vraća ISO datum sa vremenom, konvertujte ili koristite direktno ako je već 'YYYY-MM-DD'
     const groupedMenus = data.reduce((acc, menu) => {
-      // Ako je datum u ISO formatu sa 'Z', koristi prvi deo
+      // Ako API vraća ISO sa 'T', koristite ovako:
       const date = menu.Datum.includes('T') ? menu.Datum.slice(0, 10) : menu.Datum
-
-      // ili ako ste sigurni da API već vraća YYYY-MM-DD, koristite:
-      // const date = menu.Datum
 
       if (!acc[date]) {
         acc[date] = {
@@ -316,7 +302,7 @@ const fetchMenus = async () => {
         acc[date].username = menu.username || ''
         acc[date].ID_kuhara = menu.ID_kuhara || ''
       } else if (menu.marendaa === 'Marenda2') {
-        acc[date].Juha_m2 = menu.Juha_1 || ''
+        acc[date].Juha_m2 = menu.Juha_m1 || ''
         acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || ''
         acc[date].Salata_m2 = menu.Salata_m1 || ''
         acc[date].username = menu.username || ''
@@ -327,7 +313,6 @@ const fetchMenus = async () => {
 
     console.log('Transformirani meniji:', Object.values(groupedMenus))
     menus.value = Object.values(groupedMenus)
-    console.log('menus.value:', menus.value)
   } catch (error) {
     console.error(error.message)
   }
