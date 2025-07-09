@@ -278,10 +278,13 @@ const fetchMenus = async () => {
     }
     const data = await response.json()
 
-    // Konvertuj datum na pravilan format
+    // U slučaju da API vraća ISO datum sa vremenom, konvertujte ili koristite direktno ako je već 'YYYY-MM-DD'
     const groupedMenus = data.reduce((acc, menu) => {
-      const date = new Date(menu.Datum).toISOString().slice(0, 10) //ovo kao formatira datum u YYYY-MM-DD
-      console.log('Datum iz baze:', menu.Datum, 'Formatiran datum:', date)
+      // Ako je datum u ISO formatu sa 'Z', koristi prvi deo
+      const date = menu.Datum.includes('T') ? menu.Datum.slice(0, 10) : menu.Datum
+
+      // ili ako ste sigurni da API već vraća YYYY-MM-DD, koristite:
+      // const date = menu.Datum
 
       if (!acc[date]) {
         acc[date] = {
@@ -304,7 +307,7 @@ const fetchMenus = async () => {
         acc[date].username = menu.username || ''
         acc[date].ID_kuhara = menu.ID_kuhara || ''
       } else if (menu.marendaa === 'Marenda2') {
-        acc[date].Juha_m2 = menu.Juha_m1 || ''
+        acc[date].Juha_m2 = menu.Juha_1 || ''
         acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || ''
         acc[date].Salata_m2 = menu.Salata_m1 || ''
         acc[date].username = menu.username || ''
