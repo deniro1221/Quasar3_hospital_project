@@ -273,15 +273,14 @@ const fetchMenus = async () => {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     })
+
     if (!response.ok) {
       throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
     }
-    const data = await response.json()
 
-    // Log API odgovor pre obrade
+    const data = await response.json()
     console.log('API podaci:', data)
 
-    // Transformacija podataka
     const groupedMenus = data.reduce((acc, menu) => {
       const date = menu.Datum.slice(0, 10)
       if (!acc[date]) {
@@ -293,28 +292,30 @@ const fetchMenus = async () => {
           Juha_m2: '',
           Glavno_jelo_m2: '',
           Salata_m2: '',
-          username: menu.username || '',
-          ID_kuhara: menu.ID_kuhara || '',
+          username: '',
+          ID_kuhara: '',
         }
       }
+
       if (menu.marenda === 'Marenda1') {
         acc[date].Juha_m1 = menu.Juha || ''
-        acc[date].Glavno_jelo_m1 = menu.Glavno_jelo || ''
-        acc[date].Salata_m1 = menu.Salata || ''
+        acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
+        acc[date].Salata_m1 = menu.Salata_m1 || ''
       } else if (menu.marenda === 'Marenda2') {
         acc[date].Juha_m2 = menu.Juha || ''
-        acc[date].Glavno_jelo_m2 = menu.Glavno_jelo || ''
-        acc[date].Salata_m2 = menu.Salata || ''
+        acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m2 || ''
+        acc[date].Salata_m2 = menu.Salata_m2 || ''
       }
+
+      acc[date].username = menu.username || ''
+      acc[date].ID_kuhara = menu.ID_kuhara || ''
+
       return acc
     }, {})
 
-    // Log transformirane i spremljene vrijednosti
-    console.log('Transformirani meniji:', Object.values(groupedMenus))
-
-    menus.value = Object.values(groupedMenus)
-
-    // Prikaz sadržaja `menus`
+    const transformed = Object.values(groupedMenus)
+    console.log('Transformirani meniji:', transformed)
+    menus.value = transformed
     console.log('menus.value:', menus.value)
   } catch (error) {
     console.error(error.message)
