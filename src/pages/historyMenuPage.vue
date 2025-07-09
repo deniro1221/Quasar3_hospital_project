@@ -277,6 +277,10 @@ const fetchMenus = async () => {
       throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
     }
     const data = await response.json()
+
+    // Log API odgovor pre obrade
+    console.log('API podaci:', data)
+
     // Transformacija podataka
     const groupedMenus = data.reduce((acc, menu) => {
       const date = menu.Datum.slice(0, 10)
@@ -297,16 +301,21 @@ const fetchMenus = async () => {
         acc[date].Juha_m1 = menu.Juha || ''
         acc[date].Glavno_jelo_m1 = menu.Glavno_jelo || ''
         acc[date].Salata_m1 = menu.Salata || ''
-        // acc[date].username = menu.username || '' // ostavi samo prvi username
       } else if (menu.marenda === 'Marenda2') {
         acc[date].Juha_m2 = menu.Juha || ''
         acc[date].Glavno_jelo_m2 = menu.Glavno_jelo || ''
         acc[date].Salata_m2 = menu.Salata || ''
-        // acc[date].username = menu.username || ''
       }
       return acc
     }, {})
+
+    // Log transformirane i spremljene vrijednosti
+    console.log('Transformirani meniji:', Object.values(groupedMenus))
+
     menus.value = Object.values(groupedMenus)
+
+    // Prikaz sadržaja `menus`
+    console.log('menus.value:', menus.value)
   } catch (error) {
     console.error(error.message)
     alert('Greška pri dohvaćanju menija: ' + error.message)
