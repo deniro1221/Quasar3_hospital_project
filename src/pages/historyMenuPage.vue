@@ -266,7 +266,16 @@ const isFutureDate = (date) => {
   const today = dayjs().format('YYYY-MM-DD')
   return date >= today
 }
-
+/*Datum_marende: '2025-07-09',
+  ID_kuhara: 2,
+  username: 'marin',
+  Juha_m1: 'test',
+  Glavno_jelo_m1: 'test',
+  Salata_m1: 'test',
+  Juha_m2: 'test2',
+  Glavno_jelo_m2: 'test2',
+  Salata_m2: 'test2'
+  */
 const fetchMenus = async () => {
   try {
     const response = await fetch('http://192.168.1.10:3000/menu/history', {
