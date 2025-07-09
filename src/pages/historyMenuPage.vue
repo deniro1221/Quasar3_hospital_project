@@ -278,7 +278,9 @@ const fetchMenus = async () => {
     const data = await response.json()
 
     const groupedMenus = data.reduce((acc, menu) => {
-      const date = menu.Datum // DIREKTNO koristimo string, bez konverzije
+      // Ako je datum u ISO-u sa 'T', ili već u 'YYYY-MM-DD', koristite direktno
+      const date = menu.Datum.includes('T') ? menu.Datum.slice(0, 10) : menu.Datum
+
       if (!acc[date]) {
         acc[date] = {
           Datum_marende: date,
@@ -300,22 +302,22 @@ const fetchMenus = async () => {
         acc[date].username = menu.username || ''
         acc[date].ID_kuhara = menu.ID_kuhara || ''
       } else if (menu.marendaa === 'Marenda2') {
-        acc[date].Juha_m2 = menu.Juha_m1 || ''
-        acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || ''
-        acc[date].Salata_m2 = menu.Salata_m1 || ''
+        acc[date].Juha_m2 = menu.Juha_m2 || ''
+        acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m2 || ''
+        acc[date].Salata_m2 = menu.Salata_m2 || ''
         acc[date].username = menu.username || ''
         acc[date].ID_kuhara = menu.ID_kuhara || ''
       }
       return acc
     }, {})
 
+    // Prikazujemo baš ono što je poslatno u API (dakle, bez konverzije)
     console.log('Transformirani meniji:', Object.values(groupedMenus))
     menus.value = Object.values(groupedMenus)
   } catch (error) {
     console.error(error.message)
   }
 }
-
 const addMenuDialog = ref(false)
 const addMenu = async () => {
   try {
