@@ -273,16 +273,15 @@ const fetchMenus = async () => {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     })
-
     if (!response.ok) {
       throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
     }
-
     const data = await response.json()
+
     console.log('API podaci:', data)
 
     const groupedMenus = data.reduce((acc, menu) => {
-      const date = menu.Datum.slice(0, 10)
+      const date = menu.Datum.slice(0, 10) // ISO format, nema problema
       if (!acc[date]) {
         acc[date] = {
           Datum_marende: date,
@@ -297,25 +296,25 @@ const fetchMenus = async () => {
         }
       }
 
-      if (menu.marenda === 'Marenda1') {
-        acc[date].Juha_m1 = menu.Juha || ''
+      if (menu.marendaa === 'Marenda1') {
+        acc[date].Juha_m1 = menu.Juha_m1 || ''
         acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
         acc[date].Salata_m1 = menu.Salata_m1 || ''
-      } else if (menu.marenda === 'Marenda2') {
-        acc[date].Juha_m2 = menu.Juha || ''
+        acc[date].username = menu.username || ''
+        acc[date].ID_kuhara = menu.ID_kuhara || ''
+      } else if (menu.marendaa === 'Marenda2') {
+        acc[date].Juha_m2 = menu.Juha_m2 || ''
         acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m2 || ''
         acc[date].Salata_m2 = menu.Salata_m2 || ''
+        acc[date].username = menu.username || ''
+        acc[date].ID_kuhara = menu.ID_kuhara || ''
       }
-
-      acc[date].username = menu.username || ''
-      acc[date].ID_kuhara = menu.ID_kuhara || ''
 
       return acc
     }, {})
 
-    const transformed = Object.values(groupedMenus)
-    console.log('Transformirani meniji:', transformed)
-    menus.value = transformed
+    console.log('Transformirani meniji:', Object.values(groupedMenus))
+    menus.value = Object.values(groupedMenus)
     console.log('menus.value:', menus.value)
   } catch (error) {
     console.error(error.message)
