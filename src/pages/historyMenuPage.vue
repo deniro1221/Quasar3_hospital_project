@@ -278,8 +278,7 @@ const fetchMenus = async () => {
     const data = await response.json()
 
     const groupedMenus = data.reduce((acc, menu) => {
-      // Ako je datum u ISO-u sa 'T', ili već u 'YYYY-MM-DD', koristite direktno
-      const date = menu.Datum
+      const date = dayjs.utc(menu.Datum).tz('Europe/Zagreb').format('YYYY-MM-DD')
 
       if (!acc[date]) {
         acc[date] = {
