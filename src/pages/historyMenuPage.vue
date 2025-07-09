@@ -296,22 +296,21 @@ const fetchMenus = async () => {
       }
 
       if (menu.marenda === 'Marenda1') {
-        acc[date].Juha_m1 = menu.Juha_m1 || ''
-        acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
-        acc[date].Salata_m1 = menu.Salata_m1 || ''
+        acc[date].Juha_m1 = menu.Juha_m1 || menu.Juha || ''
+        acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || menu.Glavno_jelo || ''
+        acc[date].Salata_m1 = menu.Salata_m1 || menu.Salata || ''
         acc[date].username = menu.username || ''
         acc[date].ID_kuhara = menu.ID_kuhara || ''
       } else if (menu.marenda === 'Marenda2') {
-        acc[date].Juha_m2 = menu.Juha_m2 || ''
-        acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m2 || ''
-        acc[date].Salata_m2 = menu.Salata_m2 || ''
+        acc[date].Juha_m2 = menu.Juha_m2 || menu.Juha || ''
+        acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m2 || menu.Glavno_jelo || ''
+        acc[date].Salata_m2 = menu.Salata_m2 || menu.Salata || ''
         acc[date].username = menu.username || ''
       }
 
       return acc
     }, {})
 
-    menus.value = Object.values(groupedMenus)
     menus.value = Object.values(groupedMenus)
   } catch (error) {
     console.error(error.message)
