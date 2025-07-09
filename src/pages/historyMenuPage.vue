@@ -466,6 +466,8 @@ async function confirmUpdate() {
       username: loggedInUser.value,
       ID_kuhara: userID.value,
     }
+    // Log the date being sent from frontend
+    console.log('Datum_marende koji se šalje s frontenda:', payload.Datum_marende)
     console.log('payload prije slanja', payload)
     const url = `http://192.168.1.10:3000/menu/fresh`
 
