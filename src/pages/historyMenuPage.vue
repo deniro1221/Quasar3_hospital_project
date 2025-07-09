@@ -279,7 +279,7 @@ const fetchMenus = async () => {
 
     const groupedMenus = data.reduce((acc, menu) => {
       // Ako je datum u ISO-u sa 'T', ili već u 'YYYY-MM-DD', koristite direktno
-      const date = menu.Datum.includes('T') ? menu.Datum.slice(0, 10) : menu.Datum
+      const date = menu.Datum
 
       if (!acc[date]) {
         acc[date] = {
