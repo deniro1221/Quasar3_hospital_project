@@ -278,8 +278,8 @@ const fetchMenus = async () => {
     const data = await response.json()
 
     const groupedMenus = data.reduce((acc, menu) => {
-      // Ako API vraća ISO sa 'T', koristite ovako:
-      const date = menu.Datum.includes('T') ? menu.Datum.slice(0, 10) : menu.Datum
+      // Koristimo direktno Datum bez konverzije
+      const date = menu.Datum // ovo je već 'YYYY-MM-DD' ili ISO već formatiran
 
       if (!acc[date]) {
         acc[date] = {
