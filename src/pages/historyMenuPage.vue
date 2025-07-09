@@ -107,7 +107,7 @@
     </q-page-container>
   </q-layout>
 </template>
-///
+
 <reference types="html2pdf.js" />
 <script setup>
 import { ref, onMounted } from 'vue'
@@ -303,9 +303,9 @@ const fetchMenus = async () => {
         acc[date].username = menu.username || ''
         acc[date].ID_kuhara = menu.ID_kuhara || ''
       } else if (menu.marendaa === 'Marenda2') {
-        acc[date].Juha_m2 = menu.Juha_m2 || ''
-        acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m2 || ''
-        acc[date].Salata_m2 = menu.Salata_m2 || ''
+        acc[date].Juha_m2 = menu.Juha_m1 || ''
+        acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || ''
+        acc[date].Salata_m2 = menu.Salata_m1 || ''
         acc[date].username = menu.username || ''
         acc[date].ID_kuhara = menu.ID_kuhara || ''
       }
