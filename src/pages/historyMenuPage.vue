@@ -271,16 +271,14 @@ const fetchMenus = async () => {
   try {
     const response = await fetch('http://192.168.1.10:3000/menu/history', {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
     })
     if (!response.ok) {
       throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
     }
     const data = await response.json()
+    // Transformacija podataka
     const groupedMenus = data.reduce((acc, menu) => {
-      // Use the date string as-is from the database, without timezone conversion
       const date = menu.Datum.slice(0, 10)
       if (!acc[date]) {
         acc[date] = {
@@ -291,27 +289,27 @@ const fetchMenus = async () => {
           Juha_m2: '',
           Glavno_jelo_m2: '',
           Salata_m2: '',
-          username: menu.username,
+          username: '',
         }
       }
-
       if (menu.marenda === 'Marenda1') {
-        acc[date].Juha_m1 = menu.Juha_m1 || menu.Juha || ''
-        acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || menu.Glavno_jelo || ''
-        acc[date].Salata_m1 = menu.Salata_m1 || menu.Salata || ''
+        acc[date].Juha_m1 = menu.Juha || ''
+        acc[date].Glavno_jelo_m1 = menu.Glavno_jelo || ''
+        acc[date].Salata_m1 = menu.Salata || ''
         acc[date].username = menu.username || ''
-        acc[date].ID_kuhara = menu.ID_kuhara || ''
+        acc[date].ID_kuhara = menu.ID_kuhara
       } else if (menu.marenda === 'Marenda2') {
-        acc[date].Juha_m2 = menu.Juha_m2 || menu.Juha || ''
-        acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m2 || menu.Glavno_jelo || ''
-        acc[date].Salata_m2 = menu.Salata_m2 || menu.Salata || ''
+        acc[date].Juha_m2 = menu.Juha || ''
+        acc[date].Glavno_jelo_m2 = menu.Glavno_jelo || ''
+        acc[date].Salata_m2 = menu.Salata || ''
         acc[date].username = menu.username || ''
       }
-
       return acc
     }, {})
-
+    // Postavljanje u reaktivnu varijablu
     menus.value = Object.values(groupedMenus)
+    // Ovde dodajte za proveru
+    console.log('Meniji nakon obrade:', menus.value)
   } catch (error) {
     console.error(error.message)
     alert('Greška pri dohvaćanju menija: ' + error.message)
