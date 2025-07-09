@@ -278,10 +278,11 @@ const fetchMenus = async () => {
     }
     const data = await response.json()
 
-    console.log('API podaci:', data)
-
+    // Konvertuj datum na pravilan format
     const groupedMenus = data.reduce((acc, menu) => {
-      const date = menu.Datum.slice(0, 10) // ISO format, nema problema
+      const date = new Date(menu.Datum).toISOString().slice(0, 10) //ovo kao formatira datum u YYYY-MM-DD
+      console.log('Datum iz baze:', menu.Datum, 'Formatiran datum:', date)
+
       if (!acc[date]) {
         acc[date] = {
           Datum_marende: date,
@@ -309,7 +310,6 @@ const fetchMenus = async () => {
         acc[date].username = menu.username || ''
         acc[date].ID_kuhara = menu.ID_kuhara || ''
       }
-
       return acc
     }, {})
 
@@ -318,7 +318,6 @@ const fetchMenus = async () => {
     console.log('menus.value:', menus.value)
   } catch (error) {
     console.error(error.message)
-    alert('Greška pri dohvaćanju menija: ' + error.message)
   }
 }
 
