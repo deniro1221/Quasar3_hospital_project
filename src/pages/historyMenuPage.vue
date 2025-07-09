@@ -278,9 +278,7 @@ const fetchMenus = async () => {
     const data = await response.json()
 
     const groupedMenus = data.reduce((acc, menu) => {
-      // Koristimo direktno Datum bez konverzije
-      const date = menu.Datum // ovo je već 'YYYY-MM-DD' ili ISO već formatiran
-
+      const date = menu.Datum // DIREKTNO koristimo string, bez konverzije
       if (!acc[date]) {
         acc[date] = {
           Datum_marende: date,
@@ -302,9 +300,9 @@ const fetchMenus = async () => {
         acc[date].username = menu.username || ''
         acc[date].ID_kuhara = menu.ID_kuhara || ''
       } else if (menu.marendaa === 'Marenda2') {
-        acc[date].Juha_m2 = menu.Juha_m1 || ''
-        acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || ''
-        acc[date].Salata_m2 = menu.Salata_m1 || ''
+        acc[date].Juha_m2 = menu.Juha_m2 || ''
+        acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m2 || ''
+        acc[date].Salata_m2 = menu.Salata_m2 || ''
         acc[date].username = menu.username || ''
         acc[date].ID_kuhara = menu.ID_kuhara || ''
       }
