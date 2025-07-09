@@ -289,27 +289,24 @@ const fetchMenus = async () => {
           Juha_m2: '',
           Glavno_jelo_m2: '',
           Salata_m2: '',
-          username: '',
+          username: menu.username || '',
+          ID_kuhara: menu.ID_kuhara || '',
         }
       }
       if (menu.marenda === 'Marenda1') {
         acc[date].Juha_m1 = menu.Juha || ''
         acc[date].Glavno_jelo_m1 = menu.Glavno_jelo || ''
         acc[date].Salata_m1 = menu.Salata || ''
-        acc[date].username = menu.username || ''
-        acc[date].ID_kuhara = menu.ID_kuhara
+        // acc[date].username = menu.username || '' // ostavi samo prvi username
       } else if (menu.marenda === 'Marenda2') {
         acc[date].Juha_m2 = menu.Juha || ''
         acc[date].Glavno_jelo_m2 = menu.Glavno_jelo || ''
         acc[date].Salata_m2 = menu.Salata || ''
-        acc[date].username = menu.username || ''
+        // acc[date].username = menu.username || ''
       }
       return acc
     }, {})
-    // Postavljanje u reaktivnu varijablu
     menus.value = Object.values(groupedMenus)
-    // Ovde dodajte za proveru
-    console.log('Meniji nakon obrade:', menus.value)
   } catch (error) {
     console.error(error.message)
     alert('Greška pri dohvaćanju menija: ' + error.message)
