@@ -12,7 +12,7 @@ const config = {
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   waitForConnections: true,
-  connectionLimit: 10,  // Broj istovremenih veza u poolu
+  connectionLimit: 30, // Broj istovremenih veza u poolu
 }
 
 /* Kreiranje pool-a */
