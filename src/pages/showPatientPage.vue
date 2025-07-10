@@ -200,7 +200,10 @@ function closeDialog() {
 // Fetch Patient Data
 async function showPatient() {
   try {
-    const response = await fetch('http://192.168.1.10:3000/active')
+    const response = await fetch('http://192.168.1.10:3000/dijeta-pacijent/active', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
     const data = await response.json()
     dijeta_pac.value = Array.isArray(data) ? data : data ? [data] : []
   } catch (error) {
