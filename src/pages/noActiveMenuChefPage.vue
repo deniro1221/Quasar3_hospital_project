@@ -61,6 +61,15 @@
 <script>
 import { ref, onMounted } from 'vue'
 import html2pdf from 'html2pdf.js'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+import localizedFormat from 'dayjs/plugin/localizedFormat'
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.extend(localizedFormat)
+// dayjs.tz.setDefault('Europe/Zagreb') // Remove default timezone to avoid shifting
+dayjs.tz.setDefault('Europe/Zagreb')
 
 export default {
   setup() {
@@ -193,7 +202,7 @@ export default {
         const data = await response.json()
 
         const groupedMenus = data.reduce((acc, menu) => {
-          const date = menu.Datum.split('T')[0]
+          const date = dayjs.utc(menu.Datum).tz('Europe/Zagreb').format('YYYY-MM-DD') //ključno z apravno formatiranje datuma
           if (!acc[date]) {
             acc[date] = {
               Datum_marende: date,
