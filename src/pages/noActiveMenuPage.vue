@@ -13,7 +13,7 @@
     <q-page padding>
       <q-card>
         <q-card-section>
-          <div class="text-h6">Arhiva menija</div>
+          <div class="text-h6">Pregled menija</div>
         </q-card-section>
 
         <q-card-section>
@@ -50,8 +50,8 @@
         </q-card-section>
 
         <q-card-actions class="q-pa-md row items-center justify-between">
+          <q-btn color="primary" label="Natrag" to="history_menu" />
           <q-btn color="primary" label="Ispiši PDF" @click="printPDF" />
-          <q-btn color="primary" label="Natrag" to="admin" />
         </q-card-actions>
       </q-card>
     </q-page>
@@ -61,6 +61,15 @@
 <script>
 import { ref, onMounted } from 'vue'
 import html2pdf from 'html2pdf.js'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+import localizedFormat from 'dayjs/plugin/localizedFormat'
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.extend(localizedFormat)
+// dayjs.tz.setDefault('Europe/Zagreb') // Remove default timezone to avoid shifting
+dayjs.tz.setDefault('Europe/Zagreb')
 
 export default {
   setup() {
@@ -193,7 +202,7 @@ export default {
         const data = await response.json()
 
         const groupedMenus = data.reduce((acc, menu) => {
-          const date = menu.Datum.split('T')[0]
+          const date = dayjs.utc(menu.Datum).tz('Europe/Zagreb').format('YYYY-MM-DD') //ključno z apravno formatiranje datuma
           if (!acc[date]) {
             acc[date] = {
               Datum_marende: date,

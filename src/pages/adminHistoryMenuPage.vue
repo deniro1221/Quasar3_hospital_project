@@ -63,6 +63,16 @@
 <script>
 import { ref, onMounted } from 'vue'
 import html2pdf from 'html2pdf.js'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+import localizedFormat from 'dayjs/plugin/localizedFormat'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.extend(localizedFormat)
+// dayjs.tz.setDefault('Europe/Zagreb') // Remove default timezone to avoid shifting
+dayjs.tz.setDefault('Europe/Zagreb')
 
 export default {
   setup() {
@@ -182,14 +192,18 @@ export default {
 
     const fetchMenus = async () => {
       try {
-        const response = await fetch('http://192.168.1.10:3000/menu/history')
+        const response = await fetch('http://192.168.1.10:3000/menu/history', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        })
         if (!response.ok) {
           throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
         }
         const data = await response.json()
 
         const groupedMenus = data.reduce((acc, menu) => {
-          const date = menu.Datum.split('T')[0]
+          const date = dayjs.utc(menu.Datum).tz('Europe/Zagreb').format('YYYY-MM-DD')
+
           if (!acc[date]) {
             acc[date] = {
               Datum_marende: date,
@@ -199,32 +213,32 @@ export default {
               Juha_m2: '',
               Glavno_jelo_m2: '',
               Salata_m2: '',
-              username: menu.username,
-              ID_kuhara: menu.ID_kuhara,
+              username: '',
+              ID_kuhara: '',
             }
           }
 
-          if (menu.marenda === 'Marenda1') {
+          if (menu.marendaa === 'Marenda1') {
             acc[date].Juha_m1 = menu.Juha_m1 || ''
             acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
             acc[date].Salata_m1 = menu.Salata_m1 || ''
             acc[date].username = menu.username || ''
             acc[date].ID_kuhara = menu.ID_kuhara || ''
-          } else if (menu.marenda === 'Marenda2') {
-            acc[date].Juha_m2 = menu.Juha_m1 || '' // Ispravljeno menu.Juha_m1 u menu.Juha_m2
-            acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || '' // Ispravljeno menu.Glavno_jelo_m1 u menu.Glavno_jelo_m2
-            acc[date].Salata_m2 = menu.Salata_m1 || '' // Ispravljeno menu.Salata_m1 u menu.Salata_m2
+          } else if (menu.marendaa === 'Marenda2') {
+            acc[date].Juha_m2 = menu.Juha_m1 || ''
+            acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || ''
+            acc[date].Salata_m2 = menu.Salata_m1 || ''
             acc[date].username = menu.username || ''
             acc[date].ID_kuhara = menu.ID_kuhara || ''
           }
-
           return acc
         }, {})
 
+        // Prikazujemo baš ono što je poslatno u API (dakle, bez konverzije)
+        console.log('Transformirani meniji:', Object.values(groupedMenus))
         menus.value = Object.values(groupedMenus)
       } catch (error) {
         console.error(error.message)
-        alert('Greška pri dohvaćanju menija: ' + error.message)
       }
     }
 
