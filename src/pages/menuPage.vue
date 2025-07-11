@@ -16,6 +16,17 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+import localizedFormat from 'dayjs/plugin/localizedFormat'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.extend(localizedFormat)
+// dayjs.tz.setDefault('Europe/Zagreb') // Remove default timezone to avoid shifting
+dayjs.tz.setDefault('Europe/Zagreb')
+const menus = ref([])
 
 // Funkcija za formatiranje datuma dd-mm-yyyy
 function formatDateDMY(dateStr) {
@@ -30,20 +41,64 @@ const formattedDate = formatDateDMY(todayDate)
 
 onMounted(async () => {
   try {
-    const response = await fetch('http://192.168.1.10:3000/menu/today') //without "s"
-    if (response.ok) {
-      const data = await response.json()
-      if (data) {
-        meni.value = {
-          ...data,
-          Datum_menija: formatDateDMY(data.Datum_menija),
+    const response = await fetch('http://192.168.1.10:3000/menu/today', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+
+    const groupedMenus = data.reduce((acc, menu) => {
+      const date = dayjs.utc(menu.Datum).tz('Europe/Zagreb').format('YYYY-MM-DD')
+
+      if (!acc[date]) {
+        acc[date] = {
+          Datum_marende: date,
+          Juha_m1: '',
+          Glavno_jelo_m1: '',
+          Salata_m1: '',
+          Juha_m2: '',
+          Glavno_jelo_m2: '',
+          Salata_m2: '',
+          username: '',
+          ID_kuhara: '',
         }
       }
-    } else {
-      console.error('Greška pri dohvaćanju menija')
+
+      if (menu.marendaa === 'Marenda1') {
+        acc[date].Juha_m1 = menu.Juha_m1 || ''
+        acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
+        acc[date].Salata_m1 = menu.Salata_m1 || ''
+        acc[date].username = menu.username || ''
+        acc[date].ID_kuhara = menu.ID_kuhara || ''
+      } else if (menu.marendaa === 'Marenda2') {
+        acc[date].Juha_m2 = menu.Juha_m1 || ''
+        acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || ''
+        acc[date].Salata_m2 = menu.Salata_m1 || ''
+        acc[date].username = menu.username || ''
+        acc[date].ID_kuhara = menu.ID_kuhara || ''
+      }
+
+      return acc
+    }, {})
+
+    menus.value = Object.values(groupedMenus)
+
+    // Postavi današnji meni
+    const todayMenu = menus.value.find((menu) => menu.Datum_marende === todayDate)
+
+    if (todayMenu) {
+      meni.value = {
+        Marenda1: `${todayMenu.Juha_m1} - ${todayMenu.Glavno_jelo_m1} - ${todayMenu.Salata_m1}`,
+        Marenda2: `${todayMenu.Juha_m2} - ${todayMenu.Glavno_jelo_m2} - ${todayMenu.Salata_m2}`,
+      }
     }
-  } catch (err) {
-    console.error('Greška:', err)
+  } catch (error) {
+    console.error(error.message)
   } finally {
     loading.value = false
   }
