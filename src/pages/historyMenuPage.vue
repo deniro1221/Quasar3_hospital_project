@@ -74,6 +74,13 @@
               :pagination="pagination"
               class="styled-table"
             >
+              <!-- Ovdje je dodano definranje akcija -->
+              <template v-slot:body-cell-actions="props">
+                <q-td :props="props">
+                  <q-btn @click="deleteMenu(props.row)" color="negative" label="Obriši" size="sm" />
+                </q-td>
+              </template>
+
               <template v-slot:body="props">
                 <q-tr :props="props">
                   <q-td v-for="col in columns" :key="col.name" :props="props">
@@ -107,7 +114,7 @@
               </template>
             </q-table>
           </q-card-section>
-          <q-card-section class="q-gutter-sm">
+          <q-card-section class="q-gutter-x-sm">
             <!-- Razmak između gumba -->
             <q-btn color="primary" @click="confirmUpdate">Ažuriraj meni</q-btn>
             <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
