@@ -7,7 +7,7 @@
         <div class="menu-heading">Marenda 1</div>
         <div class="menu-details">
           <div><strong>Salata:</strong> {{ meni.Marenda1.Salata }}</div>
-          <div><strong>Jelo:</strong> {{ meni.Marenda1.Glavno_jelo }}</div>
+          <div><strong>Glavno Jelo:</strong> {{ meni.Marenda1.Glavno_jelo }}</div>
           <div><strong>Juha:</strong> {{ meni.Marenda1.Juha }}</div>
         </div>
       </div>
@@ -16,7 +16,7 @@
         <div class="menu-heading">Marenda 2</div>
         <div class="menu-details">
           <div><strong>Salata:</strong> {{ meni.Marenda2.Salata }}</div>
-          <div><strong>Jelo:</strong> {{ meni.Marenda2.Glavno_jelo }}</div>
+          <div><strong>Glavno Jelo:</strong> {{ meni.Marenda2.Glavno_jelo }}</div>
           <div><strong>Juha:</strong> {{ meni.Marenda2.Juha }}</div>
         </div>
       </div>

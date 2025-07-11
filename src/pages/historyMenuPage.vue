@@ -325,8 +325,8 @@ const addMenu = async () => {
 
     const payload = {
       Datum_marende: datumZaSlanje,
-      ID_kuhara: 2,
-      username: 'marin',
+      ID_kuhara: userID.value,
+      username: loggedInUser.value,
       Juha_m1: form.value.juha_m1,
       Glavno_jelo_m1: form.value.glavno_jelo_m1,
       Salata_m1: form.value.salata_m1,
