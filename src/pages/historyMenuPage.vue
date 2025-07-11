@@ -74,6 +74,14 @@
               :pagination="pagination"
               class="styled-table"
             >
+              <template v-slot:header="props">
+                <q-tr :props="props">
+                  <q-th v-for="col in props.cols" :key="col.name" :props="props">
+                    {{ col.label }}
+                  </q-th>
+                </q-tr>
+              </template>
+
               <template v-slot:body="props">
                 <q-tr :props="props">
                   <q-td key="actions" :props="props" auto-width>
@@ -127,7 +135,6 @@
     </q-page-container>
   </q-layout>
 </template>
-
 <script setup>
 import { ref, onMounted } from 'vue'
 import html2pdf from 'html2pdf.js'
