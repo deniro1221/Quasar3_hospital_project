@@ -74,41 +74,41 @@
               :pagination="pagination"
               class="styled-table"
             >
-              <!-- Ovdje je dodano definranje akcija -->
-              <template v-slot:body-cell-actions="props">
-                <q-td :props="props">
-                  <q-btn @click="deleteMenu(props.row)" color="negative" label="Obriši" size="sm" />
-                </q-td>
-              </template>
-
               <template v-slot:body="props">
                 <q-tr :props="props">
-                  <q-td v-for="col in columns" :key="col.name" :props="props">
-                    <!-- Uređivanje na dvostruki klik -->
-                    <div
-                      v-if="
-                        editingCell.rowId === props.row.Datum_marende &&
-                        editingCell.col === col.name
-                      "
-                    >
-                      <input
-                        v-model="props.row[col.field]"
-                        @blur="onCellInput(props.row, col, $event)"
-                        @keydown.enter="onCellInput(props.row, col, $event)"
-                        @keydown.esc="cancelEdit()"
-                        autofocus
-                        style="width: 100%"
-                      />
-                    </div>
-                    <!-- Prikaz vrijednosti/teksta u ćeliji -->
-                    <div
-                      v-else
-                      @dblclick="onCellDblClick(props.row, col)"
-                      style="min-width: 80px; cursor: pointer; user-select: none"
-                      title="Dvostruki klik za uređivanje"
-                    >
-                      {{ props.row[col.field] }}
-                    </div>
+                  <q-td key="actions" :props="props" auto-width>
+                    <q-btn
+                      flat
+                      round
+                      dense
+                      color="negative"
+                      icon="delete"
+                      @click="deleteMenu(props.row)"
+                    />
+                  </q-td>
+                  <q-td key="Datum_marende" :props="props">
+                    {{ props.row.Datum_marende }}
+                  </q-td>
+                  <q-td key="Juha_m1" :props="props">
+                    {{ props.row.Juha_m1 }}
+                  </q-td>
+                  <q-td key="Glavno_jelo_m1" :props="props">
+                    {{ props.row.Glavno_jelo_m1 }}
+                  </q-td>
+                  <q-td key="Salata_m1" :props="props">
+                    {{ props.row.Salata_m1 }}
+                  </q-td>
+                  <q-td key="Juha_m2" :props="props">
+                    {{ props.row.Juha_m2 }}
+                  </q-td>
+                  <q-td key="Glavno_jelo_m2" :props="props">
+                    {{ props.row.Glavno_jelo_m2 }}
+                  </q-td>
+                  <q-td key="Salata_m2" :props="props">
+                    {{ props.row.Salata_m2 }}
+                  </q-td>
+                  <q-td key="username" :props="props">
+                    {{ props.row.username }}
                   </q-td>
                 </q-tr>
               </template>
@@ -127,7 +127,6 @@
     </q-page-container>
   </q-layout>
 </template>
-<reference types="html2pdf.js" />
 
 <script setup>
 import { ref, onMounted } from 'vue'
