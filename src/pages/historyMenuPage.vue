@@ -46,6 +46,21 @@
           </q-card>
         </q-dialog>
 
+        <!-- Prikaz korisničkog imena i ID-a -->
+        <div class="q-mb-md">
+          <p v-if="loggedInUser">Prijavljen: {{ loggedInUser }}</p>
+          <p v-if="userID">ID Kuhara: {{ userID }}</p>
+        </div>
+
+        <!-- Poruka -->
+        <div
+          v-if="message"
+          :class="isSuccess ? 'bg-green-2 text-green-10' : 'bg-red-2 text-red-10'"
+          class="q-pa-md q-mb-md rounded-borders"
+        >
+          {{ message }}
+        </div>
+
         <!-- Tablica za pregled menija -->
         <q-card>
           <q-card-section>
@@ -57,46 +72,44 @@
               :columns="columns"
               row-key="Datum_marende"
               :pagination="pagination"
+              class="styled-table"
             >
-              <!-- Ažuriranje podataka -->
-              <template v-slot:body-cell="props">
-                <q-td
-                  :props="props"
-                  @dblclick="onCellDblClick(props.row, props.col)"
-                  style="cursor: pointer"
-                >
-                  <!-- Dodan style za bolji UX -->
-                  <div
-                    v-if="
-                      editingCell.rowId !== props.row.Datum_marende ||
-                      editingCell.col !== props.col.name
-                    "
-                  >
-                    <div v-if="props.col.name === 'Datum_marende'">{{ props.value }}</div>
-                    <div v-else>{{ props.value }}</div>
-                  </div>
-                  <q-input
-                    v-else
-                    v-model="props.row[props.col.field]"
-                    @update:model-value="onCellInput(props.row, props.col, $event)"
-                    dense
-                    autofocus
-                  />
-                </q-td>
-              </template>
-
-              <!-- Brisanje menija -->
-              <template v-slot:body-cell-actions="props">
-                <q-td :props="props">
-                  <q-btn @click="deleteMenu(props.row)" color="negative" label="Obriši" size="sm" />
-                </q-td>
+              <template v-slot:body="props">
+                <q-tr :props="props">
+                  <q-td v-for="col in columns" :key="col.name" :props="props">
+                    <!-- Uređivanje na dvostruki klik -->
+                    <div
+                      v-if="
+                        editingCell.rowId === props.row.Datum_marende &&
+                        editingCell.col === col.name
+                      "
+                    >
+                      <input
+                        v-model="props.row[col.field]"
+                        @blur="onCellInput(props.row, col, $event)"
+                        @keydown.enter="onCellInput(props.row, col, $event)"
+                        @keydown.esc="cancelEdit()"
+                        autofocus
+                        style="width: 100%"
+                      />
+                    </div>
+                    <!-- Prikaz vrijednosti/teksta u ćeliji -->
+                    <div
+                      v-else
+                      @dblclick="onCellDblClick(props.row, col)"
+                      style="min-width: 80px; cursor: pointer; user-select: none"
+                      title="Dvostruki klik za uređivanje"
+                    >
+                      {{ props.row[col.field] }}
+                    </div>
+                  </q-td>
+                </q-tr>
               </template>
             </q-table>
           </q-card-section>
-          <q-card-section>
+          <q-card-section class="q-gutter-sm">
+            <!-- Razmak između gumba -->
             <q-btn color="primary" @click="confirmUpdate">Ažuriraj meni</q-btn>
-
-            <!-- Gumb za otvaranje dijaloga -->
             <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
             <q-btn color="primary" label="Ispiši PDF" @click="printPDF" />
             <q-btn color="primary" label="Arhiv marenda" to="noActiveMenu" />
@@ -107,8 +120,8 @@
     </q-page-container>
   </q-layout>
 </template>
-
 <reference types="html2pdf.js" />
+
 <script setup>
 import { ref, onMounted } from 'vue'
 import html2pdf from 'html2pdf.js'
@@ -134,43 +147,42 @@ const form = ref({
 })
 const loggedInUser = ref('')
 const userID = ref('')
-// const apiUrl = import.meta.env.VITE_API_URL
 
 const printPDF = () => {
   // Prepare the table HTML
   let tableHTML = `
-        <h2 style="text-align: center; margin-bottom: 20px">Plan menija</h2>
-        <table style="width: 100%; border-collapse: collapse;">
-          <thead>
+    <h2 style="text-align: center; margin-bottom: 20px">Plan menija</h2>
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr>
+          ${columns
+            .filter((col) => col.name !== 'actions')
+            .map(
+              (col) =>
+                `<th style="border: 1px solid black; padding: 8px; text-align: left;">${col.label}</th>`,
+            )
+            .join('')}
+        </tr>
+      </thead>
+      <tbody>
+        ${menus.value
+          .map(
+            (menu) => `
             <tr>
               ${columns
                 .filter((col) => col.name !== 'actions')
                 .map(
                   (col) =>
-                    `<th style="border: 1px solid black; padding: 8px; text-align: left;">${col.label}</th>`,
+                    `<td style="border: 1px solid black; padding: 8px;">${menu[col.field] || ''}</td>`,
                 )
                 .join('')}
             </tr>
-          </thead>
-          <tbody>
-            ${menus.value
-              .map(
-                (menu) => `
-              <tr>
-                ${columns
-                  .filter((col) => col.name !== 'actions')
-                  .map(
-                    (col) =>
-                      `<td style="border: 1px solid black; padding: 8px;">${menu[col.field] || ''}</td>`,
-                  )
-                  .join('')}
-              </tr>
-            `,
-              )
-              .join('')}
-          </tbody>
-        </table>
-      `
+          `,
+          )
+          .join('')}
+      </tbody>
+    </table>
+  `
 
   // Create a temporary div element to hold the table HTML
   const element = document.createElement('div')
@@ -589,26 +601,28 @@ defineExpose({
 })
 </script>
 
-<style>
+<style scoped>
 .styled-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 16px;
 }
 
 .styled-table th,
 .styled-table td {
-  border: 1px solid #ddd;
+  border: 1px solid #333;
   padding: 8px;
   text-align: left;
+  font-weight: bold;
 }
 
 .styled-table th {
   background-color: #f2f2f2;
-  font-weight: bold;
 }
 
-.button-group .q-btn {
-  margin-right: 10px; /* Adjust the spacing as needed */
+.button-group {
+  display: flex;
+  justify-content: start;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 </style>
