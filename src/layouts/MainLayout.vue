@@ -11,7 +11,12 @@
     <q-drawer v-model="leftDrawerOpen" bordered>
       <q-list>
         <q-item-label header> Essential Links </q-item-label>
-        <EssentialLink v-for="route in routesList" :key="route.title" v-bind="route" />
+        <EssentialLink
+          v-for="route in routesList"
+          :key="route.title"
+          v-bind="route"
+          :close-drawer="closeDrawer"
+        />
       </q-list>
     </q-drawer>
 
@@ -65,5 +70,9 @@ const leftDrawerOpen = ref(false)
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
+}
+
+function closeDrawer() {
+  leftDrawerOpen.value = false
 }
 </script>
