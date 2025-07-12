@@ -99,7 +99,7 @@
               <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
               <q-btn color="primary" label="Ispiši PDF" @click="printPDF" />
               <q-btn color="primary" label="Arhiv marenda" to="noActiveMenu" />
-              <q-btn label="Odjavi se" color="negative" class="button-item" @click="logout" />
+              <q-btn label="Odjavi se" color="negative" @click="logout" />
             </div>
           </q-card-section>
         </q-card>
@@ -610,8 +610,18 @@ defineExpose({
   background-color: #f2f2f2;
 }
 
-/* Razmak između gumba */
-.q-gutter-x-sm > * {
-  margin-right: 10px;
+.button-group {
+  display: flex; /* Dodajte ovo ako želite da gumbi budu u jednom redu */
+  flex-wrap: wrap; /* Omogućite prelamanje gumba ako ih ima previše */
+  justify-content: flex-start; /* Poravnajte gumbe na početak reda */
+}
+
+.button-group > * {
+  margin-right: 10px; /* Razmak s desne strane svakog gumba */
+  margin-bottom: 5px; /* Razmak ispod svakog gumba (za slučaj prelamanja) */
+}
+
+.button-group > *:last-child {
+  margin-right: 0; /* Uklanja razmak s desne strane zadnjeg gumba */
 }
 </style>
