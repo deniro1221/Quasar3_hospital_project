@@ -124,7 +124,7 @@ dayjs.extend(localizedFormat)
 dayjs.tz.setDefault('Europe/Zagreb')
 
 const form = ref({
-  date: dayjs().format('DD-MM-YYYY'),
+  date: dayjs().format('YYYY-MM-DD'),
   juha_m1: '',
   glavno_jelo_m1: '',
   salata_m1: '',
@@ -263,7 +263,7 @@ const pagination = ref({
 })
 
 const isFutureDate = (date) => {
-  const today = dayjs().format('DD-MM-YYYY')
+  const today = dayjs().format('YYYY-MM-DD')
   return date >= today
 }
 const fetchMenus = async () => {
@@ -278,12 +278,11 @@ const fetchMenus = async () => {
     const data = await response.json()
 
     const groupedMenus = data.reduce((acc, menu) => {
-      const date = dayjs.utc(menu.Datum).tz('Europe/Zagreb')
-      const formattedDate = date.format('DD-MM-YYYY') // Formatiranje za prikaz
+      const date = dayjs.utc(menu.Datum).tz('Europe/Zagreb').format('YYYY-MM-DD')
 
-      if (!acc[formattedDate]) {
-        acc[formattedDate] = {
-          Datum_marende: formattedDate, // Koristi formatirani datum kao ključ
+      if (!acc[date]) {
+        acc[date] = {
+          Datum_marende: date,
           Juha_m1: '',
           Glavno_jelo_m1: '',
           Salata_m1: '',
@@ -296,17 +295,17 @@ const fetchMenus = async () => {
       }
 
       if (menu.marendaa === 'Marenda1') {
-        acc[formattedDate].Juha_m1 = menu.Juha_m1 || ''
-        acc[formattedDate].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
-        acc[formattedDate].Salata_m1 = menu.Salata_m1 || ''
-        acc[formattedDate].username = menu.username || ''
-        acc[formattedDate].ID_kuhara = menu.ID_kuhara || ''
+        acc[date].Juha_m1 = menu.Juha_m1 || ''
+        acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
+        acc[date].Salata_m1 = menu.Salata_m1 || ''
+        acc[date].username = menu.username || ''
+        acc[date].ID_kuhara = menu.ID_kuhara || ''
       } else if (menu.marendaa === 'Marenda2') {
-        acc[formattedDate].Juha_m2 = menu.Juha_m1 || ''
-        acc[formattedDate].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || ''
-        acc[formattedDate].Salata_m2 = menu.Salata_m1 || ''
-        acc[formattedDate].username = menu.username || ''
-        acc[formattedDate].ID_kuhara = menu.ID_kuhara || ''
+        acc[date].Juha_m2 = menu.Juha_m1 || ''
+        acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || ''
+        acc[date].Salata_m2 = menu.Salata_m1 || ''
+        acc[date].username = menu.username || ''
+        acc[date].ID_kuhara = menu.ID_kuhara || ''
       }
       return acc
     }, {})
@@ -321,8 +320,7 @@ const fetchMenus = async () => {
 const addMenuDialog = ref(false)
 const addMenu = async () => {
   try {
-    const originalDate = form.value.date // Datum u formatu DD-MM-YYYY
-    const datumZaSlanje = dayjs(originalDate, 'DD-MM-YYYY').format('YYYY-MM-DD') // Konverzija u YYYY-MM-DD
+    const datumZaSlanje = form.value.date // Šalji direktno bez konverzije
     console.log('Frontend Datum za slanje:', datumZaSlanje)
 
     const payload = {
@@ -351,7 +349,7 @@ const addMenu = async () => {
 
       // Resetiraj formu
       form.value = {
-        date: dayjs().format('DD-MM-YYYY'), // Ovdje isto promijeni
+        date: dayjs().format('YYYY-MM-DD'),
         juha_m1: '',
         glavno_jelo_m1: '',
         salata_m1: '',
@@ -387,7 +385,7 @@ const closeTheGreatDialog = () => {
 // Dialog cancel
 const onDialogCancel = () => {
   form.value = {
-    date: dayjs().format('DD-MM-YYYY'),
+    date: dayjs().format('YYYY-MM-DD'),
     juha_m1: '',
     glavno_jelo_m1: '',
     salata_m1: '',
@@ -459,10 +457,8 @@ async function confirmUpdate() {
     const updatedRow = { ...changesMap.value[rowId] }
 
     // Pripremi podatke za slanje
-    const originalDate = updatedRow.Datum_marende
-    const datumZaSlanje = dayjs(originalDate, 'DD-MM-YYYY').format('YYYY-MM-DD')
     const payload = {
-      Datum_marende: datumZaSlanje,
+      Datum_marende: updatedRow.Datum_marende,
       Juha_m1: updatedRow.Juha_m1,
       Glavno_jelo_m1: updatedRow.Glavno_jelo_m1,
       Salata_m1: updatedRow.Salata_m1,
@@ -615,7 +611,7 @@ defineExpose({
 }
 
 /* Razmak između gumba */
-.button-group > * {
+.q-gutter-x-sm > * {
   margin-right: 10px;
 }
 </style>
