@@ -94,13 +94,15 @@
             </q-table>
           </q-card-section>
           <q-card-section>
-            <q-btn color="primary" @click="confirmUpdate">Ažuriraj meni</q-btn>
+            <div class="button-group">
+              <q-btn color="primary" @click="confirmUpdate">Ažuriraj meni</q-btn>
 
-            <!-- Gumb za otvaranje dijaloga -->
-            <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
-            <q-btn color="primary" label="Ispiši PDF" @click="printPDF" />
-            <q-btn color="primary" label="Arhiv marenda" to="noActiveMenu" />
-            <q-btn label="Odjavi se" color="negative" class="button-item" @click="logout" />
+              <!-- Gumb za otvaranje dijaloga -->
+              <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
+              <q-btn color="primary" label="Ispiši PDF" @click="printPDF" />
+              <q-btn color="primary" label="Arhiv marenda" to="noActiveMenu" />
+              <q-btn label="Odjavi se" color="negative" class="button-item" @click="logout" />
+            </div>
           </q-card-section>
         </q-card>
       </q-page>
@@ -124,7 +126,7 @@ dayjs.extend(localizedFormat)
 dayjs.tz.setDefault('Europe/Zagreb')
 
 const form = ref({
-  date: dayjs().format('YYYY-MM-DD'),
+  date: dayjs().format('DD-MM-YYYY'),
   juha_m1: '',
   glavno_jelo_m1: '',
   salata_m1: '',
@@ -263,7 +265,7 @@ const pagination = ref({
 })
 
 const isFutureDate = (date) => {
-  const today = dayjs().format('YYYY-MM-DD')
+  const today = dayjs().format('DD-MM-YYYY')
   return date >= today
 }
 const fetchMenus = async () => {
@@ -278,11 +280,12 @@ const fetchMenus = async () => {
     const data = await response.json()
 
     const groupedMenus = data.reduce((acc, menu) => {
-      const date = dayjs.utc(menu.Datum).tz('Europe/Zagreb').format('YYYY-MM-DD')
+      const date = dayjs.utc(menu.Datum).tz('Europe/Zagreb')
+      const formattedDate = date.format('DD-MM-YYYY') // Formatiranje za prikaz
 
-      if (!acc[date]) {
-        acc[date] = {
-          Datum_marende: date,
+      if (!acc[formattedDate]) {
+        acc[formattedDate] = {
+          Datum_marende: formattedDate, // Koristi formatirani datum kao ključ
           Juha_m1: '',
           Glavno_jelo_m1: '',
           Salata_m1: '',
@@ -295,17 +298,17 @@ const fetchMenus = async () => {
       }
 
       if (menu.marendaa === 'Marenda1') {
-        acc[date].Juha_m1 = menu.Juha_m1 || ''
-        acc[date].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
-        acc[date].Salata_m1 = menu.Salata_m1 || ''
-        acc[date].username = menu.username || ''
-        acc[date].ID_kuhara = menu.ID_kuhara || ''
+        acc[formattedDate].Juha_m1 = menu.Juha_m1 || ''
+        acc[formattedDate].Glavno_jelo_m1 = menu.Glavno_jelo_m1 || ''
+        acc[formattedDate].Salata_m1 = menu.Salata_m1 || ''
+        acc[formattedDate].username = menu.username || ''
+        acc[formattedDate].ID_kuhara = menu.ID_kuhara || ''
       } else if (menu.marendaa === 'Marenda2') {
-        acc[date].Juha_m2 = menu.Juha_m1 || ''
-        acc[date].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || ''
-        acc[date].Salata_m2 = menu.Salata_m1 || ''
-        acc[date].username = menu.username || ''
-        acc[date].ID_kuhara = menu.ID_kuhara || ''
+        acc[formattedDate].Juha_m2 = menu.Juha_m1 || ''
+        acc[formattedDate].Glavno_jelo_m2 = menu.Glavno_jelo_m1 || ''
+        acc[formattedDate].Salata_m2 = menu.Salata_m1 || ''
+        acc[formattedDate].username = menu.username || ''
+        acc[formattedDate].ID_kuhara = menu.ID_kuhara || ''
       }
       return acc
     }, {})
@@ -320,7 +323,8 @@ const fetchMenus = async () => {
 const addMenuDialog = ref(false)
 const addMenu = async () => {
   try {
-    const datumZaSlanje = form.value.date // Šalji direktno bez konverzije
+    const originalDate = form.value.date // Datum u formatu DD-MM-YYYY
+    const datumZaSlanje = dayjs(originalDate, 'DD-MM-YYYY').format('YYYY-MM-DD') // Konverzija u YYYY-MM-DD
     console.log('Frontend Datum za slanje:', datumZaSlanje)
 
     const payload = {
@@ -349,7 +353,7 @@ const addMenu = async () => {
 
       // Resetiraj formu
       form.value = {
-        date: dayjs().format('YYYY-MM-DD'),
+        date: dayjs().format('DD-MM-YYYY'), // Ovdje isto promijeni
         juha_m1: '',
         glavno_jelo_m1: '',
         salata_m1: '',
@@ -385,7 +389,7 @@ const closeTheGreatDialog = () => {
 // Dialog cancel
 const onDialogCancel = () => {
   form.value = {
-    date: dayjs().format('YYYY-MM-DD'),
+    date: dayjs().format('DD-MM-YYYY'),
     juha_m1: '',
     glavno_jelo_m1: '',
     salata_m1: '',
@@ -457,8 +461,10 @@ async function confirmUpdate() {
     const updatedRow = { ...changesMap.value[rowId] }
 
     // Pripremi podatke za slanje
+    const originalDate = updatedRow.Datum_marende
+    const datumZaSlanje = dayjs(originalDate, 'DD-MM-YYYY').format('YYYY-MM-DD')
     const payload = {
-      Datum_marende: updatedRow.Datum_marende,
+      Datum_marende: datumZaSlanje,
       Juha_m1: updatedRow.Juha_m1,
       Glavno_jelo_m1: updatedRow.Glavno_jelo_m1,
       Salata_m1: updatedRow.Salata_m1,
@@ -611,7 +617,7 @@ defineExpose({
 }
 
 /* Razmak između gumba */
-.q-gutter-x-sm > * {
+.button-group > * {
   margin-right: 10px;
 }
 </style>
