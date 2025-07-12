@@ -589,26 +589,29 @@ defineExpose({
 })
 </script>
 
-<style>
+<style scoped>
 .styled-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate; /* Koristimo separate umjesto collapse */
+  border-spacing: 0; /* Uklanjamo razmak između obruba */
   font-size: 16px;
+  border: 2px solid #000; /* Vanjski obrub, promijenite boju po želji */
 }
 
 .styled-table th,
 .styled-table td {
-  border: 1px solid #ddd;
+  border: 1px solid #000; /* Unutarnji obrub, promijenite boju po želji */
   padding: 8px;
   text-align: left;
+  font-weight: bold;
 }
 
 .styled-table th {
   background-color: #f2f2f2;
-  font-weight: bold;
 }
 
-.button-group .q-btn {
-  margin-right: 10px; /* Adjust the spacing as needed */
+/* Razmak između gumba */
+.q-gutter-x-sm > * {
+  margin-right: 10px;
 }
 </style>
