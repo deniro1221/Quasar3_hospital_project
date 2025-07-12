@@ -48,7 +48,7 @@
 
         <!-- Prikaz korisničkog imena i ID-a -->
         <div class="q-mb-md">
-          <p v-if="loggedInUser">Prijavljen: {{ loggedInUser }}</p>
+          <p v-if="loggedInUser" style="margin-right: 10px">Korisnik: {{ loggedInUser }}</p>
           <p v-if="userID">ID Kuhara: {{ userID }}</p>
         </div>
 
@@ -74,14 +74,6 @@
               :pagination="pagination"
               class="styled-table"
             >
-              <template v-slot:header="props">
-                <q-tr :props="props">
-                  <q-th v-for="col in props.cols" :key="col.name" :props="props">
-                    {{ col.label }}
-                  </q-th>
-                </q-tr>
-              </template>
-
               <template v-slot:body="props">
                 <q-tr :props="props">
                   <q-td key="actions" auto-width>
