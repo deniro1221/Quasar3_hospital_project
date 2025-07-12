@@ -138,7 +138,7 @@ const userID = ref('')
 
 const printPDF = () => {
   // Prepare the table HTML
-  let tableHTML =
+  let tableHTML = `
         <h2 style="text-align: center; margin-bottom: 20px">Plan menija</h2>
         <table style="width: 100%; border-collapse: collapse;">
           <thead>
@@ -147,7 +147,7 @@ const printPDF = () => {
                 .filter((col) => col.name !== 'actions')
                 .map(
                   (col) =>
-                    <th style="border: 1px solid black; padding: 8px; text-align: left;">${col.label}</th>,
+                    `<th style="border: 1px solid black; padding: 8px; text-align: left;">${col.label}</th>`,
                 )
                 .join('')}
             </tr>
@@ -155,22 +155,22 @@ const printPDF = () => {
           <tbody>
             ${menus.value
               .map(
-                (menu) =>
+                (menu) => `
               <tr>
                 ${columns
                   .filter((col) => col.name !== 'actions')
                   .map(
                     (col) =>
-                      <td style="border: 1px solid black; padding: 8px;">${menu[col.field] || ''}</td>,
+                      `<td style="border: 1px solid black; padding: 8px;">${menu[col.field] || ''}</td>`,
                   )
                   .join('')}
               </tr>
-            ,
+            `,
               )
               .join('')}
           </tbody>
         </table>
-
+      `
 
   // Create a temporary div element to hold the table HTML
   const element = document.createElement('div')
@@ -273,7 +273,7 @@ const fetchMenus = async () => {
       headers: { 'Content-Type': 'application/json' },
     })
     if (!response.ok) {
-      throw new Error(Greška pri dohvaćanju menija: ${response.status} ${response.statusText})
+      throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
     }
     const data = await response.json()
 
@@ -336,7 +336,7 @@ const addMenu = async () => {
     }
     console.log('Frontend Payload:', JSON.stringify(payload))
 
-    const response = await fetch(http://192.168.1.10:3000/menu, {
+    const response = await fetch('http://192.168.1.10:3000/menu', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -364,11 +364,11 @@ const addMenu = async () => {
       try {
         const errorData = await response.json()
         alert(
-          Greška pri dodavanju menija: ${response.status} - ${errorData.message || response.statusText},
+          `Greška pri dodavanju menija: ${response.status} - ${errorData.message || response.statusText}`,
         )
       } catch (jsonError) {
         console.error('Greška pri parsiranju JSON odgovora:', jsonError)
-        alert(Greška pri dodavanju menija: ${response.status} - ${response.statusText})
+        alert(`Greška pri dodavanju menija: ${response.status} - ${response.statusText}`)
       }
     }
   } catch (error) {
@@ -471,7 +471,7 @@ async function confirmUpdate() {
     // Log the date being sent from frontend
     console.log('Datum_marende koji se šalje s frontenda:', payload.Datum_marende)
     console.log('payload prije slanja', payload)
-    const url = http://192.168.1.10:3000/menu/fresh
+    const url = 'http://192.168.1.10:3000/menu/fresh'
 
     try {
       const response = await fetch(url, {
@@ -492,18 +492,18 @@ async function confirmUpdate() {
       } else {
         failCount++
         const errMsg = await response.json()
-        alert(Greška kod datuma ${rowId}: ${errMsg.message})
+        alert(`Greška kod datuma ${rowId}: ${errMsg.message}`)
       }
     } catch (err) {
       failCount++
-      alert(Neuspješno slanje za datum ${rowId}: ${err.message})
+      alert(`Neuspješno slanje za datum ${rowId}: ${err.message}`)
     }
   }
 
   // Osvježi podatke nakon svih pokušaja ažuriranja
   await fetchMenus()
 
-  alert(Uspješno ažurirano: ${successCount}, Neuspješno: ${failCount}.)
+  alert(`Uspješno ažurirano: ${successCount}, Neuspješno: ${failCount}.`)
   changesMap.value = {}
   editingCell.value = {}
   console.log('changesMap.value nakon ažuriranja', changesMap.value)
@@ -514,7 +514,7 @@ const deleteMenu = async (menu) => {
   try {
     const confirmDelete = confirm('Jeste li sigurni da želite obrisati meni?')
     if (confirmDelete) {
-      const url = http://192.168.1.10:3000/menu/delete?datum=${menu.Datum_marende}
+      const url = `http://192.168.1.10:3000/menu/delete?datum=${menu.Datum_marende}`
       console.log('URL za brisanje:', url)
       const response = await fetch(url, {
         method: 'DELETE',
@@ -611,3 +611,4 @@ defineExpose({
 .button-group .q-btn {
   margin-right: 10px; /* Adjust the spacing as needed */
 }
+</style>
