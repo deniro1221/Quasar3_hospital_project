@@ -84,7 +84,7 @@
 
               <template v-slot:body="props">
                 <q-tr :props="props">
-                  <q-td key="actions" :props="props" auto-width>
+                  <q-td key="actions" auto-width>
                     <q-btn
                       flat
                       round
