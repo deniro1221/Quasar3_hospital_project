@@ -90,22 +90,154 @@
                     {{ props.row.Datum_marende }}
                   </q-td>
                   <q-td key="Juha_m1" :props="props">
-                    {{ props.row.Juha_m1 }}
+                    <div
+                      v-if="
+                        editingCell.rowId === props.row.Datum_marende &&
+                        editingCell.col === 'Juha_m1'
+                      "
+                    >
+                      <q-input
+                        v-model="props.row.Juha_m1"
+                        @blur="onCellInput(props.row, { field: 'Juha_m1' }, $event)"
+                        @keydown.enter="onCellInput(props.row, { field: 'Juha_m1' }, $event)"
+                        @keydown.esc="cancelEdit()"
+                        autofocus
+                        style="width: 100%"
+                      />
+                    </div>
+                    <div
+                      v-else
+                      @dblclick="onCellDblClick(props.row, { field: 'Juha_m1' })"
+                      style="min-width: 80px; cursor: pointer; user-select: none"
+                      title="Dvoklik za uređivanje"
+                    >
+                      {{ props.row.Juha_m1 }}
+                    </div>
                   </q-td>
                   <q-td key="Glavno_jelo_m1" :props="props">
-                    {{ props.row.Glavno_jelo_m1 }}
+                    <div
+                      v-if="
+                        editingCell.rowId === props.row.Datum_marende &&
+                        editingCell.col === 'Glavno_jelo_m1'
+                      "
+                    >
+                      <q-input
+                        v-model="props.row.Glavno_jelo_m1"
+                        @blur="onCellInput(props.row, { field: 'Glavno_jelo_m1' }, $event)"
+                        @keydown.enter="onCellInput(props.row, { field: 'Glavno_jelo_m1' }, $event)"
+                        @keydown.esc="cancelEdit()"
+                        autofocus
+                        style="width: 100%"
+                      />
+                    </div>
+                    <div
+                      v-else
+                      @dblclick="onCellDblClick(props.row, { field: 'Glavno_jelo_m1' })"
+                      style="min-width: 80px; cursor: pointer; user-select: none"
+                      title="Dvoklik za uređivanje"
+                    >
+                      {{ props.row.Glavno_jelo_m1 }}
+                    </div>
                   </q-td>
                   <q-td key="Salata_m1" :props="props">
-                    {{ props.row.Salata_m1 }}
+                    <div
+                      v-if="
+                        editingCell.rowId === props.row.Datum_marende &&
+                        editingCell.col === 'Salata_m1'
+                      "
+                    >
+                      <q-input
+                        v-model="props.row.Salata_m1"
+                        @blur="onCellInput(props.row, { field: 'Salata_m1' }, $event)"
+                        @keydown.enter="onCellInput(props.row, { field: 'Salata_m1' }, $event)"
+                        @keydown.esc="cancelEdit()"
+                        autofocus
+                        style="width: 100%"
+                      />
+                    </div>
+                    <div
+                      v-else
+                      @dblclick="onCellDblClick(props.row, { field: 'Salata_m1' })"
+                      style="min-width: 80px; cursor: pointer; user-select: none"
+                      title="Dvoklik za uređivanje"
+                    >
+                      {{ props.row.Salata_m1 }}
+                    </div>
                   </q-td>
                   <q-td key="Juha_m2" :props="props">
-                    {{ props.row.Juha_m2 }}
+                    <div
+                      v-if="
+                        editingCell.rowId === props.row.Datum_marende &&
+                        editingCell.col === 'Juha_m2'
+                      "
+                    >
+                      <q-input
+                        v-model="props.row.Juha_m2"
+                        @blur="onCellInput(props.row, { field: 'Juha_m2' }, $event)"
+                        @keydown.enter="onCellInput(props.row, { field: 'Juha_m2' }, $event)"
+                        @keydown.esc="cancelEdit()"
+                        autofocus
+                        style="width: 100%"
+                      />
+                    </div>
+                    <div
+                      v-else
+                      @dblclick="onCellDblClick(props.row, { field: 'Juha_m2' })"
+                      style="min-width: 80px; cursor: pointer; user-select: none"
+                      title="Dvoklik za uređivanje"
+                    >
+                      {{ props.row.Juha_m2 }}
+                    </div>
                   </q-td>
                   <q-td key="Glavno_jelo_m2" :props="props">
-                    {{ props.row.Glavno_jelo_m2 }}
+                    <div
+                      v-if="
+                        editingCell.rowId === props.row.Datum_marende &&
+                        editingCell.col === 'Glavno_jelo_m2'
+                      "
+                    >
+                      <q-input
+                        v-model="props.row.Glavno_jelo_m2"
+                        @blur="onCellInput(props.row, { field: 'Glavno_jelo_m2' }, $event)"
+                        @keydown.enter="onCellInput(props.row, { field: 'Glavno_jelo_m2' }, $event)"
+                        @keydown.esc="cancelEdit()"
+                        autofocus
+                        style="width: 100%"
+                      />
+                    </div>
+                    <div
+                      v-else
+                      @dblclick="onCellDblClick(props.row, { field: 'Glavno_jelo_m2' })"
+                      style="min-width: 80px; cursor: pointer; user-select: none"
+                      title="Dvoklik za uređivanje"
+                    >
+                      {{ props.row.Glavno_jelo_m2 }}
+                    </div>
                   </q-td>
                   <q-td key="Salata_m2" :props="props">
-                    {{ props.row.Salata_m2 }}
+                    <div
+                      v-if="
+                        editingCell.rowId === props.row.Datum_marende &&
+                        editingCell.col === 'Salata_m2'
+                      "
+                    >
+                      <q-input
+                        v-model="props.row.Salata_m2"
+                        @blur="onCellInput(props.row, { field: 'Salata_m2' }, $event)"
+                        @keydown.enter="onCellInput(props.row, { field: 'Salata_m2' }, $event)"
+                        @keydown.esc="cancelEdit()"
+                        autofocus
+                        style="width: 100%"
+                      />
+                    </div>
+                    <div
+                      v-else
+                      @dblclick="onCellDblClick(props.row, { field: 'Salata_m2' })"
+                      style="min-width: 80px; cursor: pointer; user-select: none"
+                      title="Dvoklik za uređivanje"
+                    >
+                      {{ props.row.Salata_m2 }}
+                    </div>
                   </q-td>
                   <q-td key="username" :props="props">
                     {{ props.row.username }}
@@ -578,6 +710,16 @@ onMounted(() => {
   window.addEventListener('focus', loadUserData)
 })
 
+const startEdit = (row, col) => {
+  editingCell.value = { rowId: row.Datum_marende, col: col.field }
+}
+
+const stopEdit = async (row, col) => {
+  editingCell.value = {}
+  console.log('ažuriranje retka:', row, col)
+  // Ovdje dodajte logiku za spremanje promjena na back-end
+}
+
 //make it accessible to the template
 defineExpose({
   form,
@@ -603,6 +745,8 @@ defineExpose({
   logout,
   printPDF,
   dayjs,
+  startEdit,
+  stopEdit,
 })
 </script>
 
