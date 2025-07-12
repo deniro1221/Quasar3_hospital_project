@@ -3,34 +3,7 @@
     <q-header elevated>
       <q-toolbar>
         <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
-
-        <!-- Left-side Buttons -->
-        <q-btn
-          flat
-          to="/login_nurse"
-          label="Sestra-Prijava"
-          class="q-mr-sm q-px-md q-py-sm text-weight-bold"
-          style="font-size: 1.1rem"
-        />
-        <q-btn
-          flat
-          to="/login_chef"
-          label="Kuhar-Prijava"
-          class="q-mr-sm q-px-md q-py-sm text-weight-bold"
-          style="font-size: 1.1rem"
-        />
-
         <q-toolbar-title> Thalassoteraphia menu </q-toolbar-title>
-
-        <!-- Right-side Button -->
-        <q-btn
-          flat
-          to="/menu_page"
-          label="PREGLED MENIJA"
-          class="q-px-xl q-py-md text-weight-bold"
-          style="font-size: 1.3rem; background-color: #f0ad4e; color: white"
-        />
-
         <div>v{{ version }}</div>
       </q-toolbar>
     </q-header>
@@ -52,6 +25,28 @@
         <div class="q-pa-md text-center" style="font-size: 1.1rem; color: #333">
           Dobrodošli u aplikaciju Thalassotherapia menu! Pregledajte ponudu jelovnika za
           zaposlenike.
+        </div>
+
+        <!-- Buttons in Content Area -->
+        <div class="row justify-center q-gutter-md">
+          <q-btn
+            to="/login_nurse"
+            label="Sestra-Prijava"
+            class="q-px-xl q-py-md text-weight-bold"
+            style="font-size: 1.2rem"
+          />
+          <q-btn
+            to="/login_chef"
+            label="Kuhar-Prijava"
+            class="q-px-xl q-py-md text-weight-bold"
+            style="font-size: 1.2rem"
+          />
+          <q-btn
+            to="/menu_page"
+            label="PREGLED MENIJA"
+            class="q-px-xl q-py-md text-weight-bold"
+            style="font-size: 1.4rem; background-color: #f0ad4e; color: white"
+          />
         </div>
 
         <router-view />
