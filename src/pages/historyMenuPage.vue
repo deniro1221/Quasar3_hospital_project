@@ -46,21 +46,6 @@
           </q-card>
         </q-dialog>
 
-        <!-- Prikaz korisničkog imena i ID-a -->
-        <div class="q-mb-md">
-          <p v-if="loggedInUser" style="margin-right: 10px">Korisnik: {{ loggedInUser }}</p>
-          <p v-if="userID">ID Kuhara: {{ userID }}</p>
-        </div>
-
-        <!-- Poruka -->
-        <div
-          v-if="message"
-          :class="isSuccess ? 'bg-green-2 text-green-10' : 'bg-red-2 text-red-10'"
-          class="q-pa-md q-mb-md rounded-borders"
-        >
-          {{ message }}
-        </div>
-
         <!-- Tablica za pregled menija -->
         <q-card>
           <q-card-section>
@@ -72,183 +57,46 @@
               :columns="columns"
               row-key="Datum_marende"
               :pagination="pagination"
-              class="styled-table"
             >
-              <template v-slot:body="props">
-                <q-tr :props="props">
-                  <q-td key="actions" auto-width>
-                    <q-btn
-                      flat
-                      round
-                      dense
-                      color="negative"
-                      icon="delete"
-                      @click="deleteMenu(props.row)"
-                    />
-                  </q-td>
-                  <q-td key="Datum_marende" :props="props">
-                    {{ props.row.Datum_marende }}
-                  </q-td>
-                  <q-td key="Juha_m1" :props="props">
-                    <div
-                      v-if="
-                        editingCell.rowId === props.row.Datum_marende &&
-                        editingCell.col === 'Juha_m1'
-                      "
-                    >
-                      <q-input
-                        v-model="props.row.Juha_m1"
-                        @blur="onCellInput(props.row, { field: 'Juha_m1' }, $event)"
-                        @keydown.enter="onCellInput(props.row, { field: 'Juha_m1' }, $event)"
-                        @keydown.esc="cancelEdit()"
-                        autofocus
-                        style="width: 100%"
-                      />
-                    </div>
-                    <div
-                      v-else
-                      @dblclick="onCellDblClick(props.row, { field: 'Juha_m1' })"
-                      style="min-width: 80px; cursor: pointer; user-select: none"
-                      title="Dvoklik za uređivanje"
-                    >
-                      {{ props.row.Juha_m1 }}
-                    </div>
-                  </q-td>
-                  <q-td key="Glavno_jelo_m1" :props="props">
-                    <div
-                      v-if="
-                        editingCell.rowId === props.row.Datum_marende &&
-                        editingCell.col === 'Glavno_jelo_m1'
-                      "
-                    >
-                      <q-input
-                        v-model="props.row.Glavno_jelo_m1"
-                        @blur="onCellInput(props.row, { field: 'Glavno_jelo_m1' }, $event)"
-                        @keydown.enter="onCellInput(props.row, { field: 'Glavno_jelo_m1' }, $event)"
-                        @keydown.esc="cancelEdit()"
-                        autofocus
-                        style="width: 100%"
-                      />
-                    </div>
-                    <div
-                      v-else
-                      @dblclick="onCellDblClick(props.row, { field: 'Glavno_jelo_m1' })"
-                      style="min-width: 80px; cursor: pointer; user-select: none"
-                      title="Dvoklik za uređivanje"
-                    >
-                      {{ props.row.Glavno_jelo_m1 }}
-                    </div>
-                  </q-td>
-                  <q-td key="Salata_m1" :props="props">
-                    <div
-                      v-if="
-                        editingCell.rowId === props.row.Datum_marende &&
-                        editingCell.col === 'Salata_m1'
-                      "
-                    >
-                      <q-input
-                        v-model="props.row.Salata_m1"
-                        @blur="onCellInput(props.row, { field: 'Salata_m1' }, $event)"
-                        @keydown.enter="onCellInput(props.row, { field: 'Salata_m1' }, $event)"
-                        @keydown.esc="cancelEdit()"
-                        autofocus
-                        style="width: 100%"
-                      />
-                    </div>
-                    <div
-                      v-else
-                      @dblclick="onCellDblClick(props.row, { field: 'Salata_m1' })"
-                      style="min-width: 80px; cursor: pointer; user-select: none"
-                      title="Dvoklik za uređivanje"
-                    >
-                      {{ props.row.Salata_m1 }}
-                    </div>
-                  </q-td>
-                  <q-td key="Juha_m2" :props="props">
-                    <div
-                      v-if="
-                        editingCell.rowId === props.row.Datum_marende &&
-                        editingCell.col === 'Juha_m2'
-                      "
-                    >
-                      <q-input
-                        v-model="props.row.Juha_m2"
-                        @blur="onCellInput(props.row, { field: 'Juha_m2' }, $event)"
-                        @keydown.enter="onCellInput(props.row, { field: 'Juha_m2' }, $event)"
-                        @keydown.esc="cancelEdit()"
-                        autofocus
-                        style="width: 100%"
-                      />
-                    </div>
-                    <div
-                      v-else
-                      @dblclick="onCellDblClick(props.row, { field: 'Juha_m2' })"
-                      style="min-width: 80px; cursor: pointer; user-select: none"
-                      title="Dvoklik za uređivanje"
-                    >
-                      {{ props.row.Juha_m2 }}
-                    </div>
-                  </q-td>
-                  <q-td key="Glavno_jelo_m2" :props="props">
-                    <div
-                      v-if="
-                        editingCell.rowId === props.row.Datum_marende &&
-                        editingCell.col === 'Glavno_jelo_m2'
-                      "
-                    >
-                      <q-input
-                        v-model="props.row.Glavno_jelo_m2"
-                        @blur="onCellInput(props.row, { field: 'Glavno_jelo_m2' }, $event)"
-                        @keydown.enter="onCellInput(props.row, { field: 'Glavno_jelo_m2' }, $event)"
-                        @keydown.esc="cancelEdit()"
-                        autofocus
-                        style="width: 100%"
-                      />
-                    </div>
-                    <div
-                      v-else
-                      @dblclick="onCellDblClick(props.row, { field: 'Glavno_jelo_m2' })"
-                      style="min-width: 80px; cursor: pointer; user-select: none"
-                      title="Dvoklik za uređivanje"
-                    >
-                      {{ props.row.Glavno_jelo_m2 }}
-                    </div>
-                  </q-td>
-                  <q-td key="Salata_m2" :props="props">
-                    <div
-                      v-if="
-                        editingCell.rowId === props.row.Datum_marende &&
-                        editingCell.col === 'Salata_m2'
-                      "
-                    >
-                      <q-input
-                        v-model="props.row.Salata_m2"
-                        @blur="onCellInput(props.row, { field: 'Salata_m2' }, $event)"
-                        @keydown.enter="onCellInput(props.row, { field: 'Salata_m2' }, $event)"
-                        @keydown.esc="cancelEdit()"
-                        autofocus
-                        style="width: 100%"
-                      />
-                    </div>
-                    <div
-                      v-else
-                      @dblclick="onCellDblClick(props.row, { field: 'Salata_m2' })"
-                      style="min-width: 80px; cursor: pointer; user-select: none"
-                      title="Dvoklik za uređivanje"
-                    >
-                      {{ props.row.Salata_m2 }}
-                    </div>
-                  </q-td>
-                  <q-td key="username" :props="props">
-                    {{ props.row.username }}
-                  </q-td>
-                </q-tr>
+              <!-- Ažuriranje podataka -->
+              <template v-slot:body-cell="props">
+                <q-td
+                  :props="props"
+                  @dblclick="onCellDblClick(props.row, props.col)"
+                  style="cursor: pointer"
+                >
+                  <!-- Dodan style za bolji UX -->
+                  <div
+                    v-if="
+                      editingCell.rowId !== props.row.Datum_marende ||
+                      editingCell.col !== props.col.name
+                    "
+                  >
+                    <div v-if="props.col.name === 'Datum_marende'">{{ props.value }}</div>
+                    <div v-else>{{ props.value }}</div>
+                  </div>
+                  <q-input
+                    v-else
+                    v-model="props.row[props.col.field]"
+                    @update:model-value="onCellInput(props.row, props.col, $event)"
+                    dense
+                    autofocus
+                  />
+                </q-td>
+              </template>
+
+              <!-- Brisanje menija -->
+              <template v-slot:body-cell-actions="props">
+                <q-td :props="props">
+                  <q-btn @click="deleteMenu(props.row)" color="negative" label="Obriši" size="sm" />
+                </q-td>
               </template>
             </q-table>
           </q-card-section>
-          <q-card-section class="q-gutter-x-sm">
-            <!-- Razmak između gumba -->
+          <q-card-section>
             <q-btn color="primary" @click="confirmUpdate">Ažuriraj meni</q-btn>
+
+            <!-- Gumb za otvaranje dijaloga -->
             <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
             <q-btn color="primary" label="Ispiši PDF" @click="printPDF" />
             <q-btn color="primary" label="Arhiv marenda" to="noActiveMenu" />
@@ -259,6 +107,8 @@
     </q-page-container>
   </q-layout>
 </template>
+
+<reference types="html2pdf.js" />
 <script setup>
 import { ref, onMounted } from 'vue'
 import html2pdf from 'html2pdf.js'
@@ -284,42 +134,43 @@ const form = ref({
 })
 const loggedInUser = ref('')
 const userID = ref('')
+// const apiUrl = import.meta.env.VITE_API_URL
 
 const printPDF = () => {
   // Prepare the table HTML
-  let tableHTML = `
-    <h2 style="text-align: center; margin-bottom: 20px">Plan menija</h2>
-    <table style="width: 100%; border-collapse: collapse;">
-      <thead>
-        <tr>
-          ${columns
-            .filter((col) => col.name !== 'actions')
-            .map(
-              (col) =>
-                `<th style="border: 1px solid black; padding: 8px; text-align: left;">${col.label}</th>`,
-            )
-            .join('')}
-        </tr>
-      </thead>
-      <tbody>
-        ${menus.value
-          .map(
-            (menu) => `
+  let tableHTML =
+        <h2 style="text-align: center; margin-bottom: 20px">Plan menija</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
             <tr>
               ${columns
                 .filter((col) => col.name !== 'actions')
                 .map(
                   (col) =>
-                    `<td style="border: 1px solid black; padding: 8px;">${menu[col.field] || ''}</td>`,
+                    <th style="border: 1px solid black; padding: 8px; text-align: left;">${col.label}</th>,
                 )
                 .join('')}
             </tr>
-          `,
-          )
-          .join('')}
-      </tbody>
-    </table>
-  `
+          </thead>
+          <tbody>
+            ${menus.value
+              .map(
+                (menu) =>
+              <tr>
+                ${columns
+                  .filter((col) => col.name !== 'actions')
+                  .map(
+                    (col) =>
+                      <td style="border: 1px solid black; padding: 8px;">${menu[col.field] || ''}</td>,
+                  )
+                  .join('')}
+              </tr>
+            ,
+              )
+              .join('')}
+          </tbody>
+        </table>
+
 
   // Create a temporary div element to hold the table HTML
   const element = document.createElement('div')
@@ -347,7 +198,6 @@ const menus = ref([])
 
 // Kolone za tablicu
 const columns = [
-  { name: 'actions', label: 'Akcije', field: 'actions', align: 'center' },
   {
     name: 'Datum_marende',
     label: 'Datum',
@@ -404,6 +254,7 @@ const columns = [
     align: 'left',
     sortable: true,
   },
+  { name: 'actions', label: 'Akcije', field: 'actions', align: 'center' },
 ]
 
 // Paginacija za tablicu
@@ -422,7 +273,7 @@ const fetchMenus = async () => {
       headers: { 'Content-Type': 'application/json' },
     })
     if (!response.ok) {
-      throw new Error(`Greška pri dohvaćanju menija: ${response.status} ${response.statusText}`)
+      throw new Error(Greška pri dohvaćanju menija: ${response.status} ${response.statusText})
     }
     const data = await response.json()
 
@@ -485,7 +336,7 @@ const addMenu = async () => {
     }
     console.log('Frontend Payload:', JSON.stringify(payload))
 
-    const response = await fetch(`http://192.168.1.10:3000/menu`, {
+    const response = await fetch(http://192.168.1.10:3000/menu, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -513,11 +364,11 @@ const addMenu = async () => {
       try {
         const errorData = await response.json()
         alert(
-          `Greška pri dodavanju menija: ${response.status} - ${errorData.message || response.statusText}`,
+          Greška pri dodavanju menija: ${response.status} - ${errorData.message || response.statusText},
         )
       } catch (jsonError) {
         console.error('Greška pri parsiranju JSON odgovora:', jsonError)
-        alert(`Greška pri dodavanju menija: ${response.status} - ${response.statusText}`)
+        alert(Greška pri dodavanju menija: ${response.status} - ${response.statusText})
       }
     }
   } catch (error) {
@@ -620,7 +471,7 @@ async function confirmUpdate() {
     // Log the date being sent from frontend
     console.log('Datum_marende koji se šalje s frontenda:', payload.Datum_marende)
     console.log('payload prije slanja', payload)
-    const url = `http://192.168.1.10:3000/menu/fresh`
+    const url = http://192.168.1.10:3000/menu/fresh
 
     try {
       const response = await fetch(url, {
@@ -641,18 +492,18 @@ async function confirmUpdate() {
       } else {
         failCount++
         const errMsg = await response.json()
-        alert(`Greška kod datuma ${rowId}: ${errMsg.message}`)
+        alert(Greška kod datuma ${rowId}: ${errMsg.message})
       }
     } catch (err) {
       failCount++
-      alert(`Neuspješno slanje za datum ${rowId}: ${err.message}`)
+      alert(Neuspješno slanje za datum ${rowId}: ${err.message})
     }
   }
 
   // Osvježi podatke nakon svih pokušaja ažuriranja
   await fetchMenus()
 
-  alert(`Uspješno ažurirano: ${successCount}, Neuspješno: ${failCount}.`)
+  alert(Uspješno ažurirano: ${successCount}, Neuspješno: ${failCount}.)
   changesMap.value = {}
   editingCell.value = {}
   console.log('changesMap.value nakon ažuriranja', changesMap.value)
@@ -663,7 +514,7 @@ const deleteMenu = async (menu) => {
   try {
     const confirmDelete = confirm('Jeste li sigurni da želite obrisati meni?')
     if (confirmDelete) {
-      const url = `http://192.168.1.10:3000/menu/delete?datum=${menu.Datum_marende}`
+      const url = http://192.168.1.10:3000/menu/delete?datum=${menu.Datum_marende}
       console.log('URL za brisanje:', url)
       const response = await fetch(url, {
         method: 'DELETE',
@@ -710,16 +561,6 @@ onMounted(() => {
   window.addEventListener('focus', loadUserData)
 })
 
-const startEdit = (row, col) => {
-  editingCell.value = { rowId: row.Datum_marende, col: col.field }
-}
-
-const stopEdit = async (row, col) => {
-  editingCell.value = {}
-  console.log('ažuriranje retka:', row, col)
-  // Ovdje dodajte logiku za spremanje promjena na back-end
-}
-
 //make it accessible to the template
 defineExpose({
   form,
@@ -745,33 +586,28 @@ defineExpose({
   logout,
   printPDF,
   dayjs,
-  startEdit,
-  stopEdit,
 })
 </script>
 
-<style scoped>
+<style>
 .styled-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 16px;
 }
 
 .styled-table th,
 .styled-table td {
-  border: 1px solid #333;
+  border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
-  font-weight: bold;
 }
 
 .styled-table th {
   background-color: #f2f2f2;
+  font-weight: bold;
 }
 
-.button-group {
-  display: flex;
-  justify-content: start;
-  gap: 10px;
-  margin-bottom: 10px;
+.button-group .q-btn {
+  margin-right: 10px; /* Adjust the spacing as needed */
 }
-</style>
