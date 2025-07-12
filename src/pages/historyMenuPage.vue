@@ -96,8 +96,6 @@
           <q-card-section>
             <div class="button-group">
               <q-btn color="primary" @click="confirmUpdate">Ažuriraj meni</q-btn>
-
-              <!-- Gumb za otvaranje dijaloga -->
               <q-btn color="primary" label="Dodaj meni" @click="openDialog" />
               <q-btn color="primary" label="Ispiši PDF" @click="printPDF" />
               <q-btn color="primary" label="Arhiv marenda" to="noActiveMenu" />
