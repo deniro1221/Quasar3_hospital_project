@@ -223,6 +223,7 @@ const menus = ref([])
 
 // Kolone za tablicu
 const columns = [
+  { name: 'actions', label: 'Akcije', field: 'actions', align: 'center' },
   {
     name: 'Datum_marende',
     label: 'Datum',
@@ -279,7 +280,6 @@ const columns = [
     align: 'left',
     sortable: true,
   },
-  { name: 'actions', label: 'Akcije', field: 'actions', align: 'center' },
 ]
 
 // Paginacija za tablicu
