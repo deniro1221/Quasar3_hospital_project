@@ -23,7 +23,7 @@
     <q-page-container>
       <q-page-container>
         <div class="q-pa-md text-center" style="font-size: 1.1rem; color: #333">
-          Dobrodošli u aplikaciju Thalassotherapia menu! Pregledajte ponudu jelovnika za
+          Dobrodošli u aplikaciju Thalassoteraphia menu! Pregledajte ponudu jelovnika za
           zaposlenike.
         </div>
 
@@ -33,19 +33,19 @@
             to="/login_nurse"
             label="Sestra-Prijava"
             class="q-px-xl q-py-md text-weight-bold"
-            style="font-size: 1.2rem"
+            style="font-size: 1.4rem; background-color: #007bff; color: white"
           />
           <q-btn
             to="/login_chef"
             label="Kuhar-Prijava"
             class="q-px-xl q-py-md text-weight-bold"
-            style="font-size: 1.2rem"
+            style="font-size: 1.4rem; background-color: #007bff; color: white"
           />
           <q-btn
             to="/menu_page"
             label="PREGLED MENIJA"
             class="q-px-xl q-py-md text-weight-bold"
-            style="font-size: 1.4rem; background-color: #f0ad4e; color: white"
+            style="font-size: 1.4rem; background-color: #007bff; color: black"
           />
         </div>
 
