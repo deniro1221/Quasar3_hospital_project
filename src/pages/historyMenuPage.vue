@@ -57,6 +57,7 @@
               :columns="columns"
               row-key="Datum_marende"
               :pagination="pagination"
+              class="styled-table"
             >
               <!-- Ažuriranje podataka -->
               <template v-slot:body-cell="props">
@@ -590,26 +591,6 @@ defineExpose({
 </script>
 
 <style scoped>
-.styled-table {
-  width: 100%;
-  border-collapse: separate; /* Koristimo separate umjesto collapse */
-  border-spacing: 0; /* Uklanjamo razmak između obruba */
-  font-size: 16px;
-  border: 2px solid #000; /* Vanjski obrub, promijenite boju po želji */
-}
-
-.styled-table th,
-.styled-table td {
-  border: 1px solid #000; /* Unutarnji obrub, promijenite boju po želji */
-  padding: 8px;
-  text-align: left;
-  font-weight: bold;
-}
-
-.styled-table th {
-  background-color: #f2f2f2;
-}
-
 .button-group {
   display: flex; /* Dodajte ovo ako želite da gumbi budu u jednom redu */
   flex-wrap: wrap; /* Omogućite prelamanje gumba ako ih ima previše */
@@ -623,5 +604,22 @@ defineExpose({
 
 .button-group > *:last-child {
   margin-right: 0; /* Uklanja razmak s desne strane zadnjeg gumba */
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.styled-table th,
+.styled-table td {
+  border: 1px solid #ddd; /* Light gray border */
+  padding: 8px;
+  text-align: left;
+}
+
+.styled-table th {
+  background-color: #f2f2f2; /* Light gray background for header */
+  font-weight: bold;
 }
 </style>
