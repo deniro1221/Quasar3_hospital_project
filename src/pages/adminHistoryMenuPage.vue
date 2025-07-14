@@ -3,10 +3,6 @@
     <q-header elevated>
       <q-toolbar>
         <q-toolbar-title>Meni</q-toolbar-title>
-
-        <div class="q-ml-md" v-if="loggedInUser">Korisnik: {{ loggedInUser }}</div>
-
-        <div class="q-ml-md" v-if="userID">ID Kuhara: {{ userID }}</div>
       </q-toolbar>
     </q-header>
 
@@ -22,6 +18,7 @@
             :columns="columns"
             row-key="Datum_marende"
             :pagination="pagination"
+            card-class="styled-table"
           >
             <template v-slot:body-cell="props">
               <q-td
@@ -267,3 +264,21 @@ export default {
   },
 }
 </script>
+<style scoped>
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.styled-table th,
+.styled-table td {
+  border: 1px solid #ddd; /* Light gray border */
+  padding: 8px;
+  text-align: left;
+}
+
+.styled-table th {
+  background-color: #f2f2f2; /* Light gray background for header */
+  font-weight: bold;
+}
+</style>
