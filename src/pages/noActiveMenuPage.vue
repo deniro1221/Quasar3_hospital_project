@@ -67,10 +67,6 @@ dayjs.extend(timezone)
 dayjs.extend(localizedFormat)
 // dayjs.tz.setDefault('Europe/Zagreb') // Remove default timezone to avoid shifting
 dayjs.tz.setDefault('Europe/Zagreb')
-/*@echo off
-start cmd /k "cd C:\thalasso_projekt\quasar-project\Quasar3_hospital_project && npx serve dist/spa -l 80"
-start cmd /k "cd C:\thalasso_projekt\quasar-project\Quasar3_hospital_project && npm start"
-exit*/
 
 export default {
   setup() {
