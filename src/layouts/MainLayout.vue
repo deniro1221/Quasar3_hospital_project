@@ -23,7 +23,7 @@
     <q-page-container>
       <q-page-container>
         <div class="q-pa-md text-center" style="font-size: 1.1rem; color: #333">
-          Dobrodošli u aplikaciju Thalassoteraphia menu! Pregledajte ponudu jelovnika za
+          Dobrodošli u aplikaciju Thalassotherapia menu! Pregledajte ponudu jelovnika za
           zaposlenike.
         </div>
 
