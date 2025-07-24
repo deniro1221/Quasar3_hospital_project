@@ -41,7 +41,7 @@ import html2pdf from 'html2pdf.js'
 const dijeta_pac = ref([])
 const message = ref('')
 const isSuccess = ref(false)
-
+const API_URL = `${window.location.protocol}//${window.location.hostname}:3000`
 const columns = [
   { name: 'ID_dijeta_pac', label: 'ID Dijete pacijenta', align: 'left', field: 'ID_dijeta_pac' },
   { name: 'Broj_sobe', label: 'Broj sobe', align: 'left', field: 'Broj_sobe' },
@@ -61,7 +61,7 @@ const columns = [
 // Učitavanje podataka
 async function showPatient() {
   try {
-    const response = await fetch('http://192.168.1.10:3000/dijeta-pacijent/active')
+    const response = await fetch(`${API_URL}/dijeta-pacijent/active`)
     const data = await response.json()
     dijeta_pac.value = Array.isArray(data) ? data : data ? [data] : []
     console.log('Učitani podaci:', dijeta_pac.value)

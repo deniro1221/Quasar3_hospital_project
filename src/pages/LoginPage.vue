@@ -23,10 +23,10 @@ const router = useRouter()
 const username = ref('')
 const password = ref('')
 const errorMessage = ref('') // Varijabla za pohranu poruka o grešci
-
+const API_URL = `${window.location.protocol}//${window.location.hostname}:3000`
 const submit = async () => {
   try {
-    const response = await axios.post('http://192.168.1.10:3000/login', {
+    const response = await axios.post(`${API_URL}/login`, {
       username: username.value,
       password: password.value,
     })

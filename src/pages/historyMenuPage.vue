@@ -136,7 +136,7 @@ const form = ref({
 const loggedInUser = ref('')
 const userID = ref('')
 // const apiUrl = import.meta.env.VITE_API_URL
-
+const API_URL = `${window.location.protocol}//${window.location.hostname}:3000`
 const printPDF = () => {
   // Prepare the table HTML
   let tableHTML = `
@@ -269,7 +269,7 @@ const isFutureDate = (date) => {
 }
 const fetchMenus = async () => {
   try {
-    const response = await fetch('http://192.168.1.10:3000/menu/history', {
+    const response = await fetch(`${API_URL}/menu/history`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     })
@@ -337,7 +337,7 @@ const addMenu = async () => {
     }
     console.log('Frontend Payload:', JSON.stringify(payload))
 
-    const response = await fetch('http://192.168.1.10:3000/menu', {
+    const response = await fetch(`${API_URL}/menu`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -472,7 +472,7 @@ async function confirmUpdate() {
     // Log the date being sent from frontend
     console.log('Datum_marende koji se šalje s frontenda:', payload.Datum_marende)
     console.log('payload prije slanja', payload)
-    const url = 'http://192.168.1.10:3000/menu/fresh'
+    const url = `${API_URL}/menu/fresh`
 
     try {
       const response = await fetch(url, {
@@ -515,7 +515,7 @@ const deleteMenu = async (menu) => {
   try {
     const confirmDelete = confirm('Jeste li sigurni da želite obrisati meni?')
     if (confirmDelete) {
-      const url = `http://192.168.1.10:3000/menu/delete?datum=${menu.Datum_marende}`
+      const url = `${API_URL}/menu/delete?datum=${menu.Datum_marende}`
       console.log('URL za brisanje:', url)
       const response = await fetch(url, {
         method: 'DELETE',

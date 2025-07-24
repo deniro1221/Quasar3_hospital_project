@@ -77,6 +77,7 @@ export default {
     const userID = ref('123') // ili dohvaćeno iz auth
     const menus = ref([])
     const editingCell = ref({ rowId: null, col: null })
+    const API_URL = `${window.location.protocol}//${window.location.hostname}:3000`
 
     const columns = [
       {
@@ -189,7 +190,7 @@ export default {
 
     const fetchMenus = async () => {
       try {
-        const response = await fetch('http://192.168.1.10:3000/menu/history', {
+        const response = await fetch(`${API_URL}/menu/history`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         })

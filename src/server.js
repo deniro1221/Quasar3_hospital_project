@@ -41,8 +41,6 @@ app.use('/', meniRouter)
 // Input pacijent
 app.use('/', inputPatientRouter)
 
-app.listen(port, '192.168.1.10', () => {
-  console.log(`Server je pokrenut na http://192.168.1.10:${port}`)
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server je pokrenut na portu ${port} i sluša na svim mrežnim interfejsima`)
 })
-
-//frontned app you can start on: https://thalassockmenu.netlify.app/

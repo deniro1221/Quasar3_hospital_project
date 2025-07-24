@@ -99,7 +99,7 @@ const editingCell = ref({})
 const changesMap = ref({})
 const message = ref('')
 const isSuccess = ref(false)
-
+const API_URL = `${window.location.protocol}//${window.location.hostname}:3000`
 // User Info
 const loggedInUser = ref('')
 const idSestre = ref('')
@@ -200,7 +200,7 @@ function closeDialog() {
 // Fetch Patient Data
 async function showPatient() {
   try {
-    const response = await fetch('http://192.168.1.10:3000/dijeta-pacijent/active', {
+    const response = await fetch(`${API_URL}/dijeta-pacijent/active`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     })
@@ -275,7 +275,7 @@ async function confirmUpdate() {
     delete updatedRow.ID_dijeta_pac
     delete updatedRow.Datum_unosa
 
-    const url = `http://192.168.1.10:3000/dijeta-pacijent/${rowId}`
+    const url = `${API_URL}/dijeta-pacijent/${rowId}`
 
     try {
       const response = await fetch(url, {
@@ -317,7 +317,7 @@ async function postPatient() {
   refreshID()
   console.log('ID_sestre za slanje: ', idSestre.value)
   try {
-    const response = await fetch('http://192.168.1.10:3000/dijeta-pacijent', {
+    const response = await fetch(`${API_URL}/dijeta-pacijent`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

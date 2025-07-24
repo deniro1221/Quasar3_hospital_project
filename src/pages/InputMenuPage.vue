@@ -101,7 +101,7 @@ import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 
 const router = useRouter()
-
+const API_URL = `${window.location.protocol}//${window.location.hostname}:3000`
 // ✅ Function to get the local date in the format yyyy-mm-dd
 function getLocalDateFormatted() {
   return dayjs().format('YYYY-MM-DD')
@@ -160,7 +160,7 @@ const submitManual = async () => {
   }
 
   try {
-    const response = await fetch('http://192.168.1.10:3000/menu', {
+    const response = await fetch(`${API_URL}/menu`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -196,7 +196,7 @@ const submitManual = async () => {
 
 const otkrijAktivniMeni = async (openDialog = true) => {
   try {
-    const response = await fetch('http://192.168.1.10:3000/menu/today')
+    const response = await fetch(`${API_URL}/menu/today`)
     const data = await response.json()
 
     if (data) {
@@ -257,7 +257,7 @@ const azurirajMeni = async () => {
   }
 
   try {
-    const response = await fetch('http://192.168.1.10:3000/menu/fresh', {
+    const response = await fetch(`${API_URL}/menu/fresh`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -319,7 +319,7 @@ const obrisiMeni = async () => {
 
   try {
     const response = await fetch(
-      `http://192.168.1.10:3000/menu/delete?datum=${encodeURIComponent(datumZaBrisanje)}`,
+      `${API_URL}/menu/delete?datum=${encodeURIComponent(datumZaBrisanje)}`,
       { method: 'DELETE' },
     )
 

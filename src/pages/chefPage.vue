@@ -68,7 +68,7 @@ const form = ref({
 
 const isEditing = ref(false)
 const isDialogOpen = ref(false)
-
+const API_URL = `${window.location.protocol}//${window.location.hostname}:3000`
 // Definicija kolona za tabelu
 const columns = [
   { name: 'ID_kuhara', label: 'ID kuhara', field: 'ID_kuhara', align: 'left' },
@@ -80,7 +80,7 @@ const columns = [
 // Dohvaćanje svih kuhara iz API-ja
 const fetchChefs = async () => {
   try {
-    const response = await axios.get('http://192.168.1.10:3000/chef')
+    const response = await axios.get(`${API_URL}/chef`)
     chefs.value = response.data
   } catch (error) {
     console.error('Greška prilikom dohvaćanja kuhara:', error)
@@ -109,7 +109,7 @@ const editChef = (chef) => {
 // Dodavanje novog kuhara
 const addChef = async () => {
   try {
-    await axios.post('http://192.168.1.10:3000/chef', form.value)
+    await axios.post(`${API_URL}/chef`, form.value)
     await fetchChefs()
     closeDialog()
   } catch (error) {
@@ -120,7 +120,7 @@ const addChef = async () => {
 // Ažuriranje podataka kuhara
 const updateChef = async () => {
   try {
-    await axios.put(`http://192.168.1.10:3000/chef/${form.value.ID_kuhara}`, form.value)
+    await axios.put(`${API_URL}/chef/${form.value.ID_kuhara}`, form.value)
     await fetchChefs()
     closeDialog()
   } catch (error) {
@@ -132,7 +132,7 @@ const updateChef = async () => {
 const deleteChef = async (id) => {
   if (confirm('Jeste li sigurni da želite izbrisati ovog kuhara?')) {
     try {
-      await axios.delete(`http://192.168.1.10:3000/chef/${id}`)
+      await axios.delete(`${API_URL}/chef/${id}`)
       await fetchChefs()
     } catch (error) {
       console.error('Greška prilikom brisanja kuhara:', error)

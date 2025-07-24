@@ -75,7 +75,7 @@ export default {
   setup() {
     const loggedInUser = ref('')
     const userID = ref('')
-
+    const API_URL = `${window.location.protocol}//${window.location.hostname}:3000`
     const menus = ref([])
     const editingCell = ref({ rowId: null, col: null })
 
@@ -190,7 +190,7 @@ export default {
 
     const fetchMenus = async () => {
       try {
-        const response = await fetch('http://192.168.1.10:3000/menu/history/noActive', {
+        const response = await fetch(`${API_URL}/menu/history/noActive`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

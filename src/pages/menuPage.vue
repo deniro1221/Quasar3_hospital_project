@@ -33,10 +33,10 @@ import dayjs from 'dayjs'
 
 const meni = ref(null)
 const formattedDate = dayjs().format('DD.MM.YYYY')
-
+const API_URL = `${window.location.protocol}//${window.location.hostname}:3000`
 onMounted(async () => {
   try {
-    const response = await fetch('http://192.168.1.10:3000/menu/today')
+    const response = await fetch(`${API_URL}/menu/today`)
     if (!response.ok) throw new Error('Greška sa API-jem')
     const data = await response.json()
     // Ako API vraća za danas

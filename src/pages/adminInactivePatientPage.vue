@@ -35,7 +35,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-
+const API_URL = `${window.location.protocol}//${window.location.hostname}:3000`
 import html2pdf from 'html2pdf.js'
 
 // Data
@@ -63,7 +63,7 @@ const columns = [
 // Fetch Inactive Patients
 async function fetchInactivePatients() {
   try {
-    const response = await fetch('http://192.168.1.10:3000/dijeta-pacijent/inactive')
+    const response = await fetch(`${API_URL}/dijeta-pacijent/inactive`)
     const data = await response.json()
     inactivePatients.value = Array.isArray(data) ? data : data ? [data] : []
   } catch (error) {
